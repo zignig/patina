@@ -1,0 +1,23 @@
+[package]
+name = "rustv"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+riscv-rt = { version = "0.11.0" }
+
+
+[profile.dev]
+panic = "abort"
+# strip = "symbols" 
+
+[profile.release]
+panic = "abort"
+# strip = true
+opt-level = 0
+mir-opt-level = 0
+
+[build-dependencies]
+riscv-target = "0.1.2"
