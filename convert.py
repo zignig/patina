@@ -20,7 +20,7 @@ def print_to_string(*args, **kwargs):
 
 array = []
 for i in struct.iter_unpack(">H",data):
-    array.append(hex(i[0]))
+    array.append(i[0])
 
 r = print_to_string(array)
 print(r)

@@ -1,8 +1,10 @@
-# Minimal RISCV runtime and build environment for 
+# Minimal RISCV runtime
 
-(https://github.com/cbiffle/hapenny)
+build environment for riscv32i on (https://github.com/cbiffle/hapenny)
 
 An attempt at a minimal rust riscv framework for fpga control plane development 
+
+## Commands 
 
 cargo objcopy --release --bin rustv -- -O ihex test.hex
 

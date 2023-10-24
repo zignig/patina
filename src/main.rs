@@ -9,7 +9,7 @@ use core::arch::global_asm;
 // extern crate riscv_rt;
 // use riscv_rt::entry;
 
-const LED_ADDRESS: u32 = 0x40010431;
+const LED_ADDRESS: u32 = 8192 + 4; // one word past the end of memory.
 
 struct Led {
     address: u32,
@@ -29,14 +29,6 @@ impl Led {
     pub fn off(&mut self) {
         unsafe {
             (self.address as *mut u32).write_volatile(0);
-        }
-    }
-
-    #[allow(dead_code)]
-    fn flikker(&mut self, flip: u32) {
-        if flip > 1325 {
-            self.on();
-            self.off();
         }
     }
 }
@@ -68,7 +60,7 @@ global_asm!(
         #csrrs   x0, stvec, a0
         
         la       sp, _stack_start
-        j       __start_rust
+        j        __start_rust
     
     .option norvc
     ",
@@ -79,18 +71,10 @@ global_asm!(
 pub unsafe extern "C" fn __start_rust() -> ! {
     let mut blink = Led::new(LED_ADDRESS);
     loop {
-        // wait(12345);
-        // wait(12346);
-        
-        for i in 0..12345 {
-            wait(i);
+            wait(u32::MAX);
             blink.off();
-            wait(i);
+            wait(u32::MAX);
             blink.on();
-            if i < 10 { 
-                wait(4);
-            }
-        }
     }
 }
 

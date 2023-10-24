@@ -16,8 +16,10 @@ panic = "abort"
 [profile.release]
 panic = "abort"
 # strip = true
-opt-level = 0
-mir-opt-level = 0
+#opt-level = 0
+#mir-opt-level = 0
 
 [build-dependencies]
 riscv-target = "0.1.2"
+
+
