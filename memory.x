@@ -1,6 +1,6 @@
 MEMORY {
-    PROGMEM (rwx): ORIGIN = 0x2000, LENGTH = 512
-    RAM (rw): ORIGIN = 0x0000, LENGTH = 8192
+    #PROGMEM (rw): ORIGIN = 0x2000, LENGTH = 512
+    RAM (rwx): ORIGIN = 0x0000, LENGTH = 8192
 }
 
 EXTERN(__start);
@@ -9,7 +9,7 @@ ENTRY(__start);
 SECTIONS {
     PROVIDE(__stack_start = ORIGIN(RAM) + LENGTH(RAM));
 
-    PROVIDE(__stext = ORIGIN(PROGMEM));
+    PROVIDE(__stext = ORIGIN(RAM));
 
     .text __stext : {
         *(.start);
@@ -18,7 +18,7 @@ SECTIONS {
 
         . = ALIGN(4);
         __etext = .;
-    } > PROGMEM
+    }
 
     .rodata : ALIGN(4) {
         . = ALIGN(4);
@@ -26,7 +26,7 @@ SECTIONS {
         *(.rodata .rodata.*);
         . = ALIGN(4);
         __erodata = .;
-    } > PROGMEM
+    } 
 
     /DISCARD/ : {
         /* throw away RAM sections to get a link error if they're used. */

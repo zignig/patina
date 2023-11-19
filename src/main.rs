@@ -4,6 +4,7 @@
 
 use core::arch::asm;
 use core::arch::global_asm;
+use core::str;
 
 mod uart;
 
@@ -27,24 +28,53 @@ global_asm! {
 #[no_mangle]
 pub extern "C" fn main() -> ! {
     loop {
-        wait(12345);
+        // val = uart::getc();
+        // uart::putb(val);
+        // wait(10);
+
+        for (name, _, _) in COMMANDS {
+            write(name);
+        }
+        wait(u32::MAX);
     }
+}
+
+#[inline(never)]
+fn write(name: &str) {
+    for c in name.as_bytes() {
+        uart::putb(*c);
+    }
+    uart::putb(b'\n');
+    uart::putb(b'\r');
 }
 
 #[panic_handler]
 unsafe fn my_panic(_info: &core::panic::PanicInfo) -> ! {
-    let mut val:u8;
-    loop {
-        val = uart::getc();
-        uart::putb(val);
-        wait(10);
-    }
+    loop {}
+}
+
+struct Ctx {
+    data: str,
+}
+
+type Command = fn(&mut Ctx, &str);
+
+static COMMANDS: &[(&str, Command, &str)] = &[
+    ("list", cmd_empty, "print names"),
+    ("info", cmd_empty, "print a summary of a type"),
+    ("other", cmd_empty, "other stuff"),
+    ("reset", cmd_empty, "other stuff"),
+    ("reboot", cmd_empty, "other stuff"),
+];
+
+#[inline(never)]
+fn cmd_empty(_ctx: &mut Ctx, _extra: &str) {
+    uart::putb(0);
 }
 
 #[no_mangle]
 #[allow(non_snake_case)]
 fn DefaultInterruptHandler() {}
-
 
 #[inline(never)]
 fn wait(dur: u32) {
@@ -54,5 +84,3 @@ fn wait(dur: u32) {
         }
     }
 }
-
-
