@@ -35,7 +35,7 @@ pub extern "C" fn main() -> ! {
         // wait(10);
         if let Some(c) = uart::get() {
             uart::putb(c);
-            if c == b'1' {
+            if c == b'`' {
                 reset();
             }
             if c == b'w' {
@@ -105,6 +105,16 @@ fn wait(dur: u32) {
 }
 
 fn reset() {
-    // return to the bootloader 
-    unsafe { asm!("ret") }
+    // return to the bootloader
+    let mut a: *mut u32 = core::ptr::null_mut();
+    a = 8192 as _;
+    unsafe {
+        core::arch::asm!(
+        "
+        jr a0               # activate routine
+        ",
+            in("a0") a,
+            options(noreturn),
+        );
+    }
 }
