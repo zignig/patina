@@ -27,15 +27,34 @@ global_asm! {
 
 #[no_mangle]
 pub extern "C" fn main() -> ! {
+    let mut counter: u32 = 0;
+    list();
     loop {
         // val = uart::getc();
         // uart::putb(val);
         // wait(10);
-
-        for (name, _, _) in COMMANDS {
-            write(name);
+        if let Some(c) = uart::get() {
+            uart::putb(c);
+            if c == b'1' {
+                reset();
+            }
+            if c == b'w' {
+                list();
+            }
         }
-        wait(u32::MAX);
+
+        // counter = counter + 1;
+        // if counter == 10000 {
+        //     uart::putb(b'j');
+        //     counter = 0;
+
+        // }
+    }
+}
+
+fn list() {
+    for (name, _, _) in COMMANDS {
+        write(name);
     }
 }
 
@@ -83,4 +102,9 @@ fn wait(dur: u32) {
             asm!("nop");
         }
     }
+}
+
+fn reset() {
+    // return to the bootloader 
+    unsafe { asm!("ret") }
 }
