@@ -20,6 +20,6 @@ panic = "abort"
 # mir-opt-level = 0
 
 [build-dependencies]
-riscv-target = "0.1.2"
+#riscv-target = "0.1.2"
 parse_int = "0.6.0"
 askama = "0.12.1"

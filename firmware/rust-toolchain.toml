@@ -1,0 +1,4 @@
+[toolchain]
+targets = [ "riscv32i-unknown-none-elf"]
+profile = "minimal"
+components = [ "rustfmt", "rust-analyzer" ]
