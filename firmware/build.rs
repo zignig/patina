@@ -35,5 +35,5 @@ fn main() {
     out.push("peripherals.rs");
 
     let mut f = std::fs::File::create(&out).unwrap();
-    writeln!(f, "pub const UART_ADDR: u32 = 0x{addr:x};").unwrap();
+    writeln!(f, "pub const UART_ADDR: i16 = 0x{addr:x};").unwrap();
 }
