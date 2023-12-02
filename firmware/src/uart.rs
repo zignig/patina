@@ -1,7 +1,7 @@
 // Simple uart functions
 
 // The uart address is generted by the build script
-use core::fmt::Write;
+use core::fmt::{Error, Write};
 
 // Default serial from build system
 // magic include.
@@ -18,11 +18,11 @@ pub trait Bind {
     const RX: *mut i16;
     const TX: *mut u16;
     fn new() -> Self;
-    fn txbusy() -> bool;
-    fn flush();
-    fn putb(b: u8);
-    fn getc() -> u8;
-    fn get() -> Option<u8>;
+    fn txbusy(&mut self) -> bool;
+    fn flush(&mut self);
+    fn putb(&mut self, b: u8);
+    fn getc(&mut self) -> u8;
+    fn get(&mut self) -> Option<u8>;
 }
 
 impl<const UART: i16> Bind for Serial<UART> {
@@ -33,25 +33,25 @@ impl<const UART: i16> Bind for Serial<UART> {
         Self {}
     }
 
-    fn txbusy() -> bool {
+    fn txbusy(&mut self) -> bool {
         unsafe { Self::TX.read_volatile() != 0 }
     }
 
-    fn flush() {
-        while Self::txbusy() {
+    fn flush(&mut self) {
+        while self.txbusy() {
             // spin
         }
     }
 
-    fn putb(b: u8) {
-        Self::flush();
+    fn putb(&mut self, b: u8) {
+        self.flush();
         unsafe {
             Self::TX.write_volatile(u16::from(b));
         }
     }
 
     // blocking
-    fn getc() -> u8 {
+    fn getc(&mut self) -> u8 {
         loop {
             let status = unsafe { Self::RX.read_volatile() };
             if status >= 0 {
@@ -60,7 +60,7 @@ impl<const UART: i16> Bind for Serial<UART> {
         }
     }
 
-    fn get() -> Option<u8> {
+    fn get(&mut self) -> Option<u8> {
         let status = unsafe { Self::RX.read_volatile() };
         if status >= 0 {
             return Some(status as u8);
@@ -72,15 +72,52 @@ impl<const UART: i16> Bind for Serial<UART> {
 // Some macros on the default serial
 // give me the basics
 // please ...
-// write! and println for the DefaultSerial
+// write! and println! for the DefaultSerial
 
-impl Write for DefaultSerial {
-    fn write_str(&mut self, s: &str) -> Result {
-        for c in s.as_bytes() {
-            self.putb(c);
-        }
-        Ok(())
+// impl Write for DefaultSerial {
+//     fn write_str(&mut self, s: &str) -> Result<(),Error> {
+//         let mut sp = DefaultSerial::new();
+//         for mut c in s.as_bytes() {
+//             sp.putb(*c);
+//         }
+//         Ok(())
+//     }
+// }
+
+// // macro_rules! write {
+// //     () => {
+// //         let mut sp = DefaultSerial::new();
+// //         for mut c in s.as_bytes() {
+// //             sp.putb(*c);
+// //         }
+// //     };
+// // }
+pub fn write(s: &str) {
+    let mut sp = DefaultSerial::new();
+    for c in s.as_bytes() {
+        sp.putb(*c);
     }
 }
 
+// #[macro_export]
+// macro_rules! print
+// {
+// 	($($args:tt)+) => ({
+// 			use core::fmt::Write;
+// 			let _ = write!(DefaultSerial::new(), $($args)+);
+// 			});
+// }
 
+// // #[macro_export]
+// macro_rules! println
+// {
+// 	() => ({
+// 		   print!("\r\n")
+// 		   });
+// 	// ($fmt:expr) => ({
+// 	// 		print!(concat!($fmt, "\r\n"))
+// 	// 		});
+// 	// ($fmt:expr, $($args:tt)+) => ({
+// 	// 		print!(concat!($fmt, "\r\n"), $($args)+)
+// 	// 		});
+// }

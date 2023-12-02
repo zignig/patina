@@ -22,10 +22,35 @@ global_asm! {
 
 // Crappy wait
 #[inline(never)]
-fn wait(dur: u32) {
+pub fn wait(dur: u32) {
     for _ in 0..dur {
         unsafe {
             asm!("nop");
         }
     }
+}
+
+pub fn reset() {
+    // return to the bootloader
+    let mut a: *mut u32 = core::ptr::null_mut();
+    a = 8192 as _;
+    unsafe {
+        core::arch::asm!(
+        "
+        jr a0               # activate routine
+        ",
+            in("a0") a,
+            options(noreturn),
+        );
+    }
+}
+
+// -- no interupts yet.
+#[no_mangle]
+#[allow(non_snake_case)]
+fn DefaultInterruptHandler() {}
+
+#[panic_handler]
+unsafe fn my_panic(_info: &core::panic::PanicInfo) -> ! {
+    loop {}
 }
