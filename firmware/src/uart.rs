@@ -2,6 +2,9 @@
 
 // The uart address is generted by the build script
 use core::fmt::{Error, Write};
+use ufmt::{uWrite};
+
+
 
 // Default serial from build system
 // magic include.

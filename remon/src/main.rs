@@ -1,12 +1,12 @@
-use std::{io::ErrorKind, io::Write, path::PathBuf, time::Duration};
+use std::{path::PathBuf, time::Duration};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
 use clap::Parser;
-use indicatif::ProgressBar;
-use serialport::SerialPort;
-use tokio_serial;
 
+mod cli;
 mod console;
+
+use cli::{do_call, do_cmd, do_peek, do_poke, do_write, drain};
 use console::run_console;
 
 //use console::traffic;
@@ -24,6 +24,10 @@ struct BootTool {
     /// Attach to a serial console
     #[clap(long, short, global = true)]
     console: bool,
+    /// Debug logging
+    #[clap(long, short, global = true)]
+    debug: bool,
+    
 
     #[clap(subcommand)]
     cmd: Option<SubCmd>,
@@ -90,13 +94,7 @@ async fn main() -> Result<()> {
         .open()
         .with_context(|| format!("opening serial port {}", args.port))?;
 
-    // let mut port = serialport::new(&args.port, args.baud_rate)
-    //     .timeout(Duration::from_millis(500))
-    //     .open()
-    //     .with_context(|| format!("opening serial port {}", args.port))?;
-
-    if let Some(cmd) = args.cmd
-    {
+    if let Some(cmd) = args.cmd {
         drain(&mut port)?;
         match cmd {
             SubCmd::Ping => {
@@ -104,33 +102,11 @@ async fn main() -> Result<()> {
             }
 
             SubCmd::Peek { address } => {
-                // load addr register
-                let mut cmd = [3, 0, 0, 0, 0];
-                cmd[1..].copy_from_slice(&address.to_le_bytes());
-                do_cmd(&mut port, &cmd).context("loading A")?;
-                // load count register
-                let cmd = [4, 1, 0, 0, 0];
-                do_cmd(&mut port, &cmd).context("loading C")?;
-                // read out the data
-                let cmd = [2];
-                do_cmd(&mut port, &cmd).context("sending GET")?;
-                let mut data = [0; 4];
-                port.read_exact(&mut data).context("waiting for data")?;
-                println!("{:#x}", u32::from_le_bytes(data));
+                do_peek(address, &mut port)?;
             }
 
             SubCmd::Poke { address, value } => {
-                // load addr register
-                let mut cmd = [3, 0, 0, 0, 0];
-                cmd[1..].copy_from_slice(&address.to_le_bytes());
-                do_cmd(&mut port, &cmd).context("loading A")?;
-                // load count register
-                let cmd = [4, 1, 0, 0, 0];
-                do_cmd(&mut port, &cmd).context("loading C")?;
-                // deposit the data.
-                let mut cmd = [1, 0, 0, 0, 0];
-                cmd[1..].copy_from_slice(&value.to_le_bytes());
-                do_cmd(&mut port, &cmd).context("sending PUT")?;
+                do_poke(address, value, &mut port)?;
             }
 
             SubCmd::Write {
@@ -157,107 +133,6 @@ async fn main() -> Result<()> {
     if args.console {
         println!("Activate all consoles, MAXIMUM YIELD!");
         run_console(&mut port).await?;
-
-    }
-
-    Ok(())
-}
-
-fn do_write(
-    image_file: PathBuf,
-    address: u32,
-    port: &mut Box<dyn SerialPort>,
-) -> Result<(), anyhow::Error> {
-    let mut image = std::fs::read(&image_file)?;
-    while image.len() % 4 != 0 {
-        image.push(0);
-    }
-    let mut cmd = [3, 0, 0, 0, 0];
-    cmd[1..].copy_from_slice(&address.to_le_bytes());
-    do_cmd(port, &cmd).context("loading A")?;
-    let bar = ProgressBar::new(image.len() as u64);
-    for chunk in image.chunks(256) {
-        // load count register
-        let word_count = u32::try_from(chunk.len() / 4)?;
-        let mut cmd = [4, 0, 0, 0, 0];
-        cmd[1..].copy_from_slice(&word_count.to_le_bytes());
-        do_cmd(port, &cmd).context("loading C")?;
-        let mut packet = vec![1];
-        packet.extend_from_slice(chunk);
-        // deposit the data.
-        do_cmd(port, &packet).context("sending PUT")?;
-        bar.inc(chunk.len() as u64);
-    }
-    bar.finish();
-    Ok(())
-}
-
-fn do_call(
-    address: u32,
-    mut port: &mut Box<dyn SerialPort>,
-    then_echo: bool,
-) -> Result<(), anyhow::Error> {
-    let mut cmd = [3, 0, 0, 0, 0];
-    cmd[1..].copy_from_slice(&address.to_le_bytes());
-    do_cmd(&mut port, &cmd).context("loading A")?;
-    do_cmd(&mut port, &[0]).context("sending CALL")?;
-    Ok(if then_echo {
-        let stdout = std::io::stdout();
-        let mut stdout = stdout.lock();
-        loop {
-            let mut b = [0];
-            match port.read_exact(&mut b) {
-                Ok(()) => {
-                    write!(stdout, "{}", b[0] as char)?;
-                    stdout.flush()?;
-                }
-                Err(e) if e.kind() == ErrorKind::TimedOut => {
-                    // meh
-                }
-                other => other?,
-            }
-        }
-    })
-}
-
-fn do_cmd(port: &mut Box<dyn SerialPort>, cmd: &[u8]) -> Result<()> {
-    port.write_all(&cmd).context("writing command")?;
-    let mut response = [0; 1];
-    port.read_exact(&mut response)
-        .context("collecting response byte")?;
-    match response[0] {
-        0xAA => Ok(()),
-        0xFF => {
-            bail!("Received NACK");
-        }
-        x => {
-            bail!("Received unexpected response: {x:#x}");
-        }
-    }
-}
-
-fn drain(port: &mut Box<dyn SerialPort>) -> Result<()> {
-    let saved_timeout = port.timeout();
-
-    port.set_timeout(Duration::from_millis(1))
-        .context("reducing timeout for drain")?;
-
-    let mut buffer = [0; 32];
-    let mut cruft = 0_usize;
-    loop {
-        match port.read(&mut buffer) {
-            Ok(n) => cruft += n,
-            Err(e) if e.kind() == ErrorKind::TimedOut => {
-                break;
-            }
-            Err(e) => return Err(e).context("attempting to drain buffer"),
-        }
-    }
-    port.set_timeout(saved_timeout)
-        .context("restoring timeout after drain")?;
-
-    if cruft > 0 {
-        println!("note: {cruft} bytes of cruft drained from serial port");
     }
 
     Ok(())

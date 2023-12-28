@@ -16,7 +16,8 @@ use init::{wait,reset};
 pub extern "C" fn main() -> ! {
     //Create a serai port
     let mut ds = DefaultSerial::new();
-    wait(10000);
+    // Delay
+    wait(60000);
     let intro =  "Welcome to patina";
     write(intro);
     loop {

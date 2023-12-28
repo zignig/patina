@@ -2,7 +2,7 @@
 //!
 //! cargo run --features="event-stream" --example event-stream-tokio
 
-use std::{io::stdout, time::Duration};
+use std::time::Duration;
 
 use futures::{future::FutureExt, select, StreamExt};
 use futures_timer::Delay;
@@ -10,11 +10,7 @@ use tokio_serial::SerialPort;
 
 use crossterm::{
     cursor::position,
-    event::{
-        DisableMouseCapture, EnableMouseCapture, Event, EventStream, KeyCode, KeyEvent,
-        KeyModifiers,
-    },
-    execute,
+    event::{Event, EventStream, KeyCode, KeyEvent, KeyModifiers},
     terminal::{disable_raw_mode, enable_raw_mode},
 };
 
@@ -48,7 +44,6 @@ async fn print_events() {
 
 pub async fn run_console(_port: &mut Box<dyn SerialPort>) -> std::io::Result<()> {
     enable_raw_mode()?;
-    let mut stdout = stdout();
     print_events().await;
     disable_raw_mode()
 }
