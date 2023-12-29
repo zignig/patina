@@ -12,23 +12,46 @@ use crate::uart::DefaultSerial;
 mod init;
 use init::{wait,reset};
 
+use heapless::String;
+
+
 // Default reset from build system (.cargo/config.toml)
 // magic include.
 mod generated {
     include!(concat!(env!("OUT_DIR"), "/peripherals.rs"));
 }
 
+struct Buffer { 
+    data: String<64>,
+    cursor: usize,
+}
+
+impl Buffer {
+    fn new() -> Self {
+        Self{
+            data: String::new(),
+            cursor: 0 
+        }
+    }
+}
+
+
 #[no_mangle]
 pub extern "C" fn main() -> ! {
+    // Some heapless constructs 
+    let mut buffer = Buffer::new();
+
     //Create a serai port
     let mut ds = DefaultSerial::new();
     // Delay
     wait(60000);
-    let intro =  "Welcome to patina";
+    let intro =  "Welcome to new patina";
     write(intro);
     loop {
         if let Some(c) = ds.get() {
             ds.putb(c);
+            let _ = buffer.data.push(c as char);
+
             if c == b'`' {
                 reset();
             }
@@ -42,7 +65,7 @@ pub extern "C" fn main() -> ! {
 fn list() {
     for (name, _, _) in COMMANDS {
         //println!("{}",name);
-        write(name);
+        println!("-{}",name);
     }
 }
 

@@ -1,7 +1,7 @@
 // Simple uart functions
 
 // The uart address is generted by the build script
-use core::fmt::{Error, Write};
+use core::{fmt::{Error, Write}, convert::Infallible};
 use ufmt::{uWrite};
 
 
@@ -71,25 +71,17 @@ impl<const UART: i16> Bind for Serial<UART> {
 // give me the basics
 // please ...
 // write! and println! for the DefaultSerial
+impl uWrite for DefaultSerial{
+    type Error = Infallible;
 
-// impl Write for DefaultSerial {
-//     fn write_str(&mut self, s: &str) -> Result<(),Error> {
-//         let mut sp = DefaultSerial::new();
-//         for mut c in s.as_bytes() {
-//             sp.putb(*c);
-//         }
-//         Ok(())
-//     }
-// }
+    fn write_str(&mut self, s: &str) -> Result<(), Self::Error> {
+        for c in s.as_bytes() { 
+            self.putb(*c);
+        }
+        Ok(())
+    }
+}
 
-// // macro_rules! write {
-// //     () => {
-// //         let mut sp = DefaultSerial::new();
-// //         for mut c in s.as_bytes() {
-// //             sp.putb(*c);
-// //         }
-// //     };
-// // }
 pub fn write(s: &str) {
     let mut sp = DefaultSerial::new();
     for c in s.as_bytes() {
@@ -97,25 +89,24 @@ pub fn write(s: &str) {
     }
 }
 
-// #[macro_export]
-// macro_rules! print
-// {
-// 	($($args:tt)+) => ({
-// 			use core::fmt::Write;
-// 			let _ = write!(DefaultSerial::new(), $($args)+);
-// 			});
-// }
+#[macro_export]
+macro_rules! println
+{
+	($($args:tt)+) => ({
+			let _ = ::ufmt::uwriteln!(DefaultSerial::new(), $($args)*);
+	});
+}
 
-// // #[macro_export]
+// #[macro_export]
 // macro_rules! println
 // {
 // 	() => ({
 // 		   print!("\r\n")
 // 		   });
-// 	// ($fmt:expr) => ({
-// 	// 		print!(concat!($fmt, "\r\n"))
-// 	// 		});
-// 	// ($fmt:expr, $($args:tt)+) => ({
-// 	// 		print!(concat!($fmt, "\r\n"), $($args)+)
-// 	// 		});
+//     ($fmt:expr) => ({
+// 			print!(concat!(fmt, "\r\n"))
+// 			});
+// 	($fmt:expr, $($args:tt)+) => ({
+// 			print!(concat!($fmt, "\r\n"), $($args)+)
+// 			});
 // }
