@@ -131,8 +131,8 @@ async fn main() -> Result<()> {
         }
     }
     if args.console {
-        println!("Activate all consoles, MAXIMUM YIELD!");
-        run_console(&mut port).await?;
+        println!("^] to exit.");
+        run_console(&mut port,args.debug).await?;
     }
 
     Ok(())

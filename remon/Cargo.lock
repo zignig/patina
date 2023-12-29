@@ -374,6 +374,7 @@ name = "hapenny-montool"
 version = "1.0.0"
 dependencies = [
  "anyhow",
+ "bytes",
  "clap",
  "crossterm",
  "futures",
