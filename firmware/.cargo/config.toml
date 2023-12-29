@@ -13,3 +13,4 @@ rustflags = [
 [env]
 # default uart (stdin,stdout)
 UART_ADDR="12288"
+RESET_VECTOR="8192"

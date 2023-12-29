@@ -6,14 +6,9 @@ use ufmt::{uWrite};
 
 
 
-// Default serial from build system
-// magic include.
-mod generated {
-    include!(concat!(env!("OUT_DIR"), "/peripherals.rs"));
-}
 
 // Build magic env in .cargo/cargo.toml defines this address
-pub type DefaultSerial = Serial<{ generated::UART_ADDR }>;
+pub type DefaultSerial = Serial<{ crate::generated::UART_ADDR }>;
 
 pub struct Serial<const UART: i16>;
 

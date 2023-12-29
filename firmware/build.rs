@@ -31,9 +31,28 @@ fn main() {
         }
     };
 
+    // Reset Vector
+    let reset_vector = match std::env::var("RESET_VECTOR") {
+        // Ugh why is this not an Option
+        Err(VarError::NotPresent) => None,
+        Ok(result) => Some(result),
+        e => panic!("{:?}", e),
+    };
+
+    let rv = match reset_vector {
+        None => {
+            println!("cargo:warning=note: UART address not provided, defaulting to 0x200");
+            0x200
+        }
+        Some(text) => {
+            parse_int::parse::<u32>(&text).unwrap()
+        }
+    };
+
     let mut out = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
     out.push("peripherals.rs");
 
     let mut f = std::fs::File::create(&out).unwrap();
     writeln!(f, "pub const UART_ADDR: i16 = 0x{addr:x};").unwrap();
+    writeln!(f, "pub const RESET_VECTOR: i16 = 0x{rv:x};").unwrap();
 }

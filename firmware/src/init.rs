@@ -33,11 +33,11 @@ pub fn wait(dur: u32) {
 pub fn reset() {
     // return to the bootloader
     let mut a: *mut u32 = core::ptr::null_mut();
-    a = 8192 as _;
+    a = crate::generated::RESET_VECTOR as _ ;
     unsafe {
         core::arch::asm!(
         "
-        jr a0               # activate routine
+        jr a0               # activate bootloader
         ",
             in("a0") a,
             options(noreturn),

@@ -12,6 +12,12 @@ use crate::uart::DefaultSerial;
 mod init;
 use init::{wait,reset};
 
+// Default reset from build system (.cargo/config.toml)
+// magic include.
+mod generated {
+    include!(concat!(env!("OUT_DIR"), "/peripherals.rs"));
+}
+
 #[no_mangle]
 pub extern "C" fn main() -> ! {
     //Create a serai port
