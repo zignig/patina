@@ -5,7 +5,7 @@
 use core::str;
 
 mod uart;
-use uart::{Bind,write};
+use uart::Bind;
 
 use crate::uart::DefaultSerial;
 
@@ -33,6 +33,11 @@ impl Buffer {
             cursor: 0 
         }
     }
+
+    fn reset(&mut self) { 
+        self.data.clear();
+        self.cursor = 0 ;
+    }
 }
 
 
@@ -46,7 +51,8 @@ pub extern "C" fn main() -> ! {
     // Delay
     wait(60000);
     let intro =  "Welcome to new patina";
-    write(intro);
+    println!("{}",intro);
+    
     loop {
         if let Some(c) = ds.get() {
             ds.putb(c);
@@ -57,6 +63,10 @@ pub extern "C" fn main() -> ! {
             }
             if c == b'w' {
                 list();
+            }
+            if c == b'\n' {
+                println!("{}",buffer.data.as_str());
+                buffer.reset();
             }
         }
     }

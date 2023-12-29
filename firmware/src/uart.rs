@@ -82,13 +82,6 @@ impl uWrite for DefaultSerial{
     }
 }
 
-pub fn write(s: &str) {
-    let mut sp = DefaultSerial::new();
-    for c in s.as_bytes() {
-        sp.putb(*c);
-    }
-}
-
 #[macro_export]
 macro_rules! println
 {
