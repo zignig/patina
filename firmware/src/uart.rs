@@ -1,10 +1,8 @@
 // Simple uart functions
 
 // The uart address is generted by the build script
-use core::{fmt::{Error, Write}, convert::Infallible};
-use ufmt::{uWrite};
-
-
+use core::convert::Infallible;
+use ufmt::uWrite;
 
 
 // Build magic env in .cargo/cargo.toml defines this address
@@ -82,11 +80,17 @@ impl uWrite for DefaultSerial{
     }
 }
 
+pub fn writer(s: &str){
+    let mut ds = DefaultSerial::new();
+    for c in s.as_bytes() { 
+        ds.putb(*c);
+    }
+}
 #[macro_export]
 macro_rules! println
 {
 	($($args:tt)+) => ({
-			let _ = ::ufmt::uwriteln!(DefaultSerial::new(), $($args)*);
+			let _ = ::ufmt::uwrite!(DefaultSerial::new(), $($args)*);
 	});
 }
 

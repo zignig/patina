@@ -18,7 +18,8 @@ panic = "abort"
 [profile.release]
 panic = "abort"
 # strip = true
-# opt-level = 0
+opt-level = 's'
+debug = true
 # mir-opt-level = 0
 
 [build-dependencies]
