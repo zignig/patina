@@ -2,10 +2,12 @@
 #![no_main]
 #![feature(strict_provenance)]
 
-use core::{marker::PhantomData, str};
+mod readline;
+
+mod terminal;
 
 mod uart;
-use uart::{ writer,Bind};
+use uart::Bind;
 
 use crate::uart::DefaultSerial;
 
@@ -14,7 +16,7 @@ use init::{reset, wait};
 
 use heapless::String;
 
-const PROMPT: &str = ">";
+const PROMPT: &str = ">>";
 
 // Default reset from build system (.cargo/config.toml)
 // magic include.
@@ -72,11 +74,11 @@ pub extern "C" fn main() -> ! {
                     buffer.reset();
                     println!("\r\n{}", PROMPT);
                 }
-                b'\x21' => list(),
-                _ => {
+                31..=127 => {
                     ds.putb(c);
                     let _ = buffer.data.push(c as char);
                 }
+                _ => {}
             }
         }
     }
@@ -90,19 +92,19 @@ fn list() {
     // for i in 0..len{
     //     println!("{} = {}\r\n",i,*COMMANDS[i].0);
     // }
-    for (name,_) in COMMANDS {
-        writer(name);
+    for item in COMMANDS {
+        println!("{}",&item.0);
     }
 }
 
 fn run_command(data: &str) {
-    let mut ctx = Ctx::new();
+    let mut ctx = Ctx::new("stuff");
     if let Some(cmd) = data.split_ascii_whitespace().next() {
         println!("\r\n>>>{}<<<", cmd);
-        for (name, imp) in COMMANDS {
-            if *name == cmd {
-                println!("MATCH\r\n");
-                imp(&mut ctx);
+        for item in COMMANDS {
+            if  item.0 == cmd {
+                println!("MATCH\r\n{}",item.0);
+                item.1(&mut ctx);
                 return;
             }
         }
@@ -110,30 +112,35 @@ fn run_command(data: &str) {
     println!("end\r\n");
 }
 struct Ctx {
-
+    data: String<8>
 }
 
 impl Ctx {
-    fn new() -> Self {
-        Self{}
+    fn new(name: &str) -> Self {
+        let name_as_str = String::try_from(name).unwrap();
+        Self{
+            data: name_as_str
+        }
     }
 }
 
 type Command = fn(&mut Ctx);
 
-static COMMANDS: &[(&str, Command)] = &[
-    ("list", cmd_list),
-    ("info", cmd_empty),
-    ("other", cmd_empty),
+struct CommandItem(&'static str, Command);
+
+static COMMANDS: &[CommandItem] = &[
+    CommandItem("list", cmd_list),
+    CommandItem("info", cmd_empty),
+    //("other", cmd_empty),
     //("reset", cmd_empty),
-      // ("reboot", cmd_empty),
+    // ("reboot", cmd_empty),
 ];
 
 #[inline(never)]
-fn cmd_empty(_ctx: &mut Ctx) {
-    println!("empty command");
+fn cmd_empty(ctx: &mut Ctx) {
+    println!("empty command as {}",ctx.data.as_str());
 }
 
 fn cmd_list(_ctx: &mut Ctx) {
-    list();
+    println!("list the commands");
 }

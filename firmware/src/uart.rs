@@ -80,17 +80,19 @@ impl uWrite for DefaultSerial{
     }
 }
 
-pub fn writer(s: &str){
-    let mut ds = DefaultSerial::new();
-    for c in s.as_bytes() { 
-        ds.putb(*c);
-    }
-}
+// pub fn writer(s: &str){
+//     let mut ds = DefaultSerial::new();
+//     for c in s.as_bytes() { 
+//         ds.putb(*c);
+//     }
+// }
+
+
 #[macro_export]
 macro_rules! println
 {
 	($($args:tt)+) => ({
-			let _ = ::ufmt::uwrite!(DefaultSerial::new(), $($args)*);
+			let _ = ::ufmt::uwrite!(DefaultSerial::new(), $($args)+);
 	});
 }
 
