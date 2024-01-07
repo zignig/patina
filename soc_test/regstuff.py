@@ -8,6 +8,7 @@ from amaranth_soc import csr
 from amaranth_soc.memory import MemoryMap
 from amaranth_soc.csr import field as csr_field, Field
 
+from csr_uart import AsyncSerialPeripheral
 
 class MemFaker(wiring.Component):
     def __init__(self, mm, addr_width):
@@ -30,7 +31,8 @@ class Counter(wiring.Component):
     class Overflow(csr.Register, access="rw"):
         value: Field(csr_field.RW,16)
     
-    def __init__(self):
+    def __init__(self,name="counter"):
+        self.name = name 
         self.enable = self.Enable()
         self.counter = self.Counter()
         self.overflow = self.Overflow()
@@ -48,6 +50,7 @@ class Counter(wiring.Component):
 
     def elaborate(platform):
         m = Module()
+        
 
      
 class Widget(wiring.Component):
@@ -83,6 +86,7 @@ class Overlord(wiring.Component):
     blink: Out(1)
 
     def __init__(self):
+        self._devices = {}
         self.mem_map = MemoryMap(addr_width=16, data_width=16)
 
         self.mem = MemFaker(self.mem_map,13)
@@ -92,22 +96,49 @@ class Overlord(wiring.Component):
         self._csr_decoder.bus.memory_map = self.mem_map
         
         self.widget = Widget("first")
-        self._csr_decoder.add(self.widget.csr_bus,addr=0x9000)
+        self._csr_decoder.add(self.widget.csr_bus,addr=0x4000)
 
-        self.widget2 = Widget("second")
-        self._csr_decoder.add(self.widget2.csr_bus)
+        # self.widget2 = Widget("second")
+        # self._csr_decoder.add(self.widget2.csr_bus)
 
         self.counter=  Counter()
-        self._csr_decoder.add(self.counter.csr_bus)
+        self.attach(self.counter)
+        
+        self.uart = AsyncSerialPeripheral(name='uart0',divisor=4000)
+        self.attach(self.uart)
+
+        self.uart1 = AsyncSerialPeripheral(name='uart1',divisor=4000)
+        self.attach(self.uart1)
+
         super().__init__()
         
+    def attach(self,device):
+        addr = self._csr_decoder.add(device.csr_bus)
+        self._devices[device.name] = (device,addr)
+
+    def get(self,name):
+        "get the device out "
+        regs = []
+        for i in self.mem_map.all_resources():
+            if i.path[0] == name:
+                regs.append(i)
+        return regs 
+    
     def show(self):
-        print("show")
         mm = self.mem_map.all_resources()
-        for i in mm:
-            #print(dir(i))
-            print(i.path, i.start, i.end,i.resource)
-        return i 
+        #for i in mm:
+        #    print(i.path,i.start,i.end,i.resource)
+        for i,j in self._devices.items():
+            map = self.get(i)
+            map2 = list(j[0].reg_map.flatten())
+            print(i)
+            #print(map)
+            #print(map2)
+            r = zip(map,map2)
+            print(list(r))
+        # for i in self.mem_map.window_patterns():
+        #     print(i)
+        # return i 
 
 if __name__ == "__main__":
     ol = Overlord()
