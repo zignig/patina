@@ -1,14 +1,20 @@
 [project]
-name = ""
 version = ""
-description = ""
+description = "riscv amaranth/rust build testing"
 authors = [
     {name = "Simon Kirkby", email = "obeygiantrobot@gmail.com"},
 ]
-dependencies = []
+
+name = "patina-build"
 requires-python = ">=3.11"
 license = {text = "MIT"}
-
+dependencies = [
+    "amaranth[builtin-yosys] @ git+https://github.com/amaranth-lang/amaranth",
+    "amaranth_soc @ git+https://github.com/jfng/amaranth-soc.git@csr-reg-rfc",
+    "amaranth_stdio @ git+https://github.com/amaranth-lang/amaranth-stdio",
+    "hapenny @ git+https://github.com/cbiffle/hapenny",
+    "yowasp-yosys",
+]
 [build-system]
 requires = ["pdm-pep517>=1.0.0"]
 build-backend = "pdm.pep517.api"
