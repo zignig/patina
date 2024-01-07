@@ -2,15 +2,19 @@
 #![no_main]
 #![feature(strict_provenance)]
 
-use core::str;
+use core::{marker::PhantomData, str};
 
 mod uart;
-use uart::{Bind,write};
+use uart::{ writer,Bind};
 
 use crate::uart::DefaultSerial;
 
 mod init;
-use init::{wait,reset};
+use init::{reset, wait};
+
+use heapless::String;
+
+const PROMPT: &str = ">";
 
 // Default reset from build system (.cargo/config.toml)
 // magic include.
@@ -18,47 +22,119 @@ mod generated {
     include!(concat!(env!("OUT_DIR"), "/peripherals.rs"));
 }
 
+struct Buffer {
+    data: String<64>,
+    cursor: usize,
+}
+
+impl Buffer {
+    fn new() -> Self {
+        Self {
+            data: String::new(),
+            cursor: 0,
+        }
+    }
+
+    fn reset(&mut self) {
+        self.data.clear();
+        self.cursor = 0;
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn main() -> ! {
+    // Some heapless constructs
+    let mut buffer = Buffer::new();
+
     //Create a serai port
     let mut ds = DefaultSerial::new();
     // Delay
     wait(60000);
-    let intro =  "Welcome to patina";
-    write(intro);
+    let intro = "Welcome to new patina";
+    println!("{}", intro);
+    println!("{}", PROMPT);
     loop {
         if let Some(c) = ds.get() {
-            ds.putb(c);
-            if c == b'`' {
-                reset();
-            }
-            if c == b'w' {
-                list();
+            match c {
+                b'\x03' => {
+                    // Control C
+                    println!("\r\n{}", PROMPT);
+                }
+                b'\x04' => {
+                    // Control D
+                    reset()
+                }
+                b'\x0D' => {
+                    // Enter
+                    let data = buffer.data.as_str();
+                    println!("\r\n>>{}<<", data);
+                    run_command(data);
+                    buffer.reset();
+                    println!("\r\n{}", PROMPT);
+                }
+                b'\x21' => list(),
+                _ => {
+                    ds.putb(c);
+                    let _ = buffer.data.push(c as char);
+                }
             }
         }
     }
 }
 
+#[inline(never)]
 fn list() {
-    for (name, _, _) in COMMANDS {
-        //println!("{}",name);
-        write(name);
+    println!("START LIST\r\n");
+    println!("len {}\r\n", COMMANDS.len());
+    // let len = COMMANDS.len();
+    // for i in 0..len{
+    //     println!("{} = {}\r\n",i,*COMMANDS[i].0);
+    // }
+    for (name,_) in COMMANDS {
+        writer(name);
     }
 }
 
+fn run_command(data: &str) {
+    let mut ctx = Ctx::new();
+    if let Some(cmd) = data.split_ascii_whitespace().next() {
+        println!("\r\n>>>{}<<<", cmd);
+        for (name, imp) in COMMANDS {
+            if *name == cmd {
+                println!("MATCH\r\n");
+                imp(&mut ctx);
+                return;
+            }
+        }
+    }
+    println!("end\r\n");
+}
 struct Ctx {
-    data: str,
+
 }
 
-type Command = fn(&mut Ctx, &str);
+impl Ctx {
+    fn new() -> Self {
+        Self{}
+    }
+}
 
-static COMMANDS: &[(&str, Command, &str)] = &[
-    ("list", cmd_empty, "print names"),
-    ("info", cmd_empty, "print a summary of a type"),
-    ("other", cmd_empty, "other stuff"),
-    ("reset", cmd_empty, "other stuff"),
-    ("reboot", cmd_empty, "other stuff"),
+type Command = fn(&mut Ctx);
+
+static COMMANDS: &[(&str, Command)] = &[
+    ("list", cmd_list),
+    ("info", cmd_empty),
+    ("other", cmd_empty),
+    //("reset", cmd_empty),
+      // ("reboot", cmd_empty),
 ];
 
+
 #[inline(never)]
-fn cmd_empty(_ctx: &mut Ctx, _extra: &str) {}
+fn cmd_empty(_ctx: &mut Ctx) {
+    println!("empty command");
+}
+
+fn cmd_list(_ctx: &mut Ctx) {
+    list();
+}
