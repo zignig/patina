@@ -1,14 +1,28 @@
 #![no_std]
 #![no_main]
 
+mod readline;
 
-use rustv::uart::{Bind, DefaultSerial};
-use rustv::println;
-use rustv::init::{reset, wait};
+mod terminal;
+
+mod uart;
+use uart::Bind;
+
+use crate::uart::DefaultSerial;
+
+mod init;
+use init::{reset, wait};
 
 use heapless::String;
 
-const PROMPT: &str = ">";
+const PROMPT: &str = ">>";
+
+
+// Default reset from build system (.cargo/config.toml)
+// magic include.
+mod generated {
+    include!(concat!(env!("OUT_DIR"), "/peripherals.rs"));
+}
 
 struct Buffer {
     data: String<16>,
