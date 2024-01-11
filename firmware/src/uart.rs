@@ -1,7 +1,9 @@
 // Simple uart functions
 
 // The uart address is generted by the build script
+use core::option::*;
 use core::convert::Infallible;
+
 use ufmt::uWrite;
 
 
@@ -80,12 +82,12 @@ impl uWrite for DefaultSerial{
     }
 }
 
-// pub fn writer(s: &str){
-//     let mut ds = DefaultSerial::new();
-//     for c in s.as_bytes() { 
-//         ds.putb(*c);
-//     }
-// }
+pub fn writer(s: &str){
+    let mut ds = DefaultSerial::new();
+    for c in s.as_bytes() { 
+        ds.putb(*c);
+    }
+}
 
 
 #[macro_export]
