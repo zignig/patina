@@ -29,7 +29,7 @@ pub fn wait(dur: u32) {
         }
     }
 }
-
+#[allow(unused_assignments)]
 pub fn reset() {
     // return to the bootloader
     let mut a: *mut u32 = core::ptr::null_mut();

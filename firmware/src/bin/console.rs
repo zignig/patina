@@ -86,7 +86,7 @@ fn list() {
     // for i in 0..len{
     //     println!("{} = {}\r\n",i,*COMMANDS[i].0);
     // }
-    for name in SOME_STRING{ 
+    for _name in SOME_STRING{ 
         println!("bork\r\n")
         //println!("{}\r\n",name);
     }
