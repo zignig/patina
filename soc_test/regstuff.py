@@ -6,7 +6,7 @@ from amaranth.lib.wiring import In, Out, flipped, connect
 
 from amaranth_soc import csr
 from amaranth_soc.memory import MemoryMap
-from amaranth_soc.csr import field as csr_field, Field
+from amaranth_soc.csr import Field,action
 
 from csr_uart import AsyncSerialPeripheral
 
@@ -23,13 +23,13 @@ class Counter(wiring.Component):
     csr_bus: In(csr.Signature(addr_width=2, data_width=16))
     
     class Enable(csr.Register, access="rw"):
-        enable: Field(csr_field.RW,1)
+        enable: Field(action.RW,1)
     
     class Counter(csr.Register, access="r"):
-        value: Field(csr_field.R,16)
+        value: Field(action.R,8)
     
     class Overflow(csr.Register, access="rw"):
-        value: Field(csr_field.RW,16)
+        value: Field(action.RW,24)
     
     def __init__(self,name="counter"):
         self.name = name 
@@ -58,16 +58,17 @@ class Widget(wiring.Component):
     csr_bus: In(csr.Signature(addr_width=2, data_width=16))
 
     class Config(csr.Register, access="rw"):
-        active: Field(csr_field.RW, 1)
-        speed: Field(csr_field.RW, 4)
-        stuff: Field(csr_field.RW, 8)
+        active: Field(action.RW, 1)
+        speed: Field(action.RW, 4)
+        stuff: Field(action.RW, 8)
 
     class Test(csr.Register, access="rw"):
-        bork: Field(csr_field.RW, 8)
-        awesome: Field(csr_field.RW, 8)
+        bork: Field(action.RW, 8)
+        awesome: Field(action.RW, 8)
 
     def __init__(self, name):
         self.conf = self.Config()
+        self.name = name
         self.test = self.Test()
 
         self.reg_map = reg_map = csr.RegisterMap()
@@ -96,9 +97,10 @@ class Overlord(wiring.Component):
         self._csr_decoder.bus.memory_map = self.mem_map
         
         self.widget = Widget("first")
-        self._csr_decoder.add(self.widget.csr_bus,addr=0x4000)
+        self.attach(self.widget)
 
-        # self.widget2 = Widget("second")
+        self.widget2 = Widget("second")
+        self.attach(self.widget2)
         # self._csr_decoder.add(self.widget2.csr_bus)
 
         self.counter=  Counter()
@@ -107,8 +109,8 @@ class Overlord(wiring.Component):
         self.uart = AsyncSerialPeripheral(name='uart0',divisor=4000)
         self.attach(self.uart)
 
-        self.uart1 = AsyncSerialPeripheral(name='uart1',divisor=4000)
-        self.attach(self.uart1)
+        # self.uart1 = AsyncSerialPeripheral(name='uart1',divisor=4000)
+        # self.attach(self.uart1)
 
         super().__init__()
         
@@ -126,8 +128,9 @@ class Overlord(wiring.Component):
     
     def show(self):
         mm = self.mem_map.all_resources()
-        #for i in mm:
-        #    print(i.path,i.start,i.end,i.resource)
+        for i in mm:
+            print(i.path,i.start,i.end,i.resource)
+        full = []
         for i,j in self._devices.items():
             map = self.get(i)
             map2 = list(j[0].reg_map.flatten())
@@ -136,10 +139,26 @@ class Overlord(wiring.Component):
             #print(map2)
             r = zip(map,map2)
             print(list(r))
-        # for i in self.mem_map.window_patterns():
-        #     print(i)
-        # return i 
+            full.append(list(r))
+        for i in self.mem_map.window_patterns():
+             print(i)
+        return full
+
+    def list(self):
+        for i,j in self._devices.items():
+            #print(i,j)
+            print(i)
+            periph = j[0]
+            for k in periph.reg_map.flatten():
+                reg = k[0]
+                print(k,reg.element.width)
+                for l in reg.f.flatten():
+                    el = l[1]
+                    print(l[0],el.port.shape.width,el.port.access)
+                    
+                    #print(dir(el),el)
 
 if __name__ == "__main__":
     ol = Overlord()
-    ol.show()
+    #r = ol.show()
+    ol.list()

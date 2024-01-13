@@ -5,8 +5,7 @@ from amaranth.lib import data, wiring
 from amaranth.lib.wiring import In, Out, flipped, connect
 
 from amaranth_soc import csr
-from amaranth_soc.csr import field
-from amaranth_soc.csr import field as csr_field, Field
+from amaranth_soc.csr import Field, action
 
 from amaranth_stdio.serial import *
 
@@ -30,9 +29,7 @@ class AsyncSerialPeripheral(wiring.Component):
                 )
             super().__init__(
                 {
-                    "divisor": Field(
-                        csr_field.RW, unsigned(divisor_bits), reset=divisor
-                    ),
+                    "divisor": Field(action.RW, unsigned(divisor_bits), reset=divisor),
                 }
             )
 
@@ -40,14 +37,12 @@ class AsyncSerialPeripheral(wiring.Component):
         def __init__(self):
             super().__init__(
                 fields={
-                    "rdy": Field(csr_field.R, unsigned(1)),
-                    "err": csr.FieldMap(
-                        {
-                            "overflow": Field(csr_field.R, unsigned(1)),
-                            "frame": Field(csr_field.R, unsigned(1)),
-                            "parity": Field(csr_field.R, unsigned(1)),
-                        }
-                    ),
+                    "rdy": Field(action.R, unsigned(1)),
+                    "err": {
+                        "overflow": Field(action.R, unsigned(1)),
+                        "frame": Field(action.R, unsigned(1)),
+                        "parity": Field(action.R, unsigned(1)),
+                    },
                 },
             )
 
@@ -55,28 +50,24 @@ class AsyncSerialPeripheral(wiring.Component):
         def __init__(self, data_bits):
             super().__init__(
                 fields={
-                    "data": Field(csr_field.R,unsigned(data_bits)),
+                    "data": Field(action.R, unsigned(data_bits)),
                 },
             )
 
     class TxInfo(csr.Register, access="r"):
         def __init__(self):
             super().__init__(
-                fields=
-                    {
-                        "rdy": Field(csr_field.R,unsigned(1)),
-                    }
-                ,
+                fields={
+                    "rdy": Field(action.R, unsigned(1)),
+                },
             )
 
     class TxData(csr.Register, access="w"):
         def __init__(self, data_bits):
             super().__init__(
-                fields=
-                    {
-                        "data": Field(csr_field.W,unsigned(data_bits)),
-                    }
-                ,
+                fields={
+                    "data": Field(action.W, unsigned(data_bits)),
+                },
             )
 
     def __init__(
@@ -121,7 +112,6 @@ class AsyncSerialPeripheral(wiring.Component):
         self._bridge = csr.Bridge(register_map, addr_width=3, data_width=16, name=name)
         super().__init__()
         self.csr_bus.memory_map = self._bridge.bus.memory_map
-
 
     @property
     def signature(self):

@@ -1,3 +1,3 @@
-cargo objcopy --release --bin base -- -O binary stuff.bin
-./hapenny-montool /dev/ttyUSB0 -b 19200 run stuff.bin
-screen /dev/ttyUSB0 19200 
+cargo objcopy --release --bin mini -- -O binary load.bin
+./hapenny-montool /dev/ttyUSB0 run load.bin
+screen /dev/ttyUSB0 115200 

@@ -7,7 +7,7 @@ EXTERN(__start);
 ENTRY(__start);
 
 SECTIONS {
-    PROVIDE(__stack_start = ORIGIN(RAM) + LENGTH(RAM));
+    PROVIDE(__stack_start = ORIGIN(RAM) + LENGTH(RAM)-16);
 
     PROVIDE(__stext = ORIGIN(RAM));
 

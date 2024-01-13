@@ -29,6 +29,7 @@ pub fn wait(dur: u32) {
         }
     }
 }
+
 #[allow(unused_assignments)]
 pub fn reset() {
     // return to the bootloader

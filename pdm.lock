@@ -23,11 +23,11 @@ dependencies = [
 
 [[package]]
 name = "amaranth-soc"
-version = "0.1.dev89+ge4eda91"
+version = "0.1.dev92+g24e7ee7"
 requires_python = "~=3.8"
 git = "https://github.com/jfng/amaranth-soc.git"
 ref = "csr-reg-rfc"
-revision = "e4eda916e07441f99c32cb8bdac29281702ea597"
+revision = "24e7ee7a75d516d948de25e4e5946c41ce505f18"
 summary = "System on Chip toolkit for Amaranth HDL"
 dependencies = [
     "amaranth @ git+https://github.com/amaranth-lang/amaranth",
@@ -61,7 +61,7 @@ git = "https://github.com/amaranth-lang/amaranth"
 revision = "ded84fe9d640c1fffa4a089fcb7233319da5ea93"
 summary = "Amaranth hardware definition language"
 dependencies = [
-    "amaranth @ git+https://github.com/amaranth-lang/amaranth",
+    "amaranth @ git+https://github.com/amaranth-lang/amaranth@ded84fe9d640c1fffa4a089fcb7233319da5ea93",
     "amaranth-yosys>=0.35",
 ]
 
@@ -109,6 +109,18 @@ requires_python = ">=3.7"
 summary = "Safely add untrusted strings to HTML/XML markup."
 
 [[package]]
+name = "minerva"
+version = "0.1.dev126+ge0a565f"
+requires_python = "~=3.8"
+git = "https://github.com/minerva-cpu/minerva"
+revision = "e0a565f4e786a6383622fdfa46e14e0c1f51126e"
+summary = "A 32-bit RISC-V soft processor"
+dependencies = [
+    "amaranth[builtin-yosys]<0.5,>=0.3",
+    "yowasp-yosys",
+]
+
+[[package]]
 name = "platformdirs"
 version = "3.11.0"
 requires_python = ">=3.7"
@@ -147,7 +159,7 @@ dependencies = [
 
 [metadata]
 lock_version = "4.0"
-content_hash = "sha256:9dfafc4bef48cceacf873c16c2566d2afa3c18944762e61070bf32b5b9613a33"
+content_hash = "sha256:6e47c38e26602536fad98034b39c1154286f2aa66de83a6b6ff9c32266540f9b"
 
 [metadata.files]
 "amaranth-yosys 0.35.0.0.post81" = [

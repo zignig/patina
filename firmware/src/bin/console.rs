@@ -1,6 +1,5 @@
 #![no_std]
 #![no_main]
-#![feature(strict_provenance)]
 
 
 use rustv::uart::{Bind, DefaultSerial};
