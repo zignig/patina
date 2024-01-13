@@ -13,7 +13,7 @@ from amaranth_stdio.serial import *
 class AsyncSerialPeripheral(wiring.Component):
     tx: Out(8)
     rx: In(8)
-    csr_bus: In(csr.Signature(addr_width=3, data_width=16))
+    csr_bus: In(csr.Signature(addr_width=4, data_width=8))
 
     class Ctrl(csr.Register, access="rw"):
         def __init__(self, divisor, divisor_bits=None):
@@ -109,7 +109,7 @@ class AsyncSerialPeripheral(wiring.Component):
         register_map.add_cluster(rx_cluster, name="rx")
         register_map.add_cluster(tx_cluster, name="tx")
 
-        self._bridge = csr.Bridge(register_map, addr_width=3, data_width=16, name=name)
+        self._bridge = csr.Bridge(register_map, addr_width=4, data_width=8, name=name)
         super().__init__()
         self.csr_bus.memory_map = self._bridge.bus.memory_map
 
@@ -125,7 +125,7 @@ class AsyncSerialPeripheral(wiring.Component):
         m.submodules.tx_fifo = self._tx_fifo
         m.submodules.phy = self._phy
 
-        connect(m, flipped(self), self._bridge)
+    #connect(m, flipped(self), self._bridge)
 
         rx_fifo_w_data = Signal(
             data.StructLayout(
