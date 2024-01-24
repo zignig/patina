@@ -4,7 +4,8 @@
 //!
 
 use bytes::Bytes;
-use std::time::Duration;
+use std::{str::from_utf8, time::Duration};
+use std::io::Write;
 
 use futures::{future::FutureExt, select, StreamExt};
 use futures_timer::Delay;
@@ -91,11 +92,22 @@ async fn print_events(_port: &mut Box<dyn SerialPort>, debug: bool) {
             maybe_event = event => {
                 match maybe_event {
                     Some(Ok(event)) => {
-                        if debug {
-                            println!("Event::{:?}\r", event);
-                        }
-                        //let k = handle_key_event(event);
-                        //println!("{k}");
+                        match event {
+                            Event::Key(k) => {
+                                if let Ok(Some(action)) =  handle_key_event(k) {
+                                    if let Ok(k) = from_utf8(&action){
+                                        //println!("{}",k);    
+                                        print!("{k}");
+                                        let _ = std::io::stdout().flush();
+                                    }
+                                }
+                            },
+                            _ => {},
+                        };
+                        // if debug {
+                        //     println!("Event::{:?}\r", event);
+                        // }
+
                         if event == Event::Key(KeyEvent::new(KeyCode::Char('5'), KeyModifiers::CONTROL)) {
                             break;
                         }
@@ -113,6 +125,6 @@ async fn print_events(_port: &mut Box<dyn SerialPort>, debug: bool) {
 
 pub async fn run_console(port: &mut Box<dyn SerialPort>, debug: bool) -> std::io::Result<()> {
     enable_raw_mode()?;
-    print_events(port,debug).await;
+    print_events(port, debug).await;
     disable_raw_mode()
 }

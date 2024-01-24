@@ -34,10 +34,7 @@ pub extern "C" fn main() -> ! {
         println!("array length - {}",SOME_STRING.len());
         println!("\r\n");
         // if this is longer than 2 is give jibberish as the length
-        for j in 0..2{
-            println!("{}\r\n", SOME_STRING[j].len());
-        }
-        println!("\r\n");
+        list(2);
         // set iter test
         for j in 0..SOME_STRING.len() {
             let l = SOME_STRING[j].len();
@@ -45,4 +42,12 @@ pub extern "C" fn main() -> ! {
         }
         reset();
     }
+}
+
+#[no_mangle]
+fn list(size: usize) {
+    for j in 0..2{
+        println!("{}\r\n", SOME_STRING[j]);
+    }
+    println!("\r\n");
 }

@@ -25,7 +25,7 @@ struct BootTool {
     #[clap(long, short, global = true)]
     console: bool,
     /// Debug logging
-    #[clap(long, short, global = true,default_value_t=true)]
+    #[clap(long, short, global = true,default_value_t=false)]
     debug: bool,
     
 
