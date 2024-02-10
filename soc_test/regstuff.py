@@ -9,20 +9,21 @@ from amaranth_soc.memory import MemoryMap
 from amaranth_soc.csr import Field, action
 
 from gensvd import GenSVD
-
+from gen_rust import GenRust
+from serial import AsyncSerialPeripheral
 
 class MemFaker(wiring.Component):
-    def __init__(self, mm, addr_width):
-        self.mm = MemoryMap(name="ram", addr_width=addr_width, data_width=16)
-        self.mm.add_resource(name=("stuff",), resource=self, size=2**addr_width)
+    def __init__(self, name, mm, addr_width):
+        self.mm = MemoryMap(name=name, addr_width=addr_width, data_width=32)
+        self.mm.add_resource(name=("ram",), resource=self, size=2**addr_width)
         mm.add_window(self.mm)
         super().__init__(
-            {"csr_bus": In(csr.Signature(addr_width=addr_width, data_width=16))}
+            {"csr_bus": In(csr.Signature(addr_width=addr_width, data_width=32))}
         )
 
 
 class Counter(wiring.Component):
-    csr_bus: In(csr.Signature(addr_width=2, data_width=16))
+    csr_bus: In(csr.Signature(addr_width=2, data_width=32))
 
     class Enable(csr.Register, access="rw"):
         enable: Field(action.RW, 1)
@@ -43,7 +44,7 @@ class Counter(wiring.Component):
         self.overflow = self.Overflow()
         self._prescale = self.Prescale()
 
-        builder = csr.Builder(name=name, addr_width=2, data_width=16)
+        builder = csr.Builder(name=name, addr_width=2, data_width=32)
         builder.add("enable", self.enable)
         builder.add("counter", self.counter)
         builder.add("overflow", self.overflow)
@@ -61,7 +62,7 @@ class Counter(wiring.Component):
 
 class Widget(wiring.Component):
     out: Out(1)
-    csr_bus: In(csr.Signature(addr_width=2, data_width=16))
+    csr_bus: In(csr.Signature(addr_width=2, data_width=32))
 
     class Config(csr.Register, access="rw"):
         active: Field(action.RW, 1)
@@ -77,7 +78,7 @@ class Widget(wiring.Component):
         self.name = name
         self.test = self.Test()
 
-        builder = csr.Builder(name=name, addr_width=2, data_width=16)
+        builder = csr.Builder(name=name, addr_width=2, data_width=32)
         builder.add("config", self.conf)
         builder.add("test", self.test)
 
@@ -88,7 +89,7 @@ class Widget(wiring.Component):
 
 
 class Simple(wiring.Component):
-    csr_bus: In(csr.Signature(addr_width=2, data_width=16))
+    csr_bus: In(csr.Signature(addr_width=1, data_width=32))
 
     class Test(csr.Register, access="rw"):
         value: Field(action.RW, 8)
@@ -97,7 +98,7 @@ class Simple(wiring.Component):
     def __init__(self, name):
         self.name = name
         self.test = self.Test()
-        builder = csr.Builder(name=name, addr_width=2, data_width=16)
+        builder = csr.Builder(name=name, addr_width=1, data_width=32)
         builder.add("test", self.test)
 
         self._csr_bridge = csr.Bridge(builder.as_memory_map())
@@ -110,12 +111,12 @@ class Overlord(wiring.Component):
     blink: Out(1)
 
     def __init__(self):
-        self._devices = {}
-        self.memory_map = MemoryMap(addr_width=16, data_width=16)
+        self.memory_map = MemoryMap(addr_width=32, data_width=32)
 
-        # self.mem = MemFaker(self.memory_map,14)
+        self.mem = MemFaker("ram", self.memory_map, 14)
+        self.booter = MemFaker("bootrom",self.memory_map,12)
 
-        self._csr_decoder = csr.Decoder(addr_width=16, data_width=16)
+        self._csr_decoder = csr.Decoder(addr_width=32, data_width=32)
 
         self._csr_decoder.bus.memory_map = self.memory_map
 
@@ -134,11 +135,13 @@ class Overlord(wiring.Component):
         self.counter = Counter(name="counter2")
         self.attach(self.counter)
 
+        self.serial = AsyncSerialPeripheral(divisor=int(16e6 // 115200), name="serial")
+        self.attach(self.serial)
+
         super().__init__()
 
     def attach(self, device):
         addr = self._csr_decoder.add(device.csr_bus)
-        self._devices[device.name] = (device, addr)
 
     def get(self, name):
         "get the device out"
@@ -152,7 +155,9 @@ class Overlord(wiring.Component):
         for i in self.memory_map.windows():
             print(i)
             sub_map = i[0]
-            print(sub_map.name)
+            # print('|{}|'.format(sub_map.name))
+            if sub_map.name in ["ram", "rom", "bootrom"]:
+                continue
             mm = sub_map.all_resources()
             for i in mm:
                 print("\t", i.path[0][0])
@@ -174,9 +179,12 @@ class Overlord(wiring.Component):
 
 if __name__ == "__main__":
     ol = Overlord()
-    r = ol.show()
+    # r = ol.show()
     # ol.list()
     a = GenSVD(ol)
-    f = open("soc.xml", "w")
-    out = a.generate_svd(file=f)
+    svd = open("soc.svd", "w")
+    out = a.generate_svd(file=svd)
     # print(str(out.decode("utf-8")))
+    mem = open("memory.x","w")
+    r = GenRust(ol)
+    a = r.generate_memory_x(file=mem)

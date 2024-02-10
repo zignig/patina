@@ -93,7 +93,7 @@ def _generate_section_device(soc, vendor, name, description):
     el = SubElement(device, "vendor")
     el.text = vendor
     el = SubElement(device, "name")
-    el.text = name.upper()
+    el.text = name # name.upper()
     el = SubElement(device, "description")
     if description is None:
         el.text = "TODO device.description"
@@ -147,11 +147,13 @@ def _generate_section_register(registers: Element, window: MemoryMap, resource_i
     resource: amaranth_soc.csr.bus.Element = resource_info.resource
     #assert type(resource) == amaranth_soc.csr.bus.Element
     from amaranth_soc.csr.bus import Element
-
+    print(resource.element.width)
     register = SubElement(registers, "register")
     el = SubElement(register, "name")
-    # el.text = "_".join(resource_info.path)
-    # el = SubElement(register, "description")
+    print(resource_info.path)
+    el.text = resource_info.path[0][0]
+    #el.text = "_".join(resource_info.path)
+    el = SubElement(register, "description")
     # if hasattr(resource_info, "desc"):
     #     description = resource_info.desc
     # else:
@@ -160,17 +162,18 @@ def _generate_section_register(registers: Element, window: MemoryMap, resource_i
     #         "_".join(resource_info.path),
     #     )
     # el.text = description
-    # el = SubElement(register, "addressOffset")
-    # el.text = "0x{:04x}".format(resource_info.start)
-    # el = SubElement(register, "size")
-    # el.text = "{:d}".format((resource_info.end - resource_info.start) * 8) # TODO
-    # el = SubElement(register, "resetValue")
-    # el.text = "0x00" # TODO - calculate from fields ?
+    
+    el = SubElement(register, "addressOffset")
+    el.text = "0x{:04x}".format(resource_info.start)
+    el = SubElement(register, "size")
+    el.text = "{:d}".format((resource_info.end - resource_info.start) * resource.element.width) # TODO
+    el = SubElement(register, "resetValue")
+    el.text = "0x00" # TODO - calculate from fields ?
 
-    # el = SubElement(register, "access")
-    # access: Element.Access = resource.element.access
-    # access = "read-only" if access is Element.Access.R  else "write-only" if access is Element.Access.W else "read-write"
-    # el.text = access
+    el = SubElement(register, "access")
+    access: Element.Access = resource.element.access
+    access = "read-only" if access is Element.Access.R  else "write-only" if access is Element.Access.W else "read-write"
+    el.text = access
 
 
     return register
@@ -181,26 +184,39 @@ def _generate_section_field(fields: Element, window: MemoryMap, resource_info: R
     assert type(resource) == amaranth_soc.csr.bus.Element
     register = resource_info.resource
     for f in register:
-        name = f[0][0]
+        name = '_'.join(f[0])
+        print(name)
         port = f[1]
 
         field =  SubElement(fields, "field")
         el = SubElement(field, "name")
         el.text = name
-        # el = SubElement(field, "description")
-        # if hasattr(resource, "desc"):
-        #     description = resource.desc
-        # else:
-        #     description = "{} {} register field".format(
-        #         window.name,
-        #         resource.name,
-        #     )
-        # el.text = description
-        el = SubElement(field, "bitRange")
-        if not port.port.access.writable():
-            el.text = "[{:d}:0]".format(port.r_data.width - 1)
+        el = SubElement(field, "description")
+        if hasattr(resource, "desc"):
+            description = resource.desc
         else:
-            el.text = "[{:d}:0]".format(port.data.width - 1)
+            description = "{} {} register field".format(
+                window.name,
+                name,
+            )
+        el.text = description
+        el = SubElement(field, "bitRange")
+        acc = port.port.access
+        # print(acc.writable())
+        print(name,acc.writable(),acc.readable())
+        ra = acc.readable()
+        wa = acc.writable()
+        width =  0
+        if ra and wa:
+            width = port.data.width
+        if ra and not wa:
+            width = port.r_data.width
+        if not ra and wa:
+            width = port.w_data.width
+            
+        el.text = "[{:d}:0]".format(width -1 )
+        print(el.text)
+        
 
         
     return field
