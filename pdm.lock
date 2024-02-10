@@ -1,9 +1,9 @@
 [[package]]
 name = "amaranth"
-version = "0.4.1.dev22+gded84fe"
+version = "0.4.1.dev77+g05ac367"
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth"
-revision = "ded84fe9d640c1fffa4a089fcb7233319da5ea93"
+revision = "05ac36751a04c6c574f65702a4a441ed865bf69f"
 summary = "Amaranth hardware definition language"
 dependencies = [
     "Jinja2~=3.0",
@@ -23,11 +23,10 @@ dependencies = [
 
 [[package]]
 name = "amaranth-soc"
-version = "0.1.dev92+g24e7ee7"
+version = "0.1.dev103+g1e1490e"
 requires_python = "~=3.8"
-git = "https://github.com/jfng/amaranth-soc.git"
-ref = "csr-reg-rfc"
-revision = "24e7ee7a75d516d948de25e4e5946c41ce505f18"
+git = "https://github.com/amaranth-lang/amaranth-soc"
+revision = "1e1490ef85433493b9c43050eae8925ec85b2a53"
 summary = "System on Chip toolkit for Amaranth HDL"
 dependencies = [
     "amaranth @ git+https://github.com/amaranth-lang/amaranth",
@@ -35,13 +34,13 @@ dependencies = [
 
 [[package]]
 name = "amaranth-stdio"
-version = "0.1.dev24+geecd49c"
+version = "0.1.dev28+g4aa39e8"
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth-stdio"
-revision = "eecd49c9bc0b10d3196e204a643c865ea6bd238e"
+revision = "4aa39e8c9dc68c4e3605bbb80a0ca84e3a25d019"
 summary = "Industry standard I/O for Amaranth HDL"
 dependencies = [
-    "amaranth @ git+https://github.com/amaranth-lang/amaranth",
+    "amaranth<0.5,>=0.4",
 ]
 
 [[package]]
@@ -54,15 +53,15 @@ dependencies = [
 
 [[package]]
 name = "amaranth"
-version = "0.4.1.dev22+gded84fe"
+version = "0.4.1.dev77+g05ac367"
 extras = ["builtin-yosys"]
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth"
-revision = "ded84fe9d640c1fffa4a089fcb7233319da5ea93"
+revision = "05ac36751a04c6c574f65702a4a441ed865bf69f"
 summary = "Amaranth hardware definition language"
 dependencies = [
-    "amaranth @ git+https://github.com/amaranth-lang/amaranth@ded84fe9d640c1fffa4a089fcb7233319da5ea93",
-    "amaranth-yosys>=0.35",
+    "amaranth @ git+https://github.com/amaranth-lang/amaranth",
+    "amaranth-yosys!=0.37.0.*,>=0.35",
 ]
 
 [[package]]
@@ -110,10 +109,10 @@ summary = "Safely add untrusted strings to HTML/XML markup."
 
 [[package]]
 name = "minerva"
-version = "0.1.dev126+ge0a565f"
+version = "0.1.dev128+g5bac31a"
 requires_python = "~=3.8"
 git = "https://github.com/minerva-cpu/minerva"
-revision = "e0a565f4e786a6383622fdfa46e14e0c1f51126e"
+revision = "5bac31a40b6d8098ba2f4b7c4906ca667b6155f7"
 summary = "A 32-bit RISC-V soft processor"
 dependencies = [
     "amaranth[builtin-yosys]<0.5,>=0.3",
@@ -150,7 +149,7 @@ dependencies = [
 
 [[package]]
 name = "yowasp-yosys"
-version = "0.36.0.8.post620"
+version = "0.38.0.0.post669"
 summary = "Yosys Open SYnthesis Suite"
 dependencies = [
     "click",
@@ -159,7 +158,7 @@ dependencies = [
 
 [metadata]
 lock_version = "4.0"
-content_hash = "sha256:6e47c38e26602536fad98034b39c1154286f2aa66de83a6b6ff9c32266540f9b"
+content_hash = "sha256:36896353c6d276e245c7239229074aaf687bafc01324e55417690cb53999fff8"
 
 [metadata.files]
 "amaranth-yosys 0.35.0.0.post81" = [
@@ -258,6 +257,6 @@ content_hash = "sha256:6e47c38e26602536fad98034b39c1154286f2aa66de83a6b6ff9c3226
 "yowasp-runtime 1.46" = [
     {url = "https://files.pythonhosted.org/packages/15/68/f1c4c9ebfabb6e8524cb6d46e823219b00bd7aef6ad005a9bfdc0b028c86/yowasp_runtime-1.46-py3-none-any.whl", hash = "sha256:cbfbb0a77d2c82c8ae7381becda9691e19126ce65102778396826a50d5a4d4e8"},
 ]
-"yowasp-yosys 0.36.0.8.post620" = [
-    {url = "https://files.pythonhosted.org/packages/34/db/a06f0b22d76cd7e8fff923e4bfad17b89795ed0778244731bb85985523f8/yowasp_yosys-0.36.0.8.post620-py3-none-any.whl", hash = "sha256:8d3da114d3c9689623f2fdf59b7abef040016fbc015cd8d973489f223fe851a8"},
+"yowasp-yosys 0.38.0.0.post669" = [
+    {url = "https://files.pythonhosted.org/packages/dc/29/93badd9e34870330ebcd4e00b1e661ca5ede5e2dcc0f618407b81873026c/yowasp_yosys-0.38.0.0.post669-py3-none-any.whl", hash = "sha256:18e955a57d53a570061ffd7415bf6a10a40e21ecca7f1b6b34231de6c6a64c9b"},
 ]

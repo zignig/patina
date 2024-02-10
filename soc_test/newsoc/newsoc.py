@@ -8,7 +8,7 @@ from amaranth_soc.csr.wishbone import WishboneCSRBridge
 
 from minerva.core import Minerva
 from memory import WishboneMemory
-from csr_uart import AsyncSerialPeripheral
+from soc_test.newsoc.csr_uart import AsyncSerialPeripheral
 
 
 from amaranth_boards.resources.interface import UARTResource
