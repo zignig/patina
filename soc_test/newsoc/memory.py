@@ -11,51 +11,36 @@ __all__ = ["WishboneMemory"]
 
 
 class WishboneMemory(wiring.Component):
-    # bus: In(wishbone.bus.Signature)
-
-    def __init__(
-        self, *, name, size, data_width=32, granularity=8, writable=True, init=None
-    ):
+    def __init__(self, *, name, size, data_width=32, granularity=8, writable=True, init=None):
         if not isinstance(name, str) or not name:
             raise ValueError("Name must be non-empty string, not {name!r}")
-        if not isinstance(size, int) or size <= 0 or size & size - 1:
+        if not isinstance(size, int) or size <= 0 or size & size-1:
             raise ValueError(f"Size must be an integer power of two, not {size!r}")
         if data_width not in (8, 16, 32, 64):
             raise ValueError(f"Data width must be 8, 16, 32 or 64, not {data_width!r}")
         if granularity not in (8, 16, 32, 64):
-            raise ValueError(
-                f"Granularity must be 8, 16, 32 or 64, not {granularity!r}"
-            )
+            raise ValueError(f"Granularity must be 8, 16, 32 or 64, not {granularity!r}")
         if size * granularity < data_width:
-            raise ValueError(
-                f"Size {size!r} * granularity {granularity!r} must be greater than "
-                f"or equal to data width {data_width!r}"
-            )
-        self._name = name
-        self._size = size
-        self._data_width = data_width
+            raise ValueError(f"Size {size!r} * granularity {granularity!r} must be greater than "
+                             f"or equal to data width {data_width!r}")
+        self._name        = name
+        self._size        = size
+        self._data_width  = data_width
         self._granularity = granularity
-        self._writable = bool(writable)
-        self._storage = Memory(
-            depth=(size * granularity) // data_width, width=data_width, init=init
-        )
-        super().__init__(
-            {
-                "bus": Out(
-                    wishbone.Signature(
-                        addr_width=bits_for(self._storage.depth),
-                        data_width=self.data_width,
-                        granularity=self.granularity,
-                        features=("cti", "bte"),
-                    )
-                )
-            }
-        )        
-        bus_map = MemoryMap(
-            addr_width=bits_for(self.size), data_width=self.granularity, name=self.name
-        )
-        bus_map.add_resource(self._storage, name="storage", size=self.size)
-        self.bus.memory_map = bus_map
+        self._writable    = bool(writable)
+        self._storage     = Memory(depth=(size * granularity) // data_width,
+                                   width=data_width, init=init)
+
+        super().__init__({
+            "bus": Out(wishbone.Signature(addr_width=bits_for(self._storage.depth),
+                                          data_width=data_width,
+                                          granularity=granularity,
+                                          features=("cti", "bte"))),
+        })
+
+        memory_map = MemoryMap(addr_width=bits_for(size), data_width=granularity,name=name)
+        memory_map.add_resource(self, name=(name,), size=size)
+        self.bus.memory_map = memory_map
 
     @property
     def name(self):
@@ -80,18 +65,6 @@ class WishboneMemory(wiring.Component):
     @property
     def init(self):
         return self._storage.init
-
-    @property
-    def signature(self):
-        bus_sig = wishbone.Signature(
-            addr_width=bits_for(self._storage.depth),
-            data_width=self.data_width,
-            granularity=self.granularity,
-            features=("cti", "bte"),
-        )
-
-        bus_sig.memory_map = bus_map
-        return wiring.Signature({"bus": Out(bus_sig)})
 
     def elaborate(self, platform):
         m = Module()

@@ -176,15 +176,53 @@ class Overlord(wiring.Component):
                     wa = wa + w
             print()
 
+    def new_show(self):
+        for i in self.memory_map.window_patterns():
+            print(i)
+        print()
+        for i in self.memory_map.windows():
+            print(i)
+            sub_map = i[0] 
+            for i in sub_map.all_resources():
+                print(i.path,i.start,i.end)
+            mm = sub_map.all_resources()
+            for i in mm:
+                print("\t", i.path[0],i.start,i.end)
+                name = i.path[0][0]
+                res = i.resource
+                wa = 0
+                if name in ["ram", "rom", "bootrom"]:
+                    continue
+                for j in res:
+                    path = j[0]
+                    port = j[1]
+                    w = 0
+                    # acc = port.port.access.value.upper()
+                    acc = port.port.access
+
+                    rac = acc.readable()
+                    wac = acc.writable()
+
+                    width = 0
+                    if rac and wac:
+                        width = port.data.width
+                    if rac and not wac:
+                        width = port.r_data.width
+                    if not rac and wac:
+                        width = port.w_data.width
+                    print("\t\t", path, wa, wa + w, acc)
+                    wa = wa + w
+            print()
 
 if __name__ == "__main__":
     ol = Overlord()
     # r = ol.show()
+    ol.new_show()
     # ol.list()
-    a = GenSVD(ol)
-    svd = open("soc.svd", "w")
-    out = a.generate_svd(file=svd)
-    # print(str(out.decode("utf-8")))
-    mem = open("memory.x","w")
-    r = GenRust(ol)
-    a = r.generate_memory_x(file=mem)
+    # a = GenSVD(ol)
+    # svd = open("soc.svd", "w")
+    # out = a.generate_svd(file=svd)
+    # # print(str(out.decode("utf-8")))
+    # mem = open("memory.x","w")
+    # r = GenRust(ol)
+    # a = r.generate_memory_x(file=mem)
