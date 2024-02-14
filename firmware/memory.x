@@ -18,7 +18,7 @@ SECTIONS {
 
         . = ALIGN(4);
         __etext = .;
-    }
+    } > RAM
 
     .rodata : ALIGN(4) {
         . = ALIGN(4);
@@ -26,7 +26,15 @@ SECTIONS {
         *(.rodata .rodata.*);
         . = ALIGN(4);
         __erodata = .;
-    } 
+    } > RAM
+
+    .data :
+    {
+    *(.data .data.*);
+    } > RAM
+
+    
+    .eh_frame (INFO) : { KEEP(*(.eh_frame)) }
 
     /DISCARD/ : {
         /* throw away RAM sections to get a link error if they're used. */
