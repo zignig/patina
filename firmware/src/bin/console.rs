@@ -86,6 +86,7 @@ fn list() {
 }
 
 fn run_command(data: &str) {
+    println!("\r\n");
     let mut ctx = Ctx::new();
     if let Some(cmd) = data.split_ascii_whitespace().next() {
         for (name, imp) in COMMANDS {
@@ -94,8 +95,8 @@ fn run_command(data: &str) {
                 return;
             }
         }
+        println!("Command not found \"{}\"",&cmd);
     }
-    println!("end\r\n");
 }
 struct Ctx {}
 
