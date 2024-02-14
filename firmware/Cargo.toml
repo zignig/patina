@@ -19,7 +19,7 @@ panic = "abort"
 panic = "abort"
 # strip = true
 opt-level = 's'
-debug = true
+debug = false 
 # mir-opt-level = 0
 
 [build-dependencies]

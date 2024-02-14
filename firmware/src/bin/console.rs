@@ -1,22 +1,13 @@
 #![no_std]
 #![no_main]
 
-mod readline;
-
-mod terminal;
-
-mod uart;
-use uart::Bind;
-
-use crate::uart::DefaultSerial;
-
-mod init;
-use init::{reset, wait};
-
 use heapless::String;
 
-const PROMPT: &str = ">>";
+use rustv::init::{reset, wait};
+use rustv::println;
+use rustv::uart::{Bind, DefaultSerial};
 
+const PROMPT: &str = ">>";
 
 // Default reset from build system (.cargo/config.toml)
 // magic include.
@@ -53,7 +44,7 @@ pub extern "C" fn main() -> ! {
     // Delay
     wait(60000);
     let intro = "Welcome to new patina";
-    println!("{}", intro);
+    println!("{}\r\n", intro);
     println!("{}", PROMPT);
     loop {
         if let Some(c) = ds.get() {
@@ -69,7 +60,6 @@ pub extern "C" fn main() -> ! {
                 b'\x0D' => {
                     // Enter
                     let data = buffer.data.as_str();
-                    println!("\r\n>>{}<<", data);
                     run_command(data);
                     buffer.reset();
                     println!("\r\n{}", PROMPT);
@@ -80,8 +70,7 @@ pub extern "C" fn main() -> ! {
                     list()
                 }
                 _ => {
-                    //ds.putb(c);
-                    println!("0x{:x}\r\n",c);
+                    ds.putb(c);
                     let _ = buffer.data.push(c as char);
                 }
             }
@@ -89,30 +78,18 @@ pub extern "C" fn main() -> ! {
     }
 }
 
-static SOME_STRING: &[&str] = &["one", "two", "three"];
-
-// #[inline(never)]
 fn list() {
-    println!("START LIST\r\n");
-    println!("len {}\r\n", SOME_STRING.len());
-    // let len = COMMANDS.len();
-    // for i in 0..len{
-    //     println!("{} = {}\r\n",i,*COMMANDS[i].0);
-    // }
-    for _name in SOME_STRING{ 
-        println!("bork\r\n")
-        //println!("{}\r\n",name);
+    let len = COMMANDS.len();
+    for i in 0..len {
+        println!("{} = {}\r\n", i, *COMMANDS[i].0);
     }
-
 }
 
 fn run_command(data: &str) {
     let mut ctx = Ctx::new();
     if let Some(cmd) = data.split_ascii_whitespace().next() {
-        println!("\r\n>>>{}<<<", cmd);
         for (name, imp) in COMMANDS {
             if *name == cmd {
-                println!("MATCH\r\n");
                 imp(&mut ctx);
                 return;
             }
@@ -134,13 +111,17 @@ static COMMANDS: &[(&str, Command)] = &[
     ("list", cmd_list),
     ("info", cmd_empty),
     ("other", cmd_empty),
-    //("reset", cmd_empty),
+    ("reset", cmd_reset),
     // ("reboot", cmd_empty),
 ];
 
 #[inline(never)]
 fn cmd_empty(_ctx: &mut Ctx) {
     println!("empty command");
+}
+
+fn cmd_reset(_ctx: &mut Ctx) {
+    reset();
 }
 
 fn cmd_list(_ctx: &mut Ctx) {
