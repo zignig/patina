@@ -42,7 +42,7 @@ class Test(Elaboratable):
         m.submodules.mainmem = mainmem = BasicMemory(depth=256 * 16)
         m.submodules.mem = bootmem = BasicMemory(depth=RAM_WORDS, contents=boot_image)
         m.submodules.uart = uart = BidiUart(
-            baud_rate=115200, oversample=4, clock_freq=F
+            baud_rate=56_700, oversample=2, clock_freq=F
         )
 
         m.submodules.iofabric = iofabric = SimpleFabric(
@@ -91,7 +91,7 @@ p.add_resources(
     ]
 )
 
-p.build(Test(),do_program=True)
+p.build(Test(), do_program=True)
 
 # TINYBOOT_UART_ADDR=12288 cargo objcopy --release -- -O binary ../tinybx8k.bin
 # MEMORY {

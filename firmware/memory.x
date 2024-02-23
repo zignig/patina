@@ -36,16 +36,4 @@ SECTIONS {
     
     .eh_frame (INFO) : { KEEP(*(.eh_frame)) }
 
-    /DISCARD/ : {
-        /* throw away RAM sections to get a link error if they're used. */
-        *(.bss);
-        *(.bss.*);
-        *(.data);
-        *(.data.*);
-        *(COMMON);
-        *(.ARM.exidx);
-        *(.ARM.exidx.*);
-        *(.ARM.extab.*);
-        *(.got);
-    }
 }

@@ -16,7 +16,7 @@ mod generated {
 }
 
 struct Buffer {
-    data: String<16>,
+    data: String<32>,
     cursor: usize,
 }
 
@@ -32,6 +32,21 @@ impl Buffer {
         self.data.clear();
         self.cursor = 0;
     }
+}
+
+pub enum Console { 
+    Char,
+    Up,
+    Down,
+    Left,
+    Right,
+    Home,
+    Insert,
+    Delete,
+    PgUp,
+    PgDown,
+    Escape,
+    Tab,
 }
 
 #[no_mangle]
@@ -64,13 +79,75 @@ pub extern "C" fn main() -> ! {
                     buffer.reset();
                     println!("\r\n{}", PROMPT);
                 }
-                b'\x21' => {
-                    // ! ( exclaimation )
-                    println!("BORK\r\n");
-                    list()
+                // \x1b
+                b'\x1b' => {
+                    // cursor keys
+                    if let Some(c) = ds.tget() {
+                        match c {
+                            b'\x5b' => {
+                                if let Some(c) = ds.tget() {
+                                    match c {
+                                        b'\x41' => {
+                                            println!("up");
+                                        }
+                                        b'\x42' => { 
+                                            println!("down");
+                                        }
+                                        b'\x43' => { 
+                                            println!("right");
+                                        }
+                                        b'\x44' => { 
+                                            println!("left");
+                                        }
+                                        b'\x31' => {
+                                            if let Some(c) = ds.tget(){
+                                                println!("home{}",c);
+                                            }
+                                        }
+                                        b'\x32' => {
+                                            if let Some(c) = ds.tget(){
+                                                println!("insert{}",c);
+                                            }
+                                        }
+                                        b'\x33' => {
+                                            if let Some(c) = ds.tget(){
+                                                println!("delete{}",c);
+                                            }
+                                        }
+                                        b'\x34' => {
+                                            if let Some(c) = ds.tget(){
+                                                println!("end{}",c);
+                                            }
+                                        }
+                                        b'\x35' => {
+                                            if let Some(c) = ds.tget(){
+                                                println!("pg up{}",c);
+                                            }
+                                        }
+                                        b'\x36' => {
+                                            if let Some(c) = ds.tget(){
+                                                println!("pg down{}",c);
+                                            }
+                                        }
+                                        
+                                        _ => {
+                                            println!("c, <{:x}>", c);
+                                        }
+                                    }
+                                }
+                            }
+                            _ => {
+                                println!("unknown, <{:x}>", c);
+                            }
+                        }
+                        println!("\r\n");
+                    } else {
+                        println!("escape only")
+                    }
                 }
                 _ => {
                     ds.putb(c);
+                    //println!(">{}<\r\n", c);
                     let _ = buffer.data.push(c as char);
                 }
             }
@@ -86,16 +163,16 @@ fn list() {
 }
 
 fn run_command(data: &str) {
-    println!("\r\n");
     let mut ctx = Ctx::new();
     if let Some(cmd) = data.split_ascii_whitespace().next() {
         for (name, imp) in COMMANDS {
             if *name == cmd {
+                println!("\r\n");
                 imp(&mut ctx);
                 return;
             }
         }
-        println!("Command not found \"{}\"",&cmd);
+        println!("\r\nCommand not found \"{}\"", &cmd);
     }
 }
 struct Ctx {}
@@ -113,7 +190,7 @@ static COMMANDS: &[(&str, Command)] = &[
     ("info", cmd_empty),
     ("other", cmd_empty),
     ("reset", cmd_reset),
-    // ("reboot", cmd_empty),
+    ("help", cmd_help),
 ];
 
 #[inline(never)]
@@ -127,4 +204,8 @@ fn cmd_reset(_ctx: &mut Ctx) {
 
 fn cmd_list(_ctx: &mut Ctx) {
     list();
+}
+
+fn cmd_help(_ctx: &mut Ctx) {
+    println!("This is some unhelpful help");
 }

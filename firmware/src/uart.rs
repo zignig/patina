@@ -21,6 +21,7 @@ pub trait Bind {
     fn putb(&mut self, b: u8);
     fn getc(&mut self) -> u8;
     fn get(&mut self) -> Option<u8>;
+    fn tget(&mut self) -> Option<u8>;
 }
 
 impl<const UART: i16> Bind for Serial<UART> {
@@ -65,6 +66,22 @@ impl<const UART: i16> Bind for Serial<UART> {
         }
         None
     }
+
+    // blocking get with timeout
+    fn tget(& mut self) -> Option<u8> { 
+        let mut counter: u32 = 0 ;
+        loop {
+            let status = unsafe { Self::RX.read_volatile() };
+            if status >= 0 {
+                return Some(status as u8);
+            }
+            counter = counter + 1;
+            if counter > 10_000{ 
+                return None
+            }
+        }
+    }
+
 }
 
 // Some macros on the default serial

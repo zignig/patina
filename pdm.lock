@@ -1,9 +1,9 @@
 [[package]]
 name = "amaranth"
-version = "0.4.1.dev81+g84709e2"
+version = "0.4.1.dev115+g09029cd"
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth"
-revision = "84709e2f00901d536ec99947efb2ad2f35ff8548"
+revision = "09029cdd914d550e924cecfb9aa1692a536b4161"
 summary = "Amaranth hardware definition language"
 dependencies = [
     "Jinja2~=3.0",
@@ -23,10 +23,10 @@ dependencies = [
 
 [[package]]
 name = "amaranth-soc"
-version = "0.1.dev103+g1e1490e"
+version = "0.1a1.dev1+g9f46553"
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth-soc"
-revision = "1e1490ef85433493b9c43050eae8925ec85b2a53"
+revision = "9f46553aa4289e2a11788a73fade6410a371b162"
 summary = "System on Chip toolkit for Amaranth HDL"
 dependencies = [
     "amaranth @ git+https://github.com/amaranth-lang/amaranth",
@@ -45,23 +45,23 @@ dependencies = [
 
 [[package]]
 name = "amaranth-yosys"
-version = "0.35.0.0.post81"
+version = "0.38.0.0.post86"
 summary = "Specialized WebAssembly build of Yosys used by Amaranth HDL"
 dependencies = [
-    "wasmtime<16,>=1",
+    "wasmtime<18,>=1",
 ]
 
 [[package]]
 name = "amaranth"
-version = "0.4.1.dev81+g84709e2"
+version = "0.4.1.dev115+g09029cd"
 extras = ["builtin-yosys"]
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth"
-revision = "84709e2f00901d536ec99947efb2ad2f35ff8548"
+revision = "09029cdd914d550e924cecfb9aa1692a536b4161"
 summary = "Amaranth hardware definition language"
 dependencies = [
     "amaranth @ git+https://github.com/amaranth-lang/amaranth",
-    "amaranth-yosys!=0.37.0.*,>=0.35",
+    "amaranth-yosys>=0.38",
 ]
 
 [[package]]
@@ -81,10 +81,10 @@ summary = "Cross-platform colored terminal text."
 
 [[package]]
 name = "hapenny"
-version = "0.0.0"
+version = "0.0.0+editable"
 requires_python = "~=3.8"
-git = "https://github.com/cbiffle/hapenny"
-revision = "10d6af538bb47feb26f5fa807f0c2ae6b64f2e9e"
+editable = true
+path = "/opt/hapenny"
 summary = ""
 dependencies = [
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards",
@@ -189,11 +189,11 @@ dependencies = [
 
 [metadata]
 lock_version = "4.0"
-content_hash = "sha256:3f46515e73191867509cb8f8842a269659de8fc300bb6ed85276e564100c1a57"
+content_hash = "sha256:26c44d32d27d2d7f096cc91c1a54f0804b46b4732ac502721ae1130c69af4c07"
 
 [metadata.files]
-"amaranth-yosys 0.35.0.0.post81" = [
-    {url = "https://files.pythonhosted.org/packages/b3/0c/871f426fd44c0be7ce93b482fdcaa5c7c108864b45a39a075585f4ea2b5e/amaranth_yosys-0.35.0.0.post81-py3-none-any.whl", hash = "sha256:9860d3a24d62f84cc65de3e33f6cb7b2aba19ab9203d7c80c084372a17fbbf6b"},
+"amaranth-yosys 0.38.0.0.post86" = [
+    {url = "https://files.pythonhosted.org/packages/91/a4/1896197e2271568cf7982474751eb87d0406cc357007f5a7318d769efa3c/amaranth_yosys-0.38.0.0.post86-py3-none-any.whl", hash = "sha256:4ccc524392f75ddc1478946194ed57c07d919292d02ab4f6d8638f2bf3b020d2"},
 ]
 "click 8.1.7" = [
     {url = "https://files.pythonhosted.org/packages/00/2e/d53fa4befbf2cfa713304affc7ca780ce4fc1fd8710527771b58311a3229/click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28"},

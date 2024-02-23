@@ -7,9 +7,10 @@ import serial
 import time
 
 the_port ="/dev/serial/by-id/usb-MicroPython_Board_in_FS_mode_e661410403178c2a-if00"
+#the_port ="/dev/ttyUSB0"
 
 class Console:
-    def __init__(self, port=the_port, baud=115200):
+    def __init__(self, port=the_port, baud=57600):
         self.port = port
         self.baud = baud
         self.ser = serial.serial_for_url(
