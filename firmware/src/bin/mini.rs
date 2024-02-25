@@ -102,7 +102,7 @@ type Command = fn(&mut Ctx);
 static COMMANDS: &[(&str, Command)] = &[
     ("list", cmd_list),
     ("info", cmd_empty),
-    ("other", cmd_empty),
+    ("other", cmd_other),
     ("reset", cmd_reset),
     ("help", cmd_help),
 ];
@@ -114,6 +114,10 @@ fn cmd_empty(_ctx: &mut Ctx) {
 
 fn cmd_reset(_ctx: &mut Ctx) {
     reset();
+}
+
+fn cmd_other(_ctx: &mut Ctx) {
+    println!("the other command");
 }
 
 fn cmd_list(_ctx: &mut Ctx) {

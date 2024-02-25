@@ -71,16 +71,20 @@ impl<const ADDR: i16> Console<ADDR> {
         if let Some(act) = self.read_key_board() {
             match act {
                 // ConsoleAction::Char(_) => todo!(),
+                // Ignore up and down , no history yet
                 ConsoleAction::Up => return None,
                 ConsoleAction::Down => return None,
                 // ConsoleAction::Left => todo!(),
                 // ConsoleAction::Right => todo!(),
                 // ConsoleAction::Home => todo!(),
                 // ConsoleAction::End => todo!(),
-                // ConsoleAction::Insert => todo!(),
+                //ConsoleAction::Insert => todo!(),
                 // ConsoleAction::Delete => todo!(),
-                // ConsoleAction::PgUp => todo!(),
-                // ConsoleAction::PgDown => todo!(),
+
+                // Ignore as well
+                ConsoleAction::PgUp => return None,
+                ConsoleAction::PgDown => return None,
+                
                 // ConsoleAction::Escape => todo!(),
                 // ConsoleAction::Tab => todo!(),
                 // ConsoleAction::Cancel => todo!(),

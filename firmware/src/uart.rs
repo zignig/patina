@@ -76,7 +76,7 @@ impl<const UART: i16> Bind for Serial<UART> {
                 return Some(status as u8);
             }
             counter = counter + 1;
-            if counter > 10_000{ 
+            if counter > 500{ 
                 return None
             }
         }
@@ -111,7 +111,7 @@ pub fn writer(s: &str){
 macro_rules! println
 {
 	($($args:tt)+) => ({
-			let _ = ::ufmt::uwrite!(DefaultSerial::new(), $($args)+);
+		let _ = ::ufmt::uwrite!(DefaultSerial::new(), $($args)+);
 	});
 }
 
