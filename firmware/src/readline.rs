@@ -47,6 +47,7 @@ impl Buffer {
 pub struct Console<const ADDR: i16> {
     buffer: Buffer,
     serial: crate::uart::DefaultSerial, //pub serial: crate::uart::Serial<ADDR>,
+    insert: bool,
 }
 
 impl<const ADDR: i16> Console<ADDR> {
@@ -54,13 +55,47 @@ impl<const ADDR: i16> Console<ADDR> {
         Self {
             buffer: Buffer::new(),
             serial: DefaultSerial::new(),
+            insert: true
         }
     }
 
-    pub fn as_str(&mut self) -> &str{
+    pub fn as_str(&mut self) -> &str {
         return self.buffer.data.as_str();
     }
-    
+
+    pub fn reset(&mut self) {
+        self.buffer.reset();
+    }
+
+    pub fn process(&mut self) -> Option<ConsoleAction> {
+        if let Some(act) = self.read_key_board() {
+            match act {
+                // ConsoleAction::Char(_) => todo!(),
+                ConsoleAction::Up => return None,
+                ConsoleAction::Down => return None,
+                // ConsoleAction::Left => todo!(),
+                // ConsoleAction::Right => todo!(),
+                // ConsoleAction::Home => todo!(),
+                // ConsoleAction::End => todo!(),
+                // ConsoleAction::Insert => todo!(),
+                // ConsoleAction::Delete => todo!(),
+                // ConsoleAction::PgUp => todo!(),
+                // ConsoleAction::PgDown => todo!(),
+                // ConsoleAction::Escape => todo!(),
+                // ConsoleAction::Tab => todo!(),
+                // ConsoleAction::Cancel => todo!(),
+                // ConsoleAction::Reset => todo!(),
+                // ConsoleAction::Enter => todo!(),
+                // ConsoleAction::BackSpace => todo!(),
+
+                // If none of these are grabbed , bubble up.
+                _ => return Some(act),
+            }
+        } else {
+            None
+        }
+    }
+
     pub fn read_key_board(&mut self) -> Option<ConsoleAction> {
         if let Some(c) = self.serial.get() {
             match c {

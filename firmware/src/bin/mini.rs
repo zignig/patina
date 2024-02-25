@@ -26,9 +26,9 @@ pub extern "C" fn main() -> ! {
     let mut cons: readline::Console<{ crate::generated::UART_ADDR }> = readline::Console::new();
     let mut counter: u32 = 0;
     loop {
-        if let Some(val) = cons.read_key_board() {
-            
+        if let Some(val) = cons.process() {
             {
+                counter = 0;
                 match val {
                     readline::ConsoleAction::Char(c) => println!("{}",(c as char)),
                     // readline::ConsoleAction::Up => todo!(),
@@ -43,23 +43,26 @@ pub extern "C" fn main() -> ! {
                     // readline::ConsoleAction::PgDown => todo!(),
                     // readline::ConsoleAction::Escape => todo!(),
                     readline::ConsoleAction::Tab => {
+                        println!("\r\n");
                         println!("Commands: \r\n");
                         list();
                     },
                     // readline::ConsoleAction::Cancel => todo!(),
                     // readline::ConsoleAction::Reset => todo!(),
                     readline::ConsoleAction::Enter => {
-                        println!("{}",cons.as_str());
-                        println!("\r\n");
+                        let data = cons.as_str();
+                        run_command(data);
+                        cons.reset();
+                        println!("\r\n{}", PROMPT);
                     },
                     // readline::ConsoleAction::BackSpace => todo!(),
-                    _ => println!("|{:?}\r\n", val)
+                    _ => println!("_{:?}_", val)
                 }
             }
         }
         // bug out timer
         counter = counter + 1;
-        if counter > 2600_000_0 {
+        if counter > 6000_000_0 {
             println!("bye");
             reset();
         }
@@ -69,7 +72,7 @@ pub extern "C" fn main() -> ! {
 fn list() {
     let len = COMMANDS.len();
     for i in 0..len {
-        println!("{}:\t{}\r\n", i, *COMMANDS[i].0);
+        println!("{}> {}\r\n", i, *COMMANDS[i].0);
     }
 }
 
@@ -118,5 +121,5 @@ fn cmd_list(_ctx: &mut Ctx) {
 }
 
 fn cmd_help(_ctx: &mut Ctx) {
-    println!("This is some unhelpful help");
+    println!("This is some unhelpful help\r\n stuff\r\n stuff.\r\n");
 }
