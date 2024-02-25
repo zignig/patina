@@ -1,5 +1,4 @@
 //! some asm to set up the risc-v machine
-
 use core::arch::global_asm;
 use core::arch::asm;
 
@@ -30,7 +29,7 @@ pub fn wait(dur: u32) {
     }
 }
 
-#[allow(unused_assignments)]
+#[allow(unused_assignments,)]
 pub fn reset() {
     // return to the bootloader
     let mut a: *mut u32 = core::ptr::null_mut();
@@ -53,5 +52,7 @@ fn DefaultInterruptHandler() {}
 
 #[panic_handler]
 unsafe fn my_panic(_info: &core::panic::PanicInfo) -> ! {
-    loop {}
+    loop {
+        reset();
+    }
 }

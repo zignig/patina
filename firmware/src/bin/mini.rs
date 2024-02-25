@@ -1,53 +1,122 @@
 #![no_std]
 #![no_main]
 
+use heapless::String;
+
 use rustv::init::{reset, wait};
 use rustv::println;
+use rustv::readline;
 use rustv::uart::{Bind, DefaultSerial};
+const PROMPT: &str = ">>";
 
-static SOME_STRING: &[&str] = &[
-    "this is a longer test to see if it changes!",
-    "two",
-    "three",
-    "four",
-    "five",
-    "woot, NOPE its still broken",
-    "seven",
-];
+// Default reset from build system (.cargo/config.toml)
+// magic include.
+mod generated {
+    include!(concat!(env!("OUT_DIR"), "/peripherals.rs"));
+}
+
 
 #[no_mangle]
 pub extern "C" fn main() -> ! {
-    //let ds = DefaultSerial::new();
-    wait(500000);
+    // Delay
+    wait(60000);
+    let intro = "Welcome to new patina";
+    println!("{}\r\n\r\n", intro);
+    println!("{}", PROMPT);
+    let mut cons: readline::Console<{ crate::generated::UART_ADDR }> = readline::Console::new();
+    let mut counter: u32 = 0;
     loop {
-        println!("size - {}\r\n", usize::MAX);
-        println!("{} - {}\r\n", SOME_STRING[0], SOME_STRING[0].len());
-        println!("{} - {}\r\n", SOME_STRING[1], SOME_STRING[1].len());
-        println!("{} - {}\r\n", SOME_STRING[2], SOME_STRING[2].len());
-        println!("{} - {}\r\n", SOME_STRING[3], SOME_STRING[3].len());
-        println!("{} - {}\r\n", SOME_STRING[4], SOME_STRING[4].len());
-        println!("{} - {}\r\n", SOME_STRING[5], SOME_STRING[5].len());
-        println!("{} - {}\r\n", SOME_STRING[6], SOME_STRING[6].len());
-        
-        println!("\r\n");
-        // var index testing
-        println!("array length - {}",SOME_STRING.len());
-        println!("\r\n");
-        // if this is longer than 2 is give jibberish as the length
-        list(2);
-        // set iter test
-        for j in 0..SOME_STRING.len() {
-            let l = SOME_STRING[j].len();
-            println!("{} - {}\r\n", j, l);
+        if let Some(val) = cons.read_key_board() {
+            
+            {
+                match val {
+                    readline::ConsoleAction::Char(c) => println!("{}",(c as char)),
+                    // readline::ConsoleAction::Up => todo!(),
+                    // readline::ConsoleAction::Down => todo!(),
+                    // readline::ConsoleAction::Left => todo!(),
+                    // readline::ConsoleAction::Right => todo!(),
+                    // readline::ConsoleAction::Home => todo!(),
+                    // readline::ConsoleAction::End => todo!(),
+                    // readline::ConsoleAction::Insert => todo!(),
+                    // readline::ConsoleAction::Delete => todo!(),
+                    // readline::ConsoleAction::PgUp => todo!(),
+                    // readline::ConsoleAction::PgDown => todo!(),
+                    // readline::ConsoleAction::Escape => todo!(),
+                    readline::ConsoleAction::Tab => {
+                        println!("Commands: \r\n");
+                        list();
+                    },
+                    // readline::ConsoleAction::Cancel => todo!(),
+                    // readline::ConsoleAction::Reset => todo!(),
+                    readline::ConsoleAction::Enter => {
+                        println!("{}",cons.as_str());
+                        println!("\r\n");
+                    },
+                    // readline::ConsoleAction::BackSpace => todo!(),
+                    _ => println!("|{:?}\r\n", val)
+                }
+            }
         }
-        reset();
+        // bug out timer
+        counter = counter + 1;
+        if counter > 2600_000_0 {
+            println!("bye");
+            reset();
+        }
     }
 }
 
-#[no_mangle]
-fn list(size: usize) {
-    for j in 0..2{
-        println!("{}\r\n", SOME_STRING[j]);
+fn list() {
+    let len = COMMANDS.len();
+    for i in 0..len {
+        println!("{}:\t{}\r\n", i, *COMMANDS[i].0);
     }
-    println!("\r\n");
+}
+
+fn run_command(data: &str) {
+    let mut ctx = Ctx::new();
+    if let Some(cmd) = data.split_ascii_whitespace().next() {
+        for (name, imp) in COMMANDS {
+            if *name == cmd {
+                println!("\r\n");
+                imp(&mut ctx);
+                return;
+            }
+        }
+        println!("\r\nCommand not found \"{}\"", &cmd);
+    }
+}
+struct Ctx {}
+
+impl Ctx {
+    fn new() -> Self {
+        Self {}
+    }
+}
+
+type Command = fn(&mut Ctx);
+
+static COMMANDS: &[(&str, Command)] = &[
+    ("list", cmd_list),
+    ("info", cmd_empty),
+    ("other", cmd_empty),
+    ("reset", cmd_reset),
+    ("help", cmd_help),
+];
+
+#[inline(never)]
+fn cmd_empty(_ctx: &mut Ctx) {
+    println!("empty command");
+}
+
+fn cmd_reset(_ctx: &mut Ctx) {
+    reset();
+}
+
+fn cmd_list(_ctx: &mut Ctx) {
+    list();
+}
+
+fn cmd_help(_ctx: &mut Ctx) {
+    println!("This is some unhelpful help");
 }

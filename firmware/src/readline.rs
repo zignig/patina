@@ -1,28 +1,8 @@
+use crate::init;
 use crate::println;
 use crate::uart::{Bind, DefaultSerial};
 use heapless::String;
 use ufmt::derive::uDebug;
-
-
-struct Buffer {
-    data: String<32>,
-    cursor: usize,
-}
-
-impl Buffer {
-    fn new() -> Self {
-        Self {
-            data: String::new(),
-            cursor: 0,
-        }
-    }
-
-    fn reset(&mut self) {
-        self.data.clear();
-        self.cursor = 0;
-    }
-}
-
 
 #[derive(uDebug)]
 pub enum ConsoleAction {
@@ -45,19 +25,42 @@ pub enum ConsoleAction {
     BackSpace,
 }
 
+struct Buffer {
+    data: String<64>,
+    cursor: usize,
+}
+
+impl Buffer {
+    fn new() -> Self {
+        Self {
+            data: String::new(),
+            cursor: 0,
+        }
+    }
+
+    fn reset(&mut self) {
+        self.data.clear();
+        self.cursor = 0;
+    }
+}
+
 pub struct Console<const ADDR: i16> {
-    pub buffer: Buffer,
-    pub serial: crate::uart::Serial<ADDR>,
+    buffer: Buffer,
+    serial: crate::uart::DefaultSerial, //pub serial: crate::uart::Serial<ADDR>,
 }
 
 impl<const ADDR: i16> Console<ADDR> {
     pub fn new() -> Self {
         Self {
             buffer: Buffer::new(),
-            serial: crate::uart::Serial::<ADDR>::new(),
+            serial: DefaultSerial::new(),
         }
     }
 
+    pub fn as_str(&mut self) -> &str{
+        return self.buffer.data.as_str();
+    }
+    
     pub fn read_key_board(&mut self) -> Option<ConsoleAction> {
         if let Some(c) = self.serial.get() {
             match c {
@@ -67,8 +70,11 @@ impl<const ADDR: i16> Console<ADDR> {
                 }
                 b'\x04' => {
                     // Control D
-                    //init::reset();
+                    init::reset();
                     return Some(ConsoleAction::Reset);
+                }
+                b'\x09' => {
+                    return Some(ConsoleAction::Tab);
                 }
                 b'\x0D' => {
                     // Enter
@@ -161,7 +167,7 @@ impl<const ADDR: i16> Console<ADDR> {
                     }
                 }
                 _ => {
-                    self.serial.putb(c);
+                    //self.serial.putb(c);
                     //println!(">{:x}<\r\n", c);
                     let _ = self.buffer.data.push(c as char);
                     return Some(ConsoleAction::Char(c));
