@@ -50,7 +50,7 @@ class GenRust:
         
         emit("}")
         emit("")
-        # region aliases
+        # memory region aliases
         ram = "ram" if "ram" in regions else "ram"
         aliases = {
             "REGION_TEXT":   ram,

@@ -37,7 +37,7 @@ class SimpleSoC(Elaboratable):
         log.info("Build Soc")
         self._cpu = Minerva()
         self._ram = WishboneMemory(
-            size=4096,
+            size=8192,
             writable=True,
             data_width=32,
             granularity=8,
@@ -208,8 +208,8 @@ if __name__ == "__main__":
     # r.generate_svd()
 
     # Generate Linker File
-    #linker = GenRust(soc)
-    #linker.generate_bootloader_x()
+    linker = GenRust(soc)
+    linker.generate_bootloader_x()
 
     # Table display
     displayer = ShowMap(soc)

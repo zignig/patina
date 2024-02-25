@@ -12,10 +12,10 @@ __all__ = ["AsyncSerialPeripheral"]
 
 class AsyncSerialPeripheral(wiring.Component):
     class CKD(csr.Register, access="rw"):
-        def __init__(self, *, reset):
+        def __init__(self, *, init):
             super().__init__(
                 {
-                    "divisor": csr.Field(csr.action.RW, unsigned(32), reset=reset),
+                    "divisor": csr.Field(csr.action.RW, unsigned(32), init=init),
                 }
             )
 
@@ -42,7 +42,7 @@ class AsyncSerialPeripheral(wiring.Component):
             addr_width=self.bus.addr_width, data_width=self.bus.data_width, name=name
         )
 
-        self._ckd = regs.add("CKD", self.CKD(reset=divisor), offset=0x00)
+        self._ckd = regs.add("CKD", self.CKD(init=divisor), offset=0x00)
         self._rxs = regs.add("RXS", self.RXS(), offset=0x04)
         self._rxd = regs.add("RXD", self.RXD(), offset=0x08)
         self._txs = regs.add("TXS", self.TXS(), offset=0x0C)

@@ -17,7 +17,7 @@ class ShowMap:
         mm = self._soc.memory_map
         for res in mm.all_resources():
             print(res)
-            table.add_row(str(res.path),str(res.start),str(res.end))
+            table.add_row(str(res.path),str(res.start),str(res.end-res.start))
         
         console = Console()
         console.print(table)

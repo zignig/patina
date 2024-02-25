@@ -8,7 +8,7 @@ from amaranth_soc import csr
 
 
 class Counter(wiring.Component):
-    bus: In(csr.Signature(addr_width=2, data_width=8))
+    bus: In(csr.Signature(addr_width=2, data_width=32))
 
     class enable(csr.Register, access="rw"):
         value: csr.Field(csr.action.RW, unsigned(1))
@@ -31,7 +31,7 @@ class Counter(wiring.Component):
         self._overflow = self.overflow()
         self._config = self.cfg()
 
-        regs = csr.Builder(name="counter", addr_width=2, data_width=8)
+        regs = csr.Builder(name="counter", addr_width=2, data_width=32,granularity=8)
         regs.add("enable", self._enable)
         regs.add("counter", self._counter)
         regs.add("overflow",self._overflow)
