@@ -1,12 +1,11 @@
 #![no_std]
 #![no_main]
 
-use heapless::String;
-
 use rustv::init::{reset, wait};
 use rustv::println;
 use rustv::readline;
 use rustv::uart::{Bind, DefaultSerial};
+
 const PROMPT: &str = ">>";
 
 // Default reset from build system (.cargo/config.toml)
@@ -14,7 +13,6 @@ const PROMPT: &str = ">>";
 mod generated {
     include!(concat!(env!("OUT_DIR"), "/peripherals.rs"));
 }
-
 
 #[no_mangle]
 pub extern "C" fn main() -> ! {
@@ -30,7 +28,7 @@ pub extern "C" fn main() -> ! {
             {
                 counter = 0;
                 match val {
-                    readline::ConsoleAction::Char(c) => println!("{}",(c as char)),
+                    readline::ConsoleAction::Char(c) => println!("{}", (c as char)),
                     // readline::ConsoleAction::Up => todo!(),
                     // readline::ConsoleAction::Down => todo!(),
                     // readline::ConsoleAction::Left => todo!(),
@@ -46,7 +44,7 @@ pub extern "C" fn main() -> ! {
                         println!("\r\n");
                         println!("Commands: \r\n");
                         list();
-                    },
+                    }
                     // readline::ConsoleAction::Cancel => todo!(),
                     // readline::ConsoleAction::Reset => todo!(),
                     readline::ConsoleAction::Enter => {
@@ -54,9 +52,9 @@ pub extern "C" fn main() -> ! {
                         run_command(data);
                         cons.reset();
                         println!("\r\n{}", PROMPT);
-                    },
+                    }
                     // readline::ConsoleAction::BackSpace => todo!(),
-                    _ => println!("_{:?}_", val)
+                    _ => println!("_{:?}_", val),
                 }
             }
         }

@@ -25,8 +25,10 @@ pub enum ConsoleAction {
     BackSpace,
 }
 
+const BUF_SIZE: usize = 64;
+
 struct Buffer {
-    data: String<64>,
+    data: String<BUF_SIZE>,
     cursor: usize,
 }
 
@@ -42,6 +44,8 @@ impl Buffer {
         self.data.clear();
         self.cursor = 0;
     }
+
+    fn insert(&mut self, c: char) {}
 }
 
 pub struct Console<const ADDR: i16> {
@@ -55,7 +59,7 @@ impl<const ADDR: i16> Console<ADDR> {
         Self {
             buffer: Buffer::new(),
             serial: DefaultSerial::new(),
-            insert: true
+            insert: true,
         }
     }
 
@@ -72,19 +76,32 @@ impl<const ADDR: i16> Console<ADDR> {
             match act {
                 // ConsoleAction::Char(_) => todo!(),
                 // Ignore up and down , no history yet
-                ConsoleAction::Up => return None,
-                ConsoleAction::Down => return None,
-                // ConsoleAction::Left => todo!(),
-                // ConsoleAction::Right => todo!(),
+                ConsoleAction::Up => None,
+                ConsoleAction::Down => None,
+
+                ConsoleAction::Left => {
+                    if self.buffer.cursor > 0 {
+                        self.buffer.cursor -= 1;
+                        self.reply(act);
+                    }
+                    None
+                }
+                ConsoleAction::Right => {
+                    if self.buffer.cursor < self.buffer.data.len() { 
+                        self.buffer.cursor +=1 ;
+                        self.reply(act);
+                    }
+                    None
+                }
                 // ConsoleAction::Home => todo!(),
                 // ConsoleAction::End => todo!(),
                 //ConsoleAction::Insert => todo!(),
                 // ConsoleAction::Delete => todo!(),
 
                 // Ignore as well
-                ConsoleAction::PgUp => return None,
-                ConsoleAction::PgDown => return None,
-                
+                ConsoleAction::PgUp => None,
+                ConsoleAction::PgDown => None,
+
                 // ConsoleAction::Escape => todo!(),
                 // ConsoleAction::Tab => todo!(),
                 // ConsoleAction::Cancel => todo!(),
@@ -93,10 +110,35 @@ impl<const ADDR: i16> Console<ADDR> {
                 // ConsoleAction::BackSpace => todo!(),
 
                 // If none of these are grabbed , bubble up.
-                _ => return Some(act),
+                _ => Some(act),
             }
         } else {
             None
+        }
+    }
+
+    pub fn reply(&mut self, action: ConsoleAction) {
+        if let Some(val) = match action {
+            // ConsoleAction::Char(_) => todo!(),
+            // ConsoleAction::Up => todo!(),
+            // ConsoleAction::Down => todo!(),
+            ConsoleAction::Left => Some("\x1b\x5b\x44"),
+            ConsoleAction::Right => Some("\x1b\x5b\x43"),
+            // ConsoleAction::Home => todo!(),
+            // ConsoleAction::End => todo!(),
+            // ConsoleAction::Insert => todo!(),
+            // ConsoleAction::Delete => todo!(),
+            // ConsoleAction::PgUp => todo!(),
+            // ConsoleAction::PgDown => todo!(),
+            // ConsoleAction::Escape => todo!(),
+            // ConsoleAction::Tab => todo!(),
+            // ConsoleAction::Cancel => todo!(),
+            // ConsoleAction::Reset => todo!(),
+            // ConsoleAction::Enter => todo!(),
+            // ConsoleAction::BackSpace => todo!(),
+            _ => None,
+        } {
+            println!("{}", val);
         }
     }
 
@@ -209,6 +251,7 @@ impl<const ADDR: i16> Console<ADDR> {
                     //self.serial.putb(c);
                     //println!(">{:x}<\r\n", c);
                     let _ = self.buffer.data.push(c as char);
+                    self.buffer.cursor +=  1 ;
                     return Some(ConsoleAction::Char(c));
                 }
             }
