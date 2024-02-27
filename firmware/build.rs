@@ -41,8 +41,8 @@ fn main() {
 
     let rv = match reset_vector {
         None => {
-            println!("cargo:warning=note: UART address not provided, defaulting to 0x200");
-            0x200
+            println!("cargo:warning=note: RESET_VECTOR is not supplied");
+            0x8000
         }
         Some(text) => {
             parse_int::parse::<u32>(&text).unwrap()
@@ -53,6 +53,8 @@ fn main() {
     out.push("peripherals.rs");
 
     let mut f = std::fs::File::create(&out).unwrap();
+    writeln!(f,"#[allow(dead_code)]").unwrap();
     writeln!(f, "pub const UART_ADDR: i16 = 0x{addr:x};").unwrap();
+    writeln!(f,"#[allow(dead_code)]").unwrap();
     writeln!(f, "pub const RESET_VECTOR: i16 = 0x{rv:x};").unwrap();
 }

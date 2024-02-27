@@ -45,21 +45,23 @@ impl Buffer {
         self.cursor = 0;
     }
 
-    fn insert(&mut self, c: char) {}
+    // fn insert(&mut self, _c: char) {}
 }
 
-pub struct Console<const ADDR: i16> {
+pub struct Console {
     buffer: Buffer,
     serial: crate::uart::DefaultSerial, //pub serial: crate::uart::Serial<ADDR>,
-    insert: bool,
+    //insert: bool,
+    echo: bool,
 }
 
-impl<const ADDR: i16> Console<ADDR> {
+impl Console {
     pub fn new() -> Self {
         Self {
             buffer: Buffer::new(),
             serial: DefaultSerial::new(),
-            insert: true,
+            // insert: true,
+            echo: true,
         }
     }
 
@@ -74,11 +76,15 @@ impl<const ADDR: i16> Console<ADDR> {
     pub fn process(&mut self) -> Option<ConsoleAction> {
         if let Some(act) = self.read_key_board() {
             match act {
-                // ConsoleAction::Char(_) => todo!(),
+                ConsoleAction::Char(c) => {
+                    if self.echo {
+                        println!("{}", (c as char));
+                    }
+                    None
+                }
                 // Ignore up and down , no history yet
-                ConsoleAction::Up => None,
-                ConsoleAction::Down => None,
-
+                //ConsoleAction::Up => None,
+                //ConsoleAction::Down => None,
                 ConsoleAction::Left => {
                     if self.buffer.cursor > 0 {
                         self.buffer.cursor -= 1;
@@ -87,8 +93,8 @@ impl<const ADDR: i16> Console<ADDR> {
                     None
                 }
                 ConsoleAction::Right => {
-                    if self.buffer.cursor < self.buffer.data.len() { 
-                        self.buffer.cursor +=1 ;
+                    if self.buffer.cursor < self.buffer.data.len() {
+                        self.buffer.cursor += 1;
                         self.reply(act);
                     }
                     None
@@ -140,6 +146,10 @@ impl<const ADDR: i16> Console<ADDR> {
         } {
             println!("{}", val);
         }
+    }
+
+    pub fn clear_screen(&mut self) {
+        println!("\x1b[2J\x1b[H"); // clear screen and home
     }
 
     pub fn read_key_board(&mut self) -> Option<ConsoleAction> {
@@ -251,7 +261,7 @@ impl<const ADDR: i16> Console<ADDR> {
                     //self.serial.putb(c);
                     //println!(">{:x}<\r\n", c);
                     let _ = self.buffer.data.push(c as char);
-                    self.buffer.cursor +=  1 ;
+                    self.buffer.cursor += 1;
                     return Some(ConsoleAction::Char(c));
                 }
             }

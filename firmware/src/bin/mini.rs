@@ -6,12 +6,31 @@ use rustv::println;
 use rustv::readline;
 use rustv::uart::{Bind, DefaultSerial};
 
+
+
 const PROMPT: &str = ">>";
 
 // Default reset from build system (.cargo/config.toml)
 // magic include.
 mod generated {
     include!(concat!(env!("OUT_DIR"), "/peripherals.rs"));
+}
+
+// Primary data construct
+// Add more to me is made available to commands
+struct Ctx {
+    cons: readline::Console,
+    counter: u32,
+}
+
+
+impl Ctx {
+    fn new() -> Self {
+        Self {
+            cons: readline::Console::new(),
+            counter: 0,
+        }
+    }
 }
 
 #[no_mangle]
@@ -21,41 +40,43 @@ pub extern "C" fn main() -> ! {
     let intro = "Welcome to new patina";
     println!("{}\r\n\r\n", intro);
     println!("{}", PROMPT);
-    let mut cons: readline::Console<{ crate::generated::UART_ADDR }> = readline::Console::new();
     let mut counter: u32 = 0;
+    let mut ctx = Ctx::new();
     loop {
-        if let Some(val) = cons.process() {
+        use readline::ConsoleAction::*;
+        if let Some(val) = ctx.cons.process() {
             {
-                counter = 0;
                 match val {
-                    readline::ConsoleAction::Char(c) => println!("{}", (c as char)),
-                    // readline::ConsoleAction::Up => todo!(),
-                    // readline::ConsoleAction::Down => todo!(),
-                    // readline::ConsoleAction::Left => todo!(),
-                    // readline::ConsoleAction::Right => todo!(),
-                    // readline::ConsoleAction::Home => todo!(),
-                    // readline::ConsoleAction::End => todo!(),
-                    // readline::ConsoleAction::Insert => todo!(),
-                    // readline::ConsoleAction::Delete => todo!(),
-                    // readline::ConsoleAction::PgUp => todo!(),
-                    // readline::ConsoleAction::PgDown => todo!(),
-                    // readline::ConsoleAction::Escape => todo!(),
-                    readline::ConsoleAction::Tab => {
+                    // Char(_) => todo!(),
+                    // Up => todo!(),
+                    // Down => todo!(),
+                    // Left => todo!(),
+                    // Right => todo!(),
+                    // Home => todo!(),
+                    // End => todo!(),
+                    // Insert => todo!(),
+                    // Delete => todo!(),
+                    // PgUp => todo!(),
+                    // PgDown => todo!(),
+                    // Escape => todo!(),
+                    Tab => {
                         println!("\r\n");
                         println!("Commands: \r\n");
                         list();
                     }
-                    // readline::ConsoleAction::Cancel => todo!(),
-                    // readline::ConsoleAction::Reset => todo!(),
-                    readline::ConsoleAction::Enter => {
-                        let data = cons.as_str();
-                        run_command(data);
-                        cons.reset();
+                    Cancel => {
+                        ctx.cons.clear_screen();
+                    }
+                    //Reset => todo!(),
+                    Enter => {
+                        run_command(&mut ctx);
+                        ctx.cons.reset();
                         println!("\r\n{}", PROMPT);
                     }
-                    // readline::ConsoleAction::BackSpace => todo!(),
-                    _ => println!("_{:?}_", val),
+                    //BackSpace => todo!(),
+                    _ => println!("|{:?}", val),
                 }
+                counter = 0;
             }
         }
         // bug out timer
@@ -70,28 +91,21 @@ pub extern "C" fn main() -> ! {
 fn list() {
     let len = COMMANDS.len();
     for i in 0..len {
-        println!("{}> {}\r\n", i, *COMMANDS[i].0);
+        println!("{}: {}\r\n", i, *COMMANDS[i].0);
     }
 }
 
-fn run_command(data: &str) {
-    let mut ctx = Ctx::new();
+fn run_command(ctx: &mut Ctx) {
+    let data = ctx.cons.as_str();
     if let Some(cmd) = data.split_ascii_whitespace().next() {
         for (name, imp) in COMMANDS {
             if *name == cmd {
                 println!("\r\n");
-                imp(&mut ctx);
+                imp(ctx);
                 return;
             }
         }
         println!("\r\nCommand not found \"{}\"", &cmd);
-    }
-}
-struct Ctx {}
-
-impl Ctx {
-    fn new() -> Self {
-        Self {}
     }
 }
 
@@ -101,11 +115,27 @@ static COMMANDS: &[(&str, Command)] = &[
     ("list", cmd_list),
     ("info", cmd_empty),
     ("other", cmd_other),
-    ("reset", cmd_reset),
     ("help", cmd_help),
+    ("?", cmd_help),
+    ("demo", cmd_demo),
+    ("cls", cmd_cls),
+    ("reset", cmd_reset),
+    ("+", cmd_plus),
 ];
 
-#[inline(never)]
+fn cmd_plus(ctx: &mut Ctx) {
+    ctx.counter += 1;
+    println!("{}", ctx.counter);
+}
+
+fn cmd_cls(ctx: &mut Ctx) {
+    ctx.cons.clear_screen();
+}
+
+fn cmd_demo(_ctx: &mut Ctx) {
+    println!("demo WOO HOO!");
+}
+
 fn cmd_empty(_ctx: &mut Ctx) {
     println!("empty command");
 }
@@ -123,5 +153,7 @@ fn cmd_list(_ctx: &mut Ctx) {
 }
 
 fn cmd_help(_ctx: &mut Ctx) {
-    println!("This is some unhelpful help\r\n stuff\r\n stuff.\r\n");
+    println!("Available commands\r\n\r\n");
+    list();
+    println!("\r\nThis is a simple readline for hapenny\r\n");
 }
