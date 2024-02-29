@@ -4,9 +4,8 @@
 use rustv::init::{reset, wait};
 use rustv::println;
 use rustv::readline;
+use rustv::terminal;
 use rustv::uart::{Bind, DefaultSerial};
-
-
 
 const PROMPT: &str = ">>";
 
@@ -17,18 +16,17 @@ mod generated {
 }
 
 // Primary data construct
-// Add more to me is made available to commands
+// Add more to me and it is made available to commands
 struct Ctx {
     cons: readline::Console,
-    counter: u32,
+    counter: usize,
 }
-
 
 impl Ctx {
     fn new() -> Self {
         Self {
             cons: readline::Console::new(),
-            counter: 0,
+            counter: 10,
         }
     }
 }
@@ -47,18 +45,6 @@ pub extern "C" fn main() -> ! {
         if let Some(val) = ctx.cons.process() {
             {
                 match val {
-                    // Char(_) => todo!(),
-                    // Up => todo!(),
-                    // Down => todo!(),
-                    // Left => todo!(),
-                    // Right => todo!(),
-                    // Home => todo!(),
-                    // End => todo!(),
-                    // Insert => todo!(),
-                    // Delete => todo!(),
-                    // PgUp => todo!(),
-                    // PgDown => todo!(),
-                    // Escape => todo!(),
                     Tab => {
                         println!("\r\n");
                         println!("Commands: \r\n");
@@ -67,7 +53,9 @@ pub extern "C" fn main() -> ! {
                     Cancel => {
                         ctx.cons.clear_screen();
                     }
-                    //Reset => todo!(),
+                    Reset => {
+                        reset();
+                    }
                     Enter => {
                         run_command(&mut ctx);
                         ctx.cons.reset();
@@ -89,9 +77,8 @@ pub extern "C" fn main() -> ! {
 }
 
 fn list() {
-    let len = COMMANDS.len();
-    for i in 0..len {
-        println!("{}: {}\r\n", i, *COMMANDS[i].0);
+    for i in COMMANDS{
+        println!("{}\r\n",i.0);
     }
 }
 
@@ -105,7 +92,8 @@ fn run_command(ctx: &mut Ctx) {
                 return;
             }
         }
-        println!("\r\nCommand not found \"{}\"", &cmd);
+        println!("\r\nCommand not found,   \"{}\" try from > \r\n \r\n", &cmd);
+        list();
     }
 }
 
@@ -113,19 +101,23 @@ type Command = fn(&mut Ctx);
 
 static COMMANDS: &[(&str, Command)] = &[
     ("list", cmd_list),
-    ("info", cmd_empty),
-    ("other", cmd_other),
+    ("r", cmd_other),
     ("help", cmd_help),
     ("?", cmd_help),
     ("demo", cmd_demo),
-    ("cls", cmd_cls),
+    ("clear", cmd_cls),
     ("reset", cmd_reset),
-    ("+", cmd_plus),
+    ("+", cmd_add),
+    ("-", cmd_sub),
 ];
 
-fn cmd_plus(ctx: &mut Ctx) {
-    ctx.counter += 1;
-    println!("{}", ctx.counter);
+fn cmd_add(ctx: &mut Ctx) {
+    ctx.counter += 10;
+}
+fn cmd_sub(ctx: &mut Ctx) {
+    if ctx.counter > 11 {
+        ctx.counter -= 10;
+    }
 }
 
 fn cmd_cls(ctx: &mut Ctx) {
@@ -136,16 +128,12 @@ fn cmd_demo(_ctx: &mut Ctx) {
     println!("demo WOO HOO!");
 }
 
-fn cmd_empty(_ctx: &mut Ctx) {
-    println!("empty command");
-}
-
 fn cmd_reset(_ctx: &mut Ctx) {
     reset();
 }
 
-fn cmd_other(_ctx: &mut Ctx) {
-    println!("the other command");
+fn cmd_other(ctx: &mut Ctx) {
+    terminal::rectangle(ctx.counter, 10);
 }
 
 fn cmd_list(_ctx: &mut Ctx) {

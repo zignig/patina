@@ -1,4 +1,3 @@
-use crate::init;
 use crate::println;
 use crate::uart::{Bind, DefaultSerial};
 use heapless::String;
@@ -23,6 +22,7 @@ pub enum ConsoleAction {
     Reset,
     Enter,
     BackSpace,
+    Unknown
 }
 
 const BUF_SIZE: usize = 64;
@@ -82,9 +82,11 @@ impl Console {
                     }
                     None
                 }
-                // Ignore up and down , no history yet
+                
+                // Perhaps a history ?
                 //ConsoleAction::Up => None,
                 //ConsoleAction::Down => None,
+
                 ConsoleAction::Left => {
                     if self.buffer.cursor > 0 {
                         self.buffer.cursor -= 1;
@@ -104,9 +106,9 @@ impl Console {
                 //ConsoleAction::Insert => todo!(),
                 // ConsoleAction::Delete => todo!(),
 
-                // Ignore as well
-                ConsoleAction::PgUp => None,
-                ConsoleAction::PgDown => None,
+                // What to do with these ? 
+                //ConsoleAction::PgUp => None,
+                //ConsoleAction::PgDown => None,
 
                 // ConsoleAction::Escape => todo!(),
                 // ConsoleAction::Tab => todo!(),
@@ -161,7 +163,6 @@ impl Console {
                 }
                 b'\x04' => {
                     // Control D
-                    init::reset();
                     return Some(ConsoleAction::Reset);
                 }
                 b'\x09' => {
@@ -169,10 +170,6 @@ impl Console {
                 }
                 b'\x0D' => {
                     // Enter
-                    // let data = buffer.data.as_str();
-                    // run_command(data);
-                    // buffer.reset();
-                    // println!("\r\n{}", PROMPT);
                     return Some(ConsoleAction::Enter);
                 }
                 b'\x7f' => {
@@ -241,15 +238,15 @@ impl Console {
                                         }
 
                                         _ => {
-                                            println!("c, <{:x}>", c);
-                                            return None;
+                                            //println!("c, <{:x}>", c);
+                                            return Some(ConsoleAction::Unknown);
                                         }
                                     }
                                 }
                             }
                             _ => {
-                                println!("unknown, <{:x}>", c);
-                                return None;
+                                //println!("unknown, <{:x}>", c);
+                                return Some(ConsoleAction::Unknown);
                             }
                         }
                     } else {
