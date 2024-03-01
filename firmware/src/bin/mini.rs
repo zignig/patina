@@ -35,20 +35,24 @@ impl Ctx {
 pub extern "C" fn main() -> ! {
     // Delay
     wait(60000);
-    let intro = "Welcome to new patina";
+    let intro = "Welcome to patina";
     println!("{}\r\n\r\n", intro);
     println!("{}", PROMPT);
+
     let mut counter: u32 = 0;
     let mut ctx = Ctx::new();
     loop {
         use readline::ConsoleAction::*;
+        // get sometihng from the serial port
         if let Some(val) = ctx.cons.process() {
             {
                 match val {
                     Tab => {
-                        println!("\r\n");
-                        println!("Commands: \r\n");
-                        list();
+                        // println!("\r\n");
+                        // println!("Commands: \r\n");
+                        // list();
+                        ctx.cons.redraw_line();
+                        // ctx.cons.redraw();
                     }
                     Cancel => {
                         ctx.cons.clear_screen();
@@ -61,9 +65,9 @@ pub extern "C" fn main() -> ! {
                         ctx.cons.reset();
                         println!("\r\n{}", PROMPT);
                     }
-                    //BackSpace => todo!(),
                     _ => println!("|{:?}", val),
                 }
+                // Stuff happened.
                 counter = 0;
             }
         }
@@ -92,7 +96,7 @@ fn run_command(ctx: &mut Ctx) {
                 return;
             }
         }
-        println!("\r\nCommand not found,   \"{}\" try from > \r\n \r\n", &cmd);
+        println!("\r\nCommand not found,\"{}\" try from > \r\n \r\n", &cmd);
         list();
     }
 }

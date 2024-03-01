@@ -55,7 +55,7 @@ fn DefaultInterruptHandler() {}
 #[panic_handler]
 unsafe fn my_panic(_info: &core::panic::PanicInfo) -> ! {
     loop {
-        println!("PANIC\r\n");
+        println!("GURU MEDITATION\r\n");
         reset();
     }
 }

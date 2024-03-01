@@ -1,7 +1,9 @@
 use crate::println;
 use crate::uart::{Bind, DefaultSerial};
-use heapless::String;
+use heapless::{String,Vec};
 use ufmt::derive::uDebug;
+
+const PROMPT: &str = ">>";
 
 #[derive(uDebug)]
 pub enum ConsoleAction {
@@ -22,11 +24,12 @@ pub enum ConsoleAction {
     Reset,
     Enter,
     BackSpace,
-    Unknown
+    Unknown,
 }
 
 const BUF_SIZE: usize = 64;
 
+#[derive(Clone)]
 struct Buffer {
     data: String<BUF_SIZE>,
     cursor: usize,
@@ -46,6 +49,13 @@ impl Buffer {
     }
 
     // fn insert(&mut self, _c: char) {}
+    fn push_str(&mut self, s: &str) {
+        self.data.push_str(s);
+    }
+
+    fn push(&mut self, c: char) {
+        let _ = self.data.push(c);
+    }
 }
 
 pub struct Console {
@@ -82,11 +92,10 @@ impl Console {
                     }
                     None
                 }
-                
+
                 // Perhaps a history ?
                 //ConsoleAction::Up => None,
                 //ConsoleAction::Down => None,
-
                 ConsoleAction::Left => {
                     if self.buffer.cursor > 0 {
                         self.buffer.cursor -= 1;
@@ -106,7 +115,7 @@ impl Console {
                 //ConsoleAction::Insert => todo!(),
                 // ConsoleAction::Delete => todo!(),
 
-                // What to do with these ? 
+                // What to do with these ?
                 //ConsoleAction::PgUp => None,
                 //ConsoleAction::PgDown => None,
 
@@ -115,7 +124,10 @@ impl Console {
                 // ConsoleAction::Cancel => todo!(),
                 // ConsoleAction::Reset => todo!(),
                 // ConsoleAction::Enter => todo!(),
-                // ConsoleAction::BackSpace => todo!(),
+                ConsoleAction::BackSpace => {
+                    //self.backspace();
+                    None
+                }
 
                 // If none of these are grabbed , bubble up.
                 _ => Some(act),
@@ -150,6 +162,35 @@ impl Console {
         }
     }
 
+    pub fn backspace(&mut self) {
+        //        let _ = self.buffer.data.remove(self.buffer.cursor);
+        self.redraw_line();
+    }
+
+    pub fn split_list(&mut self) {
+        // this is unsafe beacuse the full split uses the full unicode libs
+        // and the firmware blows out by 7Kb.
+        unsafe {
+            let buf = &self.buffer.clone();
+            let start = buf.data.get_unchecked(0..buf.cursor - 1);
+            let end = buf.data.get_unchecked(buf.cursor..buf.data.len());
+
+            println!("{}|{}", start, end);
+            self.buffer.reset();
+            self.buffer.push_str(start);
+            //self.buffer.push('|');
+            self.buffer.push_str(end);
+        }
+    }
+    pub fn redraw_line(&mut self) {
+        //Clear line
+        println!("\x1b[2K");
+        // Move al the way left
+        println!("\x1b[G");
+        println!("{}", PROMPT);
+        println!("{}", self.buffer.data.as_str());
+    }
+
     pub fn clear_screen(&mut self) {
         println!("\x1b[2J\x1b[H"); // clear screen and home
     }
@@ -173,7 +214,7 @@ impl Console {
                     return Some(ConsoleAction::Enter);
                 }
                 b'\x7f' => {
-                    //println!("backspace");
+                    // Backspace
                     return Some(ConsoleAction::BackSpace);
                 }
                 // \x1b

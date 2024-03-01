@@ -17,7 +17,7 @@ panic = "abort"
 
 [profile.release]
 panic = "abort"
-# strip = true
+#strip = true
 opt-level = 's'
 debug = false 
 # mir-opt-level = 0
@@ -26,3 +26,7 @@ debug = false
 #riscv-target = "0.1.2"
 parse_int = "0.6.0"
 askama = "0.12.1"
+
+[[bin]]
+name = "mini"
+test = false

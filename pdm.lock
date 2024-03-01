@@ -1,9 +1,9 @@
 [[package]]
 name = "amaranth"
-version = "0.4.1.dev115+g09029cd"
+version = "0.5.0.dev134+gf8e2d26"
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth"
-revision = "09029cdd914d550e924cecfb9aa1692a536b4161"
+revision = "f8e2d26b8f366fe88980f485c03873b2e897bb6a"
 summary = "Amaranth hardware definition language"
 dependencies = [
     "Jinja2~=3.0",
@@ -12,13 +12,13 @@ dependencies = [
 
 [[package]]
 name = "amaranth-boards"
-version = "0.1.dev241+g1706758"
+version = "0.1.dev243+gb67996c"
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth-boards"
-revision = "170675812b71ee722bcf8ccdb88409a9ad97ffe2"
+revision = "b67996c48f1bc91412605acd7012f242514d3927"
 summary = "Board and connector definitions for Amaranth HDL"
 dependencies = [
-    "amaranth<0.5,>=0.4",
+    "amaranth<0.6,>=0.4",
 ]
 
 [[package]]
@@ -34,13 +34,13 @@ dependencies = [
 
 [[package]]
 name = "amaranth-stdio"
-version = "0.1.dev28+g4aa39e8"
+version = "0.1.dev31+gae774a5"
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth-stdio"
-revision = "4aa39e8c9dc68c4e3605bbb80a0ca84e3a25d019"
+revision = "ae774a5709321d5bffddbcebed09b0e350cb6282"
 summary = "Industry standard I/O for Amaranth HDL"
 dependencies = [
-    "amaranth<0.5,>=0.4",
+    "amaranth @ git+https://github.com/amaranth-lang/amaranth",
 ]
 
 [[package]]
@@ -53,11 +53,11 @@ dependencies = [
 
 [[package]]
 name = "amaranth"
-version = "0.4.1.dev115+g09029cd"
+version = "0.5.0.dev134+gf8e2d26"
 extras = ["builtin-yosys"]
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth"
-revision = "09029cdd914d550e924cecfb9aa1692a536b4161"
+revision = "f8e2d26b8f366fe88980f485c03873b2e897bb6a"
 summary = "Amaranth hardware definition language"
 dependencies = [
     "amaranth @ git+https://github.com/amaranth-lang/amaranth",
@@ -123,18 +123,6 @@ requires_python = ">=3.7"
 summary = "Markdown URL utilities"
 
 [[package]]
-name = "minerva"
-version = "0.1.dev128+g5bac31a"
-requires_python = "~=3.8"
-git = "https://github.com/minerva-cpu/minerva"
-revision = "5bac31a40b6d8098ba2f4b7c4906ca667b6155f7"
-summary = "A 32-bit RISC-V soft processor"
-dependencies = [
-    "amaranth[builtin-yosys]<0.5,>=0.3",
-    "yowasp-yosys",
-]
-
-[[package]]
 name = "platformdirs"
 version = "3.11.0"
 requires_python = ">=3.7"
@@ -154,7 +142,7 @@ summary = "Python VCD file support"
 
 [[package]]
 name = "rich"
-version = "13.7.0"
+version = "13.7.1"
 requires_python = ">=3.7.0"
 summary = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 dependencies = [
@@ -189,7 +177,7 @@ dependencies = [
 
 [metadata]
 lock_version = "4.0"
-content_hash = "sha256:26c44d32d27d2d7f096cc91c1a54f0804b46b4732ac502721ae1130c69af4c07"
+content_hash = "sha256:aa6c812538a31a79bcafd7cf642dc58d06e11ef74777e436546580bc22f70c84"
 
 [metadata.files]
 "amaranth-yosys 0.38.0.0.post86" = [
@@ -289,9 +277,9 @@ content_hash = "sha256:26c44d32d27d2d7f096cc91c1a54f0804b46b4732ac502721ae1130c6
     {url = "https://files.pythonhosted.org/packages/96/f0/a9ef4efb5283539ad3cec0fffcff35adda91f1df5319f6d7600669f6259d/pyvcd-0.4.0.tar.gz", hash = "sha256:31be3f501441a9b8c5dc72660ff7b9cfef9b43b2121a23d96f586d2863270290"},
     {url = "https://files.pythonhosted.org/packages/98/8d/a0d8fb2b9611f3ae22ddc98890b346833fa2c645ad21fd282e61ccdad477/pyvcd-0.4.0-py2.py3-none-any.whl", hash = "sha256:a21b10e5018b7940c8f2c20ef83d97496e86f15e215afed134ee115166035e17"},
 ]
-"rich 13.7.0" = [
-    {url = "https://files.pythonhosted.org/packages/a7/ec/4a7d80728bd429f7c0d4d51245287158a1516315cadbb146012439403a9d/rich-13.7.0.tar.gz", hash = "sha256:5cb5123b5cf9ee70584244246816e9114227e0b98ad9176eede6ad54bf5403fa"},
-    {url = "https://files.pythonhosted.org/packages/be/be/1520178fa01eabe014b16e72a952b9f900631142ccd03dc36cf93e30c1ce/rich-13.7.0-py3-none-any.whl", hash = "sha256:6da14c108c4866ee9520bbffa71f6fe3962e193b7da68720583850cd4548e235"},
+"rich 13.7.1" = [
+    {url = "https://files.pythonhosted.org/packages/87/67/a37f6214d0e9fe57f6ae54b2956d550ca8365857f42a1ce0392bb21d9410/rich-13.7.1-py3-none-any.whl", hash = "sha256:4edbae314f59eb482f54e9e30bf00d33350aaa94f4bfcd4e9e3110e64d0d7222"},
+    {url = "https://files.pythonhosted.org/packages/b3/01/c954e134dc440ab5f96952fe52b4fdc64225530320a910473c1fe270d9aa/rich-13.7.1.tar.gz", hash = "sha256:9be308cb1fe2f1f57d67ce99e95af38a1e2bc71ad9813b0e247cf7ffbcc3a432"},
 ]
 "wasmtime 15.0.0" = [
     {url = "https://files.pythonhosted.org/packages/4a/c5/6238868809b70742bd447fdf030c94adb8178b208d4f3591413339e9c713/wasmtime-15.0.0-py3-none-any.whl", hash = "sha256:24de208dccea948e924b6af23c2b659f08bdd58e4ef5b549e2913a022cef2e50"},

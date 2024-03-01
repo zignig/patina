@@ -2,3 +2,4 @@ target/
 test.bin
 hapenny-montool
 build/
+__pycache__/
