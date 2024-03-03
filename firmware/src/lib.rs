@@ -8,4 +8,4 @@ mod generated {
 pub mod init;
 pub mod uart;
 pub mod readline;
-pub mod terminal;
+//pub mod terminal;

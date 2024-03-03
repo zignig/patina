@@ -2,10 +2,9 @@
 #![no_main]
 
 use rustv::init::{reset, wait};
-use rustv::println;
 use rustv::readline;
-use rustv::terminal;
-use rustv::uart::{Bind, DefaultSerial};
+//use rustv::terminal;
+use rustv::uart::{write,writer};
 
 const PROMPT: &str = ">>";
 
@@ -36,8 +35,9 @@ pub extern "C" fn main() -> ! {
     // Delay
     wait(60000);
     let intro = "Welcome to patina";
-    println!("{}\r\n\r\n", intro);
-    println!("{}", PROMPT);
+    write("\r\n\r\n");
+    writer(intro);
+    write(PROMPT);
 
     let mut counter: u32 = 0;
     let mut ctx = Ctx::new();
@@ -63,9 +63,10 @@ pub extern "C" fn main() -> ! {
                     Enter => {
                         run_command(&mut ctx);
                         ctx.cons.reset();
-                        println!("\r\n{}", PROMPT);
+                        writer("");
+                        write(PROMPT);
                     }
-                    _ => println!("|{:?}", val),
+                    _ => write(val.show()),
                 }
                 // Stuff happened.
                 counter = 0;
@@ -74,15 +75,15 @@ pub extern "C" fn main() -> ! {
         // bug out timer
         counter = counter + 1;
         if counter > 6000_000_0 {
-            println!("bye");
+            write("bye");
             reset();
         }
     }
 }
 
 fn list() {
-    for i in COMMANDS{
-        println!("{}\r\n",i.0);
+    for i in COMMANDS {
+        writer(i.0);
     }
 }
 
@@ -91,12 +92,13 @@ fn run_command(ctx: &mut Ctx) {
     if let Some(cmd) = data.split_ascii_whitespace().next() {
         for (name, imp) in COMMANDS {
             if *name == cmd {
-                println!("\r\n");
+                write("\r\n");
                 imp(ctx);
                 return;
             }
         }
-        println!("\r\nCommand not found,\"{}\" try from > \r\n \r\n", &cmd);
+        write("\r\nCommand not found,\"{}\" try from > \r\n \r\n");
+        write(&cmd);
         list();
     }
 }
@@ -129,15 +131,16 @@ fn cmd_cls(ctx: &mut Ctx) {
 }
 
 fn cmd_demo(_ctx: &mut Ctx) {
-    println!("demo WOO HOO!");
+    write("demo WOO HOO!");
 }
 
 fn cmd_reset(_ctx: &mut Ctx) {
     reset();
 }
 
-fn cmd_other(ctx: &mut Ctx) {
-    terminal::rectangle(ctx.counter, 10);
+fn cmd_other(_ctx: &mut Ctx) {
+    write("other");
+    //terminal::rectangle(ctx.counter, 10);
 }
 
 fn cmd_list(_ctx: &mut Ctx) {
@@ -145,7 +148,7 @@ fn cmd_list(_ctx: &mut Ctx) {
 }
 
 fn cmd_help(_ctx: &mut Ctx) {
-    println!("Available commands\r\n\r\n");
+    write("Available commands\r\n\r\n");
     list();
-    println!("\r\nThis is a simple readline for hapenny\r\n");
+    write("\r\nThis is a simple readline for hapenny\r\n");
 }

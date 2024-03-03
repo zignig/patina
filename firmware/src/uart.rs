@@ -1,11 +1,10 @@
 // Simple uart functions
 
 // The uart address is generted by the build script
-use core::option::*;
 use core::convert::Infallible;
+use core::option::*;
 
 use ufmt::uWrite;
-
 
 // Build magic env in .cargo/cargo.toml defines this address
 pub type DefaultSerial = Serial<{ crate::generated::UART_ADDR }>;
@@ -68,52 +67,60 @@ impl<const UART: i16> Bind for Serial<UART> {
     }
 
     // blocking get with timeout
-    fn tget(& mut self) -> Option<u8> { 
-        let mut counter: u32 = 0 ;
+    fn tget(&mut self) -> Option<u8> {
+        let mut counter: u32 = 0;
         loop {
             let status = unsafe { Self::RX.read_volatile() };
             if status >= 0 {
                 return Some(status as u8);
             }
             counter = counter + 1;
-            if counter > 500{ 
-                return None
+            if counter > 500 {
+                return None;
             }
         }
     }
-
 }
 
 // Some macros on the default serial
 // give me the basics
 // please ...
 // write! and println! for the DefaultSerial
-impl uWrite for DefaultSerial{
+impl uWrite for DefaultSerial {
     type Error = Infallible;
 
     fn write_str(&mut self, s: &str) -> Result<(), Self::Error> {
-        for c in s.as_bytes() { 
+        for c in s.as_bytes() {
             self.putb(*c);
         }
         Ok(())
     }
 }
 
-pub fn writer(s: &str){
+pub fn write(s: &str) {
     let mut ds = DefaultSerial::new();
-    for c in s.as_bytes() { 
+    for c in s.as_bytes() {
         ds.putb(*c);
     }
 }
 
-
-#[macro_export]
-macro_rules! println
-{
-	($($args:tt)+) => ({
-		let _ = ::ufmt::uwrite!(DefaultSerial::new(), $($args)+);
-	});
+pub fn writer(s: &str) { 
+    write(s);
+    write("\r\n");
 }
+
+pub fn write_char(c: u8) {
+    let mut ds = DefaultSerial::new();
+    ds.putb(c);
+}
+
+// #[macro_export]
+// macro_rules! println
+// {
+// 	($($args:tt)+) => ({
+// 		let _ = ::ufmt::uwrite!(DefaultSerial::new(), $($args)+);
+// 	});
+// }
 
 // #[macro_export]
 // macro_rules! println

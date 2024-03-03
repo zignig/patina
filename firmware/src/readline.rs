@@ -1,11 +1,10 @@
-use crate::println;
-use crate::uart::{Bind, DefaultSerial};
-use heapless::{String,Vec};
-use ufmt::derive::uDebug;
+use crate::uart::{write, write_char, Bind, DefaultSerial};
+use heapless::String;
+//use ufmt::derive::uDebug;
 
 const PROMPT: &str = ">>";
 
-#[derive(uDebug)]
+//#[derive(uDebug)]
 pub enum ConsoleAction {
     Char(u8),
     Up,
@@ -25,6 +24,33 @@ pub enum ConsoleAction {
     Enter,
     BackSpace,
     Unknown,
+}
+
+impl ConsoleAction {
+
+    pub fn show(&self) -> &str {
+        let val = match self{
+            ConsoleAction::Char(_) => "Char",
+            ConsoleAction::Up => "Up",
+            ConsoleAction::Down => "Down",
+            ConsoleAction::Left => "Left",
+            ConsoleAction::Right => "Right",
+            ConsoleAction::Home => "Home",
+            ConsoleAction::End => "End",
+            ConsoleAction::Insert => "Insert",
+            ConsoleAction::Delete => "Delete",
+            ConsoleAction::PgUp => "PgUp",
+            ConsoleAction::PgDown => "PgDown",
+            ConsoleAction::Escape => "Escape",
+            ConsoleAction::Tab => "Tab",
+            ConsoleAction::Cancel => "Cancel",
+            ConsoleAction::Reset => "Reset",
+            ConsoleAction::Enter => "Enter",
+            ConsoleAction::BackSpace => "Backspace",
+            ConsoleAction::Unknown => "Unknown",
+        };
+        val
+    }
 }
 
 const BUF_SIZE: usize = 64;
@@ -50,12 +76,12 @@ impl Buffer {
 
     // fn insert(&mut self, _c: char) {}
     fn push_str(&mut self, s: &str) {
-        self.data.push_str(s);
+        self.data.push_str(s).unwrap();
     }
 
-    fn push(&mut self, c: char) {
-        let _ = self.data.push(c);
-    }
+    // fn push(&mut self, c: char) {
+    //     let _ = self.data.push(c);
+    // }
 }
 
 pub struct Console {
@@ -88,7 +114,7 @@ impl Console {
             match act {
                 ConsoleAction::Char(c) => {
                     if self.echo {
-                        println!("{}", (c as char));
+                        write_char(c)
                     }
                     None
                 }
@@ -158,7 +184,7 @@ impl Console {
             // ConsoleAction::BackSpace => todo!(),
             _ => None,
         } {
-            println!("{}", val);
+            write(val);
         }
     }
 
@@ -175,7 +201,8 @@ impl Console {
             let start = buf.data.get_unchecked(0..buf.cursor - 1);
             let end = buf.data.get_unchecked(buf.cursor..buf.data.len());
 
-            println!("{}|{}", start, end);
+            write(start);
+            write(end);
             self.buffer.reset();
             self.buffer.push_str(start);
             //self.buffer.push('|');
@@ -184,15 +211,15 @@ impl Console {
     }
     pub fn redraw_line(&mut self) {
         //Clear line
-        println!("\x1b[2K");
+        write("\x1b[2K");
         // Move al the way left
-        println!("\x1b[G");
-        println!("{}", PROMPT);
-        println!("{}", self.buffer.data.as_str());
+        write("\x1b[G");
+        write(PROMPT);
+        write(self.buffer.data.as_str());
     }
 
     pub fn clear_screen(&mut self) {
-        println!("\x1b[2J\x1b[H"); // clear screen and home
+        write("\x1b[2J\x1b[H"); // clear screen and home
     }
 
     pub fn read_key_board(&mut self) -> Option<ConsoleAction> {
@@ -226,78 +253,63 @@ impl Console {
                                 if let Some(c) = self.serial.tget() {
                                     match c {
                                         b'\x41' => {
-                                            //println!("up");
                                             return Some(ConsoleAction::Up);
                                         }
                                         b'\x42' => {
-                                            //println!("down");
                                             return Some(ConsoleAction::Down);
                                         }
                                         b'\x43' => {
-                                            //println!("right");
                                             return Some(ConsoleAction::Right);
                                         }
                                         b'\x44' => {
-                                            //println!("left");
                                             return Some(ConsoleAction::Left);
                                         }
                                         b'\x31' => {
                                             if let Some(_) = self.serial.tget() {
-                                                //println!("home{}", c);
                                                 return Some(ConsoleAction::Home);
                                             }
                                         }
                                         b'\x32' => {
                                             if let Some(_) = self.serial.tget() {
-                                                //println!("insert{}", c);
                                                 return Some(ConsoleAction::Insert);
                                             }
                                         }
                                         b'\x33' => {
                                             if let Some(_) = self.serial.tget() {
-                                                //println!("delete{}", c);
                                                 return Some(ConsoleAction::Delete);
                                             }
                                         }
                                         b'\x34' => {
                                             if let Some(_) = self.serial.tget() {
-                                                //println!("end{}", c);
                                                 return Some(ConsoleAction::End);
                                             }
                                         }
                                         b'\x35' => {
                                             if let Some(_) = self.serial.tget() {
-                                                //println!("pg up{}", c);
                                                 return Some(ConsoleAction::PgUp);
                                             }
                                         }
                                         b'\x36' => {
                                             if let Some(_) = self.serial.tget() {
-                                                //println!("pg down{}", c);
                                                 return Some(ConsoleAction::PgDown);
                                             }
                                         }
 
                                         _ => {
-                                            //println!("c, <{:x}>", c);
                                             return Some(ConsoleAction::Unknown);
                                         }
                                     }
                                 }
                             }
                             _ => {
-                                //println!("unknown, <{:x}>", c);
                                 return Some(ConsoleAction::Unknown);
                             }
                         }
                     } else {
-                        //println!("escape only")
                         return Some(ConsoleAction::Escape);
                     }
                 }
                 _ => {
-                    //self.serial.putb(c);
-                    //println!(">{:x}<\r\n", c);
                     let _ = self.buffer.data.push(c as char);
                     self.buffer.cursor += 1;
                     return Some(ConsoleAction::Char(c));

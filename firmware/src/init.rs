@@ -1,6 +1,6 @@
 //! some asm to set up the risc-v machine
-use crate::println;
-use crate::uart::{Bind, DefaultSerial};
+//use crate::println;
+use crate::uart::write;
 use core::arch::asm;
 use core::arch::global_asm;
 
@@ -55,7 +55,7 @@ fn DefaultInterruptHandler() {}
 #[panic_handler]
 unsafe fn my_panic(_info: &core::panic::PanicInfo) -> ! {
     loop {
-        println!("GURU MEDITATION\r\n");
+        write("GURU MEDITATION\r\n");
         reset();
     }
 }
