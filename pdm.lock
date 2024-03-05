@@ -1,9 +1,9 @@
 [[package]]
 name = "amaranth"
-version = "0.5.0.dev134+gf8e2d26"
+version = "0.5.0.dev149+g31a12c0"
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth"
-revision = "f8e2d26b8f366fe88980f485c03873b2e897bb6a"
+revision = "31a12c03d19fef601b6515c431c5b686d2ba3702"
 summary = "Amaranth hardware definition language"
 dependencies = [
     "Jinja2~=3.0",
@@ -23,10 +23,10 @@ dependencies = [
 
 [[package]]
 name = "amaranth-soc"
-version = "0.1a1.dev1+g9f46553"
+version = "0.1a1.dev3+g1923558"
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth-soc"
-revision = "9f46553aa4289e2a11788a73fade6410a371b162"
+revision = "19235589cb79ec5670445f64fe22ddd3a130e91d"
 summary = "System on Chip toolkit for Amaranth HDL"
 dependencies = [
     "amaranth @ git+https://github.com/amaranth-lang/amaranth",
@@ -53,11 +53,11 @@ dependencies = [
 
 [[package]]
 name = "amaranth"
-version = "0.5.0.dev134+gf8e2d26"
+version = "0.5.0.dev149+g31a12c0"
 extras = ["builtin-yosys"]
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth"
-revision = "f8e2d26b8f366fe88980f485c03873b2e897bb6a"
+revision = "31a12c03d19fef601b6515c431c5b686d2ba3702"
 summary = "Amaranth hardware definition language"
 dependencies = [
     "amaranth @ git+https://github.com/amaranth-lang/amaranth",
