@@ -10,12 +10,11 @@ class WarmBoot(Elaboratable):
 
     def __init__(self):
         self.loader = Signal()
-        self.user = Signal()
 
     def elaborate(self, platform):
         m = Module()
         # Warm boot object
-        image_internal = Signal(2, init=1)
+        image_internal = Signal(2, init=0)
         boot_internal = Signal()
         m.submodules.wb = Instance(
             "SB_WARMBOOT",
@@ -27,22 +26,11 @@ class WarmBoot(Elaboratable):
         # state machine to run the warmboot
         with m.FSM() as fsm:
             with m.State("WAIT"):
-                with m.If(self.loader | self.user):
+                with m.If(self.loader):
                     m.next = "START"
 
             with m.State("START"):
-                # meta state
-                with m.If(self.loader):
-                    m.next = "LOADER"
-                with m.If(self.user):
-                    m.next = "USER"
-
-            with m.State("LOADER"):
                 m.d.sync += image_internal.eq(0)
-                m.next = "BOOT"
-
-            with m.State("USER"):
-                m.d.sync += image_internal.eq(1)
                 m.next = "BOOT"
 
             with m.State("BOOT"):

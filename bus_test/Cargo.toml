@@ -1,0 +1,12 @@
+[package]
+name = "bus_test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[profile.release]
+panic = "abort"
+#strip = true
+opt-level = 0
+debug = false 
