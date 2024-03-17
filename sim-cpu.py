@@ -11,6 +11,16 @@ from hapenny.bus import BusPort, partial_decode, SimpleFabric
 from hapenny import *
 from hapenny.mem import BasicMemory
 
+import logging
+from rich.logging import RichHandler
+
+FORMAT = "%(message)s"
+logging.basicConfig(
+    level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
+)
+log = logging.getLogger("computer")
+log.setLevel(logging.DEBUG)
+
 class TestPhase(Enum):
     INIT = 0
     SETUP = 1
@@ -159,7 +169,7 @@ def test_inst(name, inst, *, before = {}, after = {}, stop_after = None):
     yield phase.eq(TestPhase.SETUP)
     for r in range(1, 32):
         if r not in before:
-            yield from write_reg(r, 0xDEADBEEF)
+            yield from write_reg(r, 0xCAFEF00D)
 
     start_address = 0
 
@@ -256,7 +266,7 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     m = Module()
-    uut = Cpu(counters = True)
+    uut = Cpu(counters = True,addr_width=32)
 
     mem = TestMemory([
         0b00000000000000000000_00000_1101111, # JAL x0, .
