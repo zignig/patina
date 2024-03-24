@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import itertools
 import argparse
 import struct
@@ -6,19 +8,15 @@ import sys
 
 from amaranth import *
 from amaranth.lib.wiring import *
-from amaranth.build import ResourceError, Resource, Pins, Attrs
-from amaranth_boards.test.blinky import Blinky
+from amaranth.build import Resource, Pins, Attrs
 from amaranth_boards.resources.interface import UARTResource
-from amaranth_boards.tinyfpga_bx import TinyFPGABXPlatform
 import amaranth.lib.cdc
 
-from hapenny import StreamSig
 from hapenny.cpu import Cpu
-from hapenny.bus import BusPort, SimpleFabric, partial_decode, SMCFabric
+from hapenny.bus import SimpleFabric, partial_decode
 from hapenny.serial import BidiUart
 
 from hapenny.mem import BasicMemory, BootMem, SpramMemory
-
 from hapenny.gpio import OutputPort, InputPort
 
 from warmboot import WarmBoot
@@ -27,6 +25,7 @@ from spi import SimpleSPI
 
 from generate import *
 
+# Logging
 import logging
 from rich.logging import RichHandler
 
@@ -52,12 +51,11 @@ class Computer(Elaboratable):
         F = 16e6  # Hz
         super().__init__()
 
-        self.cpu = Cpu(reset_vector=4096,addr_width=14)  # 4096 in half words
-        
+        self.cpu = Cpu(reset_vector=4096, addr_width=14)  # 4096 in half words
 
-        self.mainmem = mainmem = BasicMemory(depth=512 * 8 )  # 16bit cells
-        #secondmem = SpramMemory()
-        #thirdmem = SpramMemory(name="spram2")
+        self.mainmem = mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
+        secondmem = SpramMemory()
+        thirdmem = SpramMemory(name="spram2")
         self.bootmem = bootmem = BootMem(boot_image)
 
         # these are attached to self so they can be altered in elaboration.
@@ -65,13 +63,13 @@ class Computer(Elaboratable):
         self.bidi = BidiUart(baud_rate=57600, oversample=8, clock_freq=F)
         self.led = OutputPort(1, read_back=True)
         self.input = InputPort(1)
-        self.spi = SimpleSPI(fifo_depth=32)
+        self.spi = SimpleSPI(fifo_depth=512)
 
         self.cpu.add_device(
-            #[bootmem,self.led]
-            #[secondmem,thirdmem,mainmem, bootmem, self.bidi, self.spi, self.led, self.input]
-            #[secondmem,mainmem,bootmem,self.bidi]
-            #[mainmem,bootmem,self.bidi,self.spi ]
+            # [bootmem,self.led]
+            # [secondmem,thirdmem,mainmem, bootmem, self.bidi, self.spi, self.led, self.input]
+            # [secondmem,mainmem,bootmem,self.bidi]
+            # [mainmem,bootmem,self.bidi,self.spi ]
             [mainmem, bootmem, self.bidi]
         )
 
@@ -81,6 +79,7 @@ class Computer(Elaboratable):
         # This creates and binds all the devices
         old = True
         if old:
+            # cliffs default bus layout
             log.warning("Build  the bus")
             log.warning("")
             # old style bus
@@ -97,13 +96,14 @@ class Computer(Elaboratable):
             m.submodules.fabric = fabric = SimpleFabric(
                 [
                     mainmem.bus,
-                    partial_decode(m, iofabric.bus, 12), 
+                    partial_decode(m, iofabric.bus, 12),
                 ]
             )
             connect(m, self.cpu.bus, fabric.bus)
         else:
+            # New bus !! broken !!
             self.cpu.build(m)
-        
+
         uart = True
         led = False
         flash = False
@@ -152,7 +152,10 @@ class Computer(Elaboratable):
         return m
 
 
+from amaranth_boards.tinyfpga_bx import TinyFPGABXPlatform
+
 p = TinyFPGABXPlatform()
+
 # 3.3V FTDI connected to the tinybx.
 # pico running micro python to run
 p.add_resources(
@@ -161,7 +164,7 @@ p.add_resources(
             0, rx="A8", tx="B8", attrs=Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
         ),
         Resource("boot", 0, Pins("A9", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
-        # Resource("user", 0, Pins("H2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
+        Resource("user", 0, Pins("H2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
     ]
 )
 
@@ -173,7 +176,7 @@ if __name__ == "__main__":
         epilog="awesome!",
     )
 
-    parser.add_argument("-v", "--verbose", action="count")
+    parser.add_argument("-v", "--verbose", action="count", default=0)
     parser.add_argument("-b", "--build", action="store_true")
     parser.add_argument("-m", "--mapping", action="store_true")
     parser.add_argument("-g", "--generate", action="store_true")
@@ -184,7 +187,7 @@ if __name__ == "__main__":
     elif args.verbose == 2:
         root_logger.setLevel(logging.DEBUG)
     else:
-        root_logger.setLevel(logging.ERROR)
+        root_logger.setLevel(logging.WARNING)
 
     log.info("Building Patina")
     log.debug("Debug mode on")
@@ -197,8 +200,6 @@ if __name__ == "__main__":
         pooter.cpu.create_map()
         pooter.memory_map = pooter.cpu.memory_map
         ra = RustArtifacts(pooter, folder="tinyboot")
-        #ra = RustArtifacts(pooter)
-
     if args.build:
         p.build(pooter, do_program=True)
 

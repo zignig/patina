@@ -69,8 +69,8 @@ class BootLoaderX(GenRust):
     def extra(self,regions,emit):
         chunk = """
     
-    EXTERN(__start);
-    ENTRY(__start);
+EXTERN(__start);
+ENTRY(__start);
 
 SECTIONS {{
     PROVIDE(__stack_start = ORIGIN({mem}) + LENGTH({mem}));
