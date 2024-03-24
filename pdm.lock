@@ -1,9 +1,9 @@
 [[package]]
 name = "amaranth"
-version = "0.5.0.dev149+g31a12c0"
+version = "0.5.0.dev184+g9ed83b6"
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth"
-revision = "31a12c03d19fef601b6515c431c5b686d2ba3702"
+revision = "9ed83b6aff794f172bc2e9c8bba7467e1317a2c5"
 summary = "Amaranth hardware definition language"
 dependencies = [
     "Jinja2~=3.0",
@@ -23,10 +23,10 @@ dependencies = [
 
 [[package]]
 name = "amaranth-soc"
-version = "0.1a1.dev3+g1923558"
+version = "0.1a1.dev7+g9b90d72"
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth-soc"
-revision = "19235589cb79ec5670445f64fe22ddd3a130e91d"
+revision = "9b90d7233889ed41ca8128f4cfcd14633b1ade91"
 summary = "System on Chip toolkit for Amaranth HDL"
 dependencies = [
     "amaranth @ git+https://github.com/amaranth-lang/amaranth",
@@ -53,14 +53,14 @@ dependencies = [
 
 [[package]]
 name = "amaranth"
-version = "0.5.0.dev149+g31a12c0"
+version = "0.5.0.dev184+g9ed83b6"
 extras = ["builtin-yosys"]
 requires_python = "~=3.8"
 git = "https://github.com/amaranth-lang/amaranth"
-revision = "31a12c03d19fef601b6515c431c5b686d2ba3702"
+revision = "9ed83b6aff794f172bc2e9c8bba7467e1317a2c5"
 summary = "Amaranth hardware definition language"
 dependencies = [
-    "amaranth @ git+https://github.com/amaranth-lang/amaranth@31a12c03d19fef601b6515c431c5b686d2ba3702",
+    "amaranth @ git+https://github.com/amaranth-lang/amaranth",
     "amaranth-yosys>=0.38",
 ]
 
@@ -192,7 +192,7 @@ dependencies = [
 
 [[package]]
 name = "yowasp-yosys"
-version = "0.38.0.0.post669"
+version = "0.39.0.0.post694"
 summary = "Yosys Open SYnthesis Suite"
 dependencies = [
     "click",
@@ -448,6 +448,6 @@ content_hash = "sha256:2c91e2936dfeab821c859df0e76a344c2dc1cc090448667c8fcb82f52
 "yowasp-runtime 1.46" = [
     {url = "https://files.pythonhosted.org/packages/15/68/f1c4c9ebfabb6e8524cb6d46e823219b00bd7aef6ad005a9bfdc0b028c86/yowasp_runtime-1.46-py3-none-any.whl", hash = "sha256:cbfbb0a77d2c82c8ae7381becda9691e19126ce65102778396826a50d5a4d4e8"},
 ]
-"yowasp-yosys 0.38.0.0.post669" = [
-    {url = "https://files.pythonhosted.org/packages/dc/29/93badd9e34870330ebcd4e00b1e661ca5ede5e2dcc0f618407b81873026c/yowasp_yosys-0.38.0.0.post669-py3-none-any.whl", hash = "sha256:18e955a57d53a570061ffd7415bf6a10a40e21ecca7f1b6b34231de6c6a64c9b"},
+"yowasp-yosys 0.39.0.0.post694" = [
+    {url = "https://files.pythonhosted.org/packages/50/d7/db284aef196d6c65e792acc96be9ebe43bbcdf8025278fc0c9bebdedfe66/yowasp_yosys-0.39.0.0.post694-py3-none-any.whl", hash = "sha256:f4eaaa60a00dda98adf4eb393592615981184f3c10fe159453c58bc30869b8ae"},
 ]

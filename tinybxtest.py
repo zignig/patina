@@ -62,16 +62,16 @@ class Computer(Elaboratable):
         F = 16e6  # Hz
         super().__init__()
 
-        self.cpu = Cpu(reset_vector=0)  # 4096)
+        self.cpu = Cpu(reset_vector=4096,addr_width=14)  # 4096)
 
-        mainmem = BasicMemory(depth=512 * 8 )  # 16bit cells
-        secondmem = SpramMemory()
-        thirdmem = SpramMemory(name="spram2")
-        bootmem = BootMem(boot_image)
+        self.mainmem = mainmem = BasicMemory(depth=512 * 8 )  # 16bit cells
+        #secondmem = SpramMemory()
+        #thirdmem = SpramMemory(name="spram2")
+        self.bootmem = bootmem = BootMem(boot_image)
 
         # these are attached to self so they can be altered in elaboration.
 
-        self.bidi = BidiUart(baud_rate=57600, oversample=8, clock_freq=F)
+        self.bidi = BidiUart(baud_rate=56700, oversample=8, clock_freq=F)
         self.led = OutputPort(1, read_back=True)
         self.input = InputPort(1)
         self.spi = SimpleSPI(fifo_depth=32)
@@ -88,11 +88,34 @@ class Computer(Elaboratable):
         m = Module()
 
         # This creates and binds all the devices
-        self.cpu.build(m)
-
+        old = True
+        if old:
+            log.warning("Build  the bus")
+            log.warning("")
+            # old style bus
+            m.submodules.cpu = self.cpu
+            m.submodules.mainmem = mainmem = self.mainmem
+            m.submodules.mem = bootmem = self.bootmem
+            m.submodules.uart = uart = self.bidi
+            m.submodules.iofabric = iofabric = SimpleFabric(
+                [
+                    partial_decode(m, bootmem.bus, 11),  # 0x____0000
+                    partial_decode(m, uart.bus, 11),  # 0x____1000
+                ]
+            )
+            m.submodules.fabric = fabric = SimpleFabric(
+                [
+                    mainmem.bus,
+                    partial_decode(m, iofabric.bus, 12), 
+                ]
+            )
+            connect(m, self.cpu.bus, fabric.bus)
+        else:
+            self.cpu.build(m)
+        
         uart = True
-        led = True
-        flash = True
+        led = False
+        flash = False
         warm_boot = True
 
         if flash:

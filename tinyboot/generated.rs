@@ -1,1 +1,1 @@
-    pub const SERIAL_ADDR: u32 = 0x3000 ; // 12288
+    pub const SERIAL_ADDR: u32 = 0x4000 ; // 16384

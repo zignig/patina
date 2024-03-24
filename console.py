@@ -6,7 +6,8 @@ from serial.tools.miniterm import Miniterm
 import serial
 import time
 
-the_port ="/dev/serial/by-id/usb-MicroPython_Board_in_FS_mode_e661410403178c2a-if00"
+#the_port ="/dev/serial/by-id/usb-MicroPython_Board_in_FS_mode_e661410403178c2a-if00"
+the_port ="/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A700eCzo-if00-port0"
 #the_port ="/dev/ttyUSB0"
 
 class Console:
