@@ -22,7 +22,7 @@ from hapenny.mem import BasicMemory, BootMem, SpramMemory
 from hapenny.gpio import OutputPort, InputPort
 
 from warmboot import WarmBoot
-from twiddler import Twiddle
+
 from spi import SimpleSPI
 
 from generate import *
@@ -40,17 +40,7 @@ root_logger.setLevel(logging.ERROR)
 
 log = root_logger.getChild("computer")
 
-
 # tiny-bootloader is written in a high-level language and needs to have a stack,
-RAM_WORDS = 256
-RAM_ADDR_BITS = (RAM_WORDS - 1).bit_length()
-BUS_ADDR_BITS = RAM_ADDR_BITS + 1
-
-boot_file = "tinybxnew.bin"
-try:
-    os.stat(bootfile)
-except:
-    log.info("generate bootfile")
 bootloader = Path("tinybx8k.bin").read_bytes()
 boot_image = struct.unpack("<" + "h" * (len(bootloader) // 2), bootloader)
 
@@ -62,7 +52,8 @@ class Computer(Elaboratable):
         F = 16e6  # Hz
         super().__init__()
 
-        self.cpu = Cpu(reset_vector=4096,addr_width=14)  # 4096)
+        self.cpu = Cpu(reset_vector=4096,addr_width=14)  # 4096 in half words
+        
 
         self.mainmem = mainmem = BasicMemory(depth=512 * 8 )  # 16bit cells
         #secondmem = SpramMemory()
@@ -71,7 +62,7 @@ class Computer(Elaboratable):
 
         # these are attached to self so they can be altered in elaboration.
 
-        self.bidi = BidiUart(baud_rate=56700, oversample=8, clock_freq=F)
+        self.bidi = BidiUart(baud_rate=57600, oversample=8, clock_freq=F)
         self.led = OutputPort(1, read_back=True)
         self.input = InputPort(1)
         self.spi = SimpleSPI(fifo_depth=32)
