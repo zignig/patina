@@ -72,7 +72,6 @@ j loop
 cnv = AC(output_mode="a", hex_mode=True)
 data = cnv(asm)
 
-
 boot_file = []
 for i in data:
     as_num = int(i, base=16)
@@ -139,7 +138,7 @@ if __name__ == "__main__":
     mem = BasicMemory(depth=512)
     #mem2 = BasicMemory(depth=32, name="second_mem")
     io = OutputPort(pins=4)
-    bootmem = BootMem(boot_file,image_size=512)
+    bootmem = BootMem(boot_image,image_size=512)
     
     # fabric = SMCFabric([mem, mem2])#, io])
     flash = SimpleSPI()
@@ -169,18 +168,18 @@ if __name__ == "__main__":
 
     ports = [phase]
 
-    for i in cpu.memory_map.all_resources():
-        print(i.path, i.start << 1, i.end << 1)
+    # for i in cpu.memory_map.all_resources():
+    #     print(i.path, i.start << 1, i.end << 1)
 
-    print()
+    # print()
 
-    for i in cpu.memory_map.window_patterns():
-        print(i)
+    # for i in cpu.memory_map.window_patterns():
+    #     print(i)
 
-    size = 2 ** (cpu.memory_map.addr_width - 1)
+    # size = 2 ** (cpu.memory_map.addr_width - 1)
+    # size = 1024
+    # print(size)
     size = 1024
-    print(size)
-
     def process():
         started = True
         #

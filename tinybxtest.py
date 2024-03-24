@@ -30,19 +30,13 @@ from generate import *
 import logging
 from rich.logging import RichHandler
 
-fomattingter = logging.Formatter(
-    fmt="%(asctime)s - %(levelname)s - %(message)s \t  %(name)s - line %(lineno)s - (%(funcName)s)",
-    datefmt="%Y%m%d %H:%M:%S",
+FORMAT = "%(message)s"
+logging.basicConfig(
+    level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
 )
-log_level = logging.DEBUG
-
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(fomattingter)
 
 root_logger = logging.getLogger()
-root_logger.addHandler(RichHandler())
-root_logger.setLevel(log_level)
-
+root_logger.setLevel(logging.ERROR)
 
 log = root_logger.getChild("computer")
 
@@ -52,10 +46,15 @@ RAM_WORDS = 256
 RAM_ADDR_BITS = (RAM_WORDS - 1).bit_length()
 BUS_ADDR_BITS = RAM_ADDR_BITS + 1
 
+boot_file = "tinybxnew.bin"
+try:
+    os.stat(bootfile)
+except:
+    log.info("generate bootfile")
 bootloader = Path("tinybx8k.bin").read_bytes()
 boot_image = struct.unpack("<" + "h" * (len(bootloader) // 2), bootloader)
 
-print("image_size", 2 ** (len(boot_image)).bit_length())
+log.info("image_size {}", 2 ** (len(boot_image)).bit_length())
 
 
 class Computer(Elaboratable):
@@ -65,7 +64,7 @@ class Computer(Elaboratable):
 
         self.cpu = Cpu(reset_vector=0)  # 4096)
 
-        mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
+        mainmem = BasicMemory(depth=512 * 8 )  # 16bit cells
         secondmem = SpramMemory()
         thirdmem = SpramMemory(name="spram2")
         bootmem = BootMem(boot_image)
@@ -80,7 +79,7 @@ class Computer(Elaboratable):
         self.cpu.add_device(
             #[bootmem,self.led]
             #[secondmem,thirdmem,mainmem, bootmem, self.bidi, self.spi, self.led, self.input]
-            #[secondmem,thirdmem,bootmem,self.bidi]
+            #[secondmem,mainmem,bootmem,self.bidi]
             #[mainmem,bootmem,self.bidi,self.spi ]
             [mainmem, bootmem, self.bidi]
         )
@@ -160,22 +159,23 @@ if __name__ == "__main__":
         epilog="awesome!",
     )
 
-    parser.add_argument("-v", "--verbose", action="store_true", default=False)
+    parser.add_argument("-v", "--verbose", action="count")
     parser.add_argument("-b", "--build", action="store_true")
     parser.add_argument("-m", "--mapping", action="store_true")
     parser.add_argument("-g", "--generate", action="store_true")
 
     args = parser.parse_args()
-    if args.verbose:
-        log.setLevel(logging.DEBUG)
+    if args.verbose == 1:
+        root_logger.setLevel(logging.INFO)
+    elif args.verbose == 2:
+        root_logger.setLevel(logging.DEBUG)
     else:
-        log.setLevel(logging.INFO)
+        root_logger.setLevel(logging.ERROR)
 
     log.info("Building Patina")
     log.debug("Debug mode on")
 
     pooter = Computer()
-
     if args.verbose:
         pooter.cpu.show()
         pooter.memory_map = pooter.cpu.memory_map
