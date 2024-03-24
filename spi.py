@@ -111,12 +111,15 @@ class SimpleSPI(Component):
 
         # handle the boneless bus.
         read_data = Signal(16)  # it expects one cycle of read latency
-        m.d.sync += self.bus.resp.eq(read_data)
+        # m.d.sync += self.bus.resp.eq(read_data)
 
         # bus cmd shorthand
         cmd = self.bus.cmd
 
-        with m.If(cmd.valid & ~cmd.payload.lanes == 0 ):
+        m.d.sync += self.bus.resp.eq(read_data)
+
+        # read
+        with m.If(cmd.valid & (cmd.payload.lanes == 0) ):
             with m.Switch(cmd.payload.addr):
                 with m.Case(0):  # status register
                     m.d.comb += [
@@ -137,7 +140,8 @@ class SimpleSPI(Component):
                                 read_data[15].eq(fifo.r_data[0]),
                                 read_data[:7].eq(fifo.r_data[1:]),
                             ]
-        with m.Elif(cmd.valid & ~cmd.payload.lanes.any()):
+        # write
+        with m.Elif(cmd.valid & (cmd.payload.lanes == 3 )):
             with m.Switch(cmd.payload.addr):
                 with m.Case(0):  # transaction start register
                     with m.If(~r0_txn_active.value):

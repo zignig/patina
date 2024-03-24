@@ -9,6 +9,7 @@
 
 import datetime
 import logging
+from hapenny.mem import BasicMemory,SpramMemory
 
 class GenRust:
     def __init__(self, soc):
@@ -34,16 +35,22 @@ class GenRust:
         # memory regions
         regions = set()
         emit("MEMORY {")
-        for window, (start, stop, ratio) in self._soc.memory_map.windows():
-            if window.name not in ["mem", "boot"]:
-                logging.debug("Skipping non-memory resource: {}".format(window.name))
+        for i in self._soc.memory_map.all_resources():
+            res = i.resource
+            name = i.resource.name.upper()
+            start = i.start
+            sec_length = i.end - i.start
+            if not isinstance(res,(BasicMemory,SpramMemory)):
                 continue
-            emit(f"    {window.name} : ORIGIN = 0x{start:08x}, LENGTH = 0x{stop-start:08x}")
-            regions.add(window.name)
+            emit(f"    {name} : ORIGIN = 0x{start:08x}, LENGTH = 0x{sec_length:0x}")
+            regions.add(name)
         emit("}")
+        emit("")   
+        self.extra(regions,emit)
         emit("")
-        
-        ram = "ram" if "ram" in regions else "ram"
+
+    def extra(self,regions,emit):
+        ram = "mem" if "mem" in regions else "mem"
         aliases = {
             "REGION_TEXT":   ram,
             "REGION_RODATA": ram,
@@ -54,46 +61,50 @@ class GenRust:
         }
         for alias, region in aliases.items():
             emit(f"REGION_ALIAS(\"{alias}\", {region});")
+        
+class BootLoaderX(GenRust):
+    def __init__(self,soc):
+        super().__init__(soc)
+    
+    def extra(self,regions,emit):
+        chunk = """
+    
+    EXTERN(__start);
+    ENTRY(__start);
 
-    # - bootloader.x generation ---------------------------------------------------
-    def generate_bootloader_x(self, file=None):
-        """ Generate a bootloader.x file for the given SoC"""
+SECTIONS {{
+    PROVIDE(__stack_start = ORIGIN({mem}) + LENGTH({mem}));
+    PROVIDE(__stext = ORIGIN({boot}));
 
-        def emit(content):
-            """ Utility function that emits a string to the targeted file. """
-            print(content, file=file)
-
-        # memory regions
-        regions = set()
-        emit("MEMORY {")
-        for window, (start, stop, ratio) in self._soc.memory_map.windows():
-            if window.name not in ["bootrom", "ram"]:
-                logging.debug("Skipping non-memory resource: {}".format(window.name))
-                continue
-            emit(f"    {window.name} : ORIGIN = 0x{start:08x}, LENGTH = 0x{stop-start:08x}")
-            regions.add(window.name)
-        emit("}")
-        emit("")
-        emit("EXTERN(__start);")
-        emit("ENTRY(__start);")
-        emit("")
-        emit("SECTIONS {")
-        # sections here
-        emit("    PROVIDE(__stack_start = ORIGIN(RAM) + LENGTH(RAM));")
-        emit("""
-    .text __stext : {
+    .text __stext : {{
         *(.start);
+
         *(.text .text.*);
+
         . = ALIGN(4);
         __etext = .;
-    } > bootrom
-    .rodata : ALIGN(4) {
+    }} > {boot}
+
+    .rodata : ALIGN(4) {{
         . = ALIGN(4);
         __srodata = .;
         *(.rodata .rodata.*);
         . = ALIGN(4);
         __erodata = .;
-    } > bootrom
-             """)
-        emit("}")
-        emit("")
+    }} > {boot}
+
+    /DISCARD/ : {{
+        /* throw away RAM sections to get a link error if they're used. */
+        *(.bss);
+        *(.bss.*);
+        *(.data);
+        *(.data.*);
+        *(COMMON);
+        *(.ARM.exidx);
+        *(.ARM.exidx.*);
+        *(.ARM.extab.*);
+        *(.got);
+    }}
+}}
+    """
+        emit(chunk.format(mem="MEM",boot="BOOT"))

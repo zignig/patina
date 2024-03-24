@@ -38,7 +38,7 @@ class GenSVD:
         peripherals = SubElement(device, "peripherals")
         window: MemoryMap
         for window, (start, stop, ratio) in self._soc.memory_map.windows():
-            if window.name in ["bootrom", "scratchpad", "mainram", "ram", "rom"]:
+            if window.name in ["spram","spram2","boot", "rom", "ram", "rom"]:
                 logging.debug("Skipping non-peripheral resource: {}".format(window.name))
                 continue
 

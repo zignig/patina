@@ -28,3 +28,4 @@ class Twiddle(Elaboratable):
         with m.Else():
             m.d.sync += timer.eq(timer + 1)
         return m
+

@@ -2,6 +2,7 @@ import itertools
 import argparse
 import struct
 from pathlib import Path
+import sys
 
 from amaranth import *
 from amaranth.lib.wiring import *
@@ -15,24 +16,35 @@ from hapenny import StreamSig
 from hapenny.cpu import Cpu
 from hapenny.bus import BusPort, SimpleFabric, partial_decode, SMCFabric
 from hapenny.serial import BidiUart
-from hapenny.mem import BasicMemory, BootMem
+
+from hapenny.mem import BasicMemory, BootMem, SpramMemory
+
 from hapenny.gpio import OutputPort, InputPort
 
 from warmboot import WarmBoot
 from twiddler import Twiddle
 from spi import SimpleSPI
 
-from generate import * 
+from generate import *
 
 import logging
 from rich.logging import RichHandler
 
-FORMAT = "%(message)s"
-logging.basicConfig(
-    level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
+fomattingter = logging.Formatter(
+    fmt="%(asctime)s - %(levelname)s - %(message)s \t  %(name)s - line %(lineno)s - (%(funcName)s)",
+    datefmt="%Y%m%d %H:%M:%S",
 )
-log = logging.getLogger("computer")
-log.setLevel(logging.WARNING)
+log_level = logging.DEBUG
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(fomattingter)
+
+root_logger = logging.getLogger()
+root_logger.addHandler(RichHandler())
+root_logger.setLevel(log_level)
+
+
+log = root_logger.getChild("computer")
 
 
 # tiny-bootloader is written in a high-level language and needs to have a stack,
@@ -43,43 +55,47 @@ BUS_ADDR_BITS = RAM_ADDR_BITS + 1
 bootloader = Path("tinybx8k.bin").read_bytes()
 boot_image = struct.unpack("<" + "h" * (len(bootloader) // 2), bootloader)
 
-print("image_size",2**(len(boot_image)).bit_length())
+print("image_size", 2 ** (len(boot_image)).bit_length())
+
 
 class Computer(Elaboratable):
     def __init__(self):
         F = 16e6  # Hz
         super().__init__()
-        self.cpu = Cpu(reset_vector=4096, addr_width=15)
 
-        mainmem = BasicMemory(depth=256 * 16)
+        self.cpu = Cpu(reset_vector=0)  # 4096)
+
+        mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
+        secondmem = SpramMemory()
+        thirdmem = SpramMemory(name="spram2")
         bootmem = BootMem(boot_image)
-        # these are attached to self so they can be altered in elaboration.
-        self.bidi = BidiUart(baud_rate=57600, oversample=8, clock_freq=F)
 
+        # these are attached to self so they can be altered in elaboration.
+
+        self.bidi = BidiUart(baud_rate=57600, oversample=8, clock_freq=F)
         self.led = OutputPort(1, read_back=True)
         self.input = InputPort(1)
+        self.spi = SimpleSPI(fifo_depth=32)
 
-        self.spi = SimpleSPI(fifo_depth=512)
-
-        mini = False
-
-        if not mini:
-            self.cpu.add_device(
-                [mainmem, bootmem, self.bidi, self.spi, self.led, self.input]
-            )
-        else:
-            self.cpu.add_device([bootmem, self.led])
+        self.cpu.add_device(
+            #[bootmem,self.led]
+            #[secondmem,thirdmem,mainmem, bootmem, self.bidi, self.spi, self.led, self.input]
+            #[secondmem,thirdmem,bootmem,self.bidi]
+            #[mainmem,bootmem,self.bidi,self.spi ]
+            [mainmem, bootmem, self.bidi]
+        )
 
     def elaborate(self, platform):
         m = Module()
 
+        # This creates and binds all the devices
         self.cpu.build(m)
 
         uart = True
         led = True
         flash = True
         warm_boot = True
-        print(self.cpu.active)
+
         if flash:
             spi_pins = platform.request("spi_flash_1x")
 
@@ -148,7 +164,6 @@ if __name__ == "__main__":
     parser.add_argument("-b", "--build", action="store_true")
     parser.add_argument("-m", "--mapping", action="store_true")
     parser.add_argument("-g", "--generate", action="store_true")
-    
 
     args = parser.parse_args()
     if args.verbose:
@@ -167,9 +182,8 @@ if __name__ == "__main__":
     if args.generate:
         pooter.cpu.create_map()
         pooter.memory_map = pooter.cpu.memory_map
-        memx = GenRust(pooter.cpu)
-        #f = open("memory.x",'w')
-        memx.generate_memory_x()
+        ra = RustArtifacts(pooter, folder="tinyboot")
+        #ra = RustArtifacts(pooter)
 
     if args.build:
         p.build(pooter, do_program=True)

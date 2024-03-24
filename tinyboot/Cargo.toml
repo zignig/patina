@@ -1,0 +1,20 @@
+[package]
+name = "hapenny-tinyboot"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cfg-if = "1.0.0"
+
+[profile.release]
+opt-level = "s"
+debug = true
+
+[[bin]]
+name = "tinyboot"
+path = "src/main.rs"
+test = false
+bench = false
+
+[build-dependencies]
+parse_int = "0.6.0"
