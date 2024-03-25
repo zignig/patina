@@ -8,6 +8,7 @@ import serial
 from enum import Enum
 from pathlib import Path
 import struct
+from tqdm import tqdm
 
 
 
@@ -31,13 +32,7 @@ class MonTool:
         # self.ser.dtr = 0
 
     def attach(self):
-        import argparse
 
-        parser = argparse.ArgumentParser()
-        parser.add_argument("-l", "--list", action="store_true")
-        parser.add_argument("-v", "--verbose", action="store_true")
-
-        args = parser.parse_args()
         term = Miniterm(self.ser)
         term.set_rx_encoding("utf-8")
         term.set_tx_encoding("utf-8")
@@ -45,16 +40,22 @@ class MonTool:
         print("Attach console")
         term.start()
         term.join(True)
+        # send exit (control d)
+        self.ser.write([0x04])
+        print("exit console")
     
     def _cmd(self,cmd):
         self.ser.write([cmd.value])
     
-    def _ack(self):
+    def _ack(self,exit=True):
         val = self.ser.read()
         if val[0] == 0xAA: # ack packet
             return True
         else:
-            raise("fail")
+            if exit:
+                raise("ack failed")
+            else:
+                return False            
 
     def _write_num(self,val):
         num = val.to_bytes(4,byteorder="little")
@@ -75,7 +76,8 @@ class MonTool:
 
     def ping(self):
         self._cmd(Commands.ping)
-        self._ack()
+        val = self._ack(exit=False)
+        return val
 
     def call(self,addr):
         self._write_a(addr)
@@ -91,20 +93,20 @@ class MonTool:
         self._cmd(Commands.read)
         self._ack()
         data = []
-        for pos in range(count):
+        for pos in tqdm(range(count)):
             val = self._read_num()
             data.append(val)
         return data
 
     def write(self,addr,data):
         count = len(data)
-        print(addr,count)
+        print(addr,count*4," bytes")
         self._write_a(addr)
         self._ack()
         self._write_c(count)
         self._ack()
         self._cmd(Commands.write)
-        for val in data:
+        for val in tqdm(data):
             self._write_num(val)
         self._ack()
 
@@ -119,8 +121,24 @@ class MonTool:
         boot_image = struct.unpack("<" + "I" * (len(bootloader) // 4), bootloader)
         return list(boot_image)
 
+    def run(self,file_name):
+        print("Loading ",file_name)
+        firm = m.load(file_name)
+        m.write(0,firm)
+        m.call(0)
+        m.attach()        
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    #parser.add_argument("-l", "--list", action="store_true")
+    #parser.add_argument("-v", "--verbose", action="store_true")
+
+    args = parser.parse_args()
+
     m = MonTool(the_port)
-    m.ping()
-    m.load("tinybx8k.bin")
+    if m.ping():
+        m.run('firmware/load.bin')
+    else:
+        m.attach()

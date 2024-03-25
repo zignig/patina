@@ -60,7 +60,7 @@ git = "https://github.com/amaranth-lang/amaranth"
 revision = "9ed83b6aff794f172bc2e9c8bba7467e1317a2c5"
 summary = "Amaranth hardware definition language"
 dependencies = [
-    "amaranth @ git+https://github.com/amaranth-lang/amaranth",
+    "amaranth @ git+https://github.com/amaranth-lang/amaranth@9ed83b6aff794f172bc2e9c8bba7467e1317a2c5",
     "amaranth-yosys>=0.38",
 ]
 
@@ -102,7 +102,6 @@ path = "/opt/hapenny"
 summary = ""
 dependencies = [
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards",
-    "amaranth-soc @ git+https://github.com/amaranth-lang/amaranth-soc",
     "amaranth[builtin-yosys] @ git+https://github.com/amaranth-lang/amaranth",
     "yowasp-yosys",
 ]
@@ -175,6 +174,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "tqdm"
+version = "4.66.2"
+requires_python = ">=3.7"
+summary = "Fast, Extensible Progress Meter"
+dependencies = [
+    "colorama; platform_system == \"Windows\"",
+]
+
+[[package]]
 name = "wasmtime"
 version = "15.0.0"
 requires_python = ">=3.8"
@@ -201,7 +209,7 @@ dependencies = [
 
 [metadata]
 lock_version = "4.0"
-content_hash = "sha256:2c91e2936dfeab821c859df0e76a344c2dc1cc090448667c8fcb82f52a7efb81"
+content_hash = "sha256:c6521f1ff379701ffc1cdb73fe3c0b20aab57bb279a8ce56b21f2ddb918a8de0"
 
 [metadata.files]
 "amaranth-yosys 0.38.0.0.post86" = [
@@ -436,6 +444,10 @@ content_hash = "sha256:2c91e2936dfeab821c859df0e76a344c2dc1cc090448667c8fcb82f52
 "riscv-assembler 1.2.1" = [
     {url = "https://files.pythonhosted.org/packages/b2/0d/e1266df95f3dd656adba974e66cc49cbcc7877ed885cf6100f15a6ad7a27/riscv_assembler-1.2.1-py3-none-any.whl", hash = "sha256:59ce05e4cfaf34e42c88273937ee9375fcf77aa290bdcace5f44137d488f8c6a"},
     {url = "https://files.pythonhosted.org/packages/b9/5a/8979cb696feb2090acefc1a824ddac59a6dea1b4839ec3db2ddd1dc61411/riscv-assembler-1.2.1.tar.gz", hash = "sha256:b90def321f5fc42424d7f102bc016a75df288afd2d53fe63294d0ee836f65207"},
+]
+"tqdm 4.66.2" = [
+    {url = "https://files.pythonhosted.org/packages/2a/14/e75e52d521442e2fcc9f1df3c5e456aead034203d4797867980de558ab34/tqdm-4.66.2-py3-none-any.whl", hash = "sha256:1ee4f8a893eb9bef51c6e35730cebf234d5d0b6bd112b0271e10ed7c24a02bd9"},
+    {url = "https://files.pythonhosted.org/packages/ea/85/3ce0f9f7d3f596e7ea57f4e5ce8c18cb44e4a9daa58ddb46ee0d13d6bff8/tqdm-4.66.2.tar.gz", hash = "sha256:6cd52cdf0fef0e0f543299cfc96fec90d7b8a7e88745f411ec33eb44d5ed3531"},
 ]
 "wasmtime 15.0.0" = [
     {url = "https://files.pythonhosted.org/packages/4a/c5/6238868809b70742bd447fdf030c94adb8178b208d4f3591413339e9c713/wasmtime-15.0.0-py3-none-any.whl", hash = "sha256:24de208dccea948e924b6af23c2b659f08bdd58e4ef5b549e2913a022cef2e50"},

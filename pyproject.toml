@@ -16,6 +16,7 @@ dependencies = [
     "rich>=13.7.0",
     # "hapenny @ git+https://github.com/zignig/hapenny@qol",
     "riscv-assembler>=1.2.1",
+    "tqdm>=4.66.2",
 ]
 
 [build-system]
