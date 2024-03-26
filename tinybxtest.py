@@ -16,7 +16,7 @@ from hapenny.cpu import Cpu
 from hapenny.bus import SimpleFabric, partial_decode
 from hapenny.serial import BidiUart
 
-from hapenny.mem import BasicMemory, BootMem, SpramMemory
+from hapenny.mem import BasicMemory, SpramMemory
 from hapenny.gpio import OutputPort, InputPort
 
 from warmboot import WarmBoot
@@ -24,6 +24,8 @@ from warmboot import WarmBoot
 from spi import SimpleSPI
 
 from generate import *
+
+from fabric_builder import FabricBuilder, BootMem
 
 # Logging
 import logging
@@ -54,8 +56,9 @@ class Computer(Elaboratable):
         self.cpu = Cpu(reset_vector=4096, addr_width=14)  # 4096 in half words
 
         self.mainmem = mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
+        self.othermem = othermem = BasicMemory(depth=512 * 3)
         secondmem = SpramMemory()
-        thirdmem = SpramMemory(name="spram2")
+        thirdmem = SpramMemory()
         self.bootmem = bootmem = BootMem(boot_image)
 
         # these are attached to self so they can be altered in elaboration.
@@ -65,13 +68,23 @@ class Computer(Elaboratable):
         self.input = InputPort(1)
         self.spi = SimpleSPI(fifo_depth=512)
 
-        self.cpu.add_device(
-            # [bootmem,self.led]
-            # [secondmem,thirdmem,mainmem, bootmem, self.bidi, self.spi, self.led, self.input]
-            # [secondmem,mainmem,bootmem,self.bidi]
-            # [mainmem,bootmem,self.bidi,self.spi ]
-            [mainmem, bootmem, self.bidi]
-        )
+        # [bootmem,self.led]
+        devices = [
+            secondmem,
+            thirdmem,
+            mainmem,
+            othermem,
+            bootmem,
+            self.bidi,
+            self.spi,
+            self.led,
+            self.input,
+        ]
+        # [secondmem,mainmem,bootmem,self.bidi]
+        # [mainmem,bootmem,self.bidi,self.spi ]
+        devices = [mainmem, bootmem, self.bidi]
+
+        self.fabric = FabricBuilder(devices)
 
     def elaborate(self, platform):
         m = Module()
@@ -193,13 +206,12 @@ if __name__ == "__main__":
     log.debug("Debug mode on")
 
     pooter = Computer()
-    if args.verbose:
-        pooter.cpu.show()
-        pooter.memory_map = pooter.cpu.memory_map
-    if args.generate:
-        pooter.cpu.create_map()
-        pooter.memory_map = pooter.cpu.memory_map
-        ra = RustArtifacts(pooter, folder="tinyboot")
+    # if args.verbose:
+    #     pooter.memory_map = pooter.fabric.memory_map
+    # if args.generate:
+    #     pooter.cpu.create_map()
+    #     pooter.memory_map = pooter.cpu.memory_map
+    #     ra = RustArtifacts(pooter, folder="tinyboot")
     if args.build:
         p.build(pooter, do_program=True)
 

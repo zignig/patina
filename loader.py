@@ -30,7 +30,6 @@ class MonTool:
         # self.ser.dtr = 0
 
     def attach(self):
-
         term = Miniterm(self.ser)
         term.set_rx_encoding("utf-8")
         term.set_tx_encoding("utf-8")
@@ -151,6 +150,8 @@ if __name__ == "__main__":
         with open(cfile, "w") as config_file:
             conf.write(config_file)
         print("config saved")
+    else:
+        del args.save
 
     # load the config file
     try:
@@ -170,6 +171,7 @@ if __name__ == "__main__":
     except:
         print("no config")
    
+    # spin up the monitor
     m = MonTool(port=args.port, baud=args.baud)
     if m.ping():
         m.run(args.firmware)
