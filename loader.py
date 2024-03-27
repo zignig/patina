@@ -34,7 +34,7 @@ class MonTool:
         term.set_rx_encoding("utf-8")
         term.set_tx_encoding("utf-8")
         term.exit_character = "\x1d"
-        print("Attach console")
+        print("Attach console ^] to exit.")
         term.start()
         term.join(True)
         # send exit (control d)
@@ -104,7 +104,7 @@ class MonTool:
         self._write_c(count)
         self._ack()
         self._cmd(Commands.write)
-        for val in tqdm(data):
+        for val in data:
             self._write_num(val)
         self._ack()
 
@@ -137,6 +137,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--port", type=str)
     parser.add_argument("-b", "--baud", type=int)
     parser.add_argument("-f", "--firmware", type=str)
+    parser.add_argument("-c", "--console", action="store_true")
     parser.add_argument("-s", "--save", action="store_true")
 
     args = parser.parse_args()
@@ -171,10 +172,16 @@ if __name__ == "__main__":
     except:
         print("no config")
    
+    print(args)
+    print(conf_dict)
+    
     # spin up the monitor
     m = MonTool(port=args.port, baud=args.baud)
     if m.ping():
         m.run(args.firmware)
     else:
-        print()
-        print('no active bootloader')
+        if args.console:
+            m.attach()
+        else:
+            print()
+            print('no active bootloader')

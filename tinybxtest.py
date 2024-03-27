@@ -81,7 +81,7 @@ class Computer(Elaboratable):
             self.input,
         ]
         # [secondmem,mainmem,bootmem,self.bidi]
-        # [mainmem,bootmem,self.bidi,self.spi ]
+        # devices = [mainmem,bootmem,self.bidi,self.spi ]
         devices = [mainmem, bootmem, self.bidi]
 
         self.fabric = FabricBuilder(devices)
