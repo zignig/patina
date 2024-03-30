@@ -36,7 +36,7 @@ pub extern "C" fn main() -> ! {
     // Delay
     wait(60000);
     let intro = "Welcome to patina";
-    println!("{}\r\n\r\n", intro);
+    println!("{}", intro);
     println!("{}", PROMPT);
 
     let mut counter: u32 = 0;
@@ -63,7 +63,7 @@ pub extern "C" fn main() -> ! {
                     Enter => {
                         run_command(&mut ctx);
                         ctx.cons.reset();
-                        println!("\r\n{}", PROMPT);
+                        println!("{}", PROMPT);
                     }
                     _ => println!("|{:?}", val),
                 }
@@ -91,7 +91,7 @@ fn run_command(ctx: &mut Ctx) {
     if let Some(cmd) = data.split_ascii_whitespace().next() {
         for (name, imp) in COMMANDS {
             if *name == cmd {
-                println!("\r\n");
+                println!("\r");
                 imp(ctx);
                 return;
             }

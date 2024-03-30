@@ -5,9 +5,7 @@ def command_line():
         char = sys.stdin.read(1)
         if ord(char) == 3: # CTRL-C
             break;
-        if ord(char) == 0xd: # CTRL-C
-            print()
-        print(hex(ord(char)),'\r')
+        print(hex(ord(char)))
 
 
 command_line()

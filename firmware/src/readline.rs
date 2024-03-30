@@ -87,7 +87,7 @@ impl Console {
         if let Some(act) = self.read_key_board() {
             match act {
                 ConsoleAction::Char(c) => {
-                    if self.echo {
+                    if self.echo{
                         println!("{}", (c as char));
                     }
                     None
@@ -123,7 +123,10 @@ impl Console {
                 // ConsoleAction::Tab => todo!(),
                 // ConsoleAction::Cancel => todo!(),
                 // ConsoleAction::Reset => todo!(),
-                // ConsoleAction::Enter => todo!(),
+                ConsoleAction::Enter => {
+                    // Bubble up the enter
+                    Some(act)
+                },
                 ConsoleAction::BackSpace => {
                     //self.backspace();
                     None

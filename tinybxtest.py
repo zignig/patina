@@ -61,7 +61,7 @@ class Computer(Elaboratable):
 
         # these are attached to self so they can be altered in elaboration.
 
-        self.bidi = BidiUart(baud_rate=57600, oversample=8, clock_freq=F)
+        self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
         self.led = OutputPort(1, read_back=True)
         self.input = InputPort(1)
         self.spi = SimpleSPI(fifo_depth=512)
@@ -74,6 +74,7 @@ class Computer(Elaboratable):
         # ]
         # devices = [secondmem,mainmem,bootmem,self.bidi]
         # devices = [mainmem, bootmem, self.bidi, self.spi]
+
         devices = [mainmem, bootmem, self.bidi]
         
         self.fabric = FabricBuilder(devices)
