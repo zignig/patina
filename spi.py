@@ -82,7 +82,7 @@ class SimpleSPI(Component):
     copi: Out(1)
     cipo: In(1)
 
-    def __init__(self, name="flash", fifo_depth=16):
+    def __init__(self,fifo_depth=16):
 
         super().__init__()
 
@@ -93,10 +93,6 @@ class SimpleSPI(Component):
         # self.miso = Signal()
 
         self.fifo = SyncFIFOBuffered(width=8, depth=fifo_depth)
-
-        self.name = name
-        self.memory_map = MemoryMap(addr_width=1, data_width=16, name=name)
-        self.memory_map.add_resource(self, name=(name,), size=2)
 
     def elaborate(self, platform):
         m = Module()

@@ -42,7 +42,7 @@ root_logger.setLevel(logging.ERROR)
 log = root_logger.getChild("computer")
 
 # tiny-bootloader is written in a high-level language and needs to have a stack,
-bootloader = Path("tinybx8k.bin").read_bytes()
+bootloader = Path("boot8k.bin").read_bytes()
 boot_image = struct.unpack("<" + "h" * (len(bootloader) // 2), bootloader)
 
 log.info("image_size {}", 2 ** (len(boot_image)).bit_length())
@@ -53,12 +53,10 @@ class Computer(Elaboratable):
         F = 16e6  # Hz
         super().__init__()
 
-        self.cpu = Cpu(reset_vector=4096, addr_width=14)  # 4096 in half words
-
         self.mainmem = mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
-        self.othermem = othermem = BasicMemory(depth=512 * 3)
-        secondmem = SpramMemory()
-        thirdmem = SpramMemory()
+        #self.othermem = othermem = BasicMemory(depth=512 * 3)
+        #secondmem = SpramMemory()
+        #thirdmem = SpramMemory()
         self.bootmem = bootmem = BootMem(boot_image)
 
         # these are attached to self so they can be altered in elaboration.
@@ -68,23 +66,19 @@ class Computer(Elaboratable):
         self.input = InputPort(1)
         self.spi = SimpleSPI(fifo_depth=512)
 
-        # [bootmem,self.led]
-        devices = [
-            secondmem,
-            thirdmem,
-            mainmem,
-            othermem,
-            bootmem,
-            self.bidi,
-            self.spi,
-            self.led,
-            self.input,
-        ]
-        # [secondmem,mainmem,bootmem,self.bidi]
-        # devices = [mainmem,bootmem,self.bidi,self.spi ]
+        # devices = [bootmem,self.led]
+        # devices = [
+        #     secondmem,
+        #     [thirdmem, mainmem, othermem],
+        #     [bootmem, [self.bidi, self.spi], [self.led, self.input]],
+        # ]
+        # devices = [secondmem,mainmem,bootmem,self.bidi]
+        # devices = [mainmem, bootmem, self.bidi, self.spi]
         devices = [mainmem, bootmem, self.bidi]
-
+        
         self.fabric = FabricBuilder(devices)
+
+        self.cpu = Cpu(reset_vector=4096, addr_width=14)  # 4096 in half words
 
     def elaborate(self, platform):
         m = Module()
@@ -120,7 +114,7 @@ class Computer(Elaboratable):
         uart = True
         led = False
         flash = False
-        warm_boot = True
+        warm_boot = False
 
         if flash:
             spi_pins = platform.request("spi_flash_1x")
@@ -208,10 +202,8 @@ if __name__ == "__main__":
     pooter = Computer()
     # if args.verbose:
     #     pooter.memory_map = pooter.fabric.memory_map
-    # if args.generate:
-    #     pooter.cpu.create_map()
-    #     pooter.memory_map = pooter.cpu.memory_map
-    #     ra = RustArtifacts(pooter, folder="tinyboot")
+    if args.generate:
+        ra = RustArtifacts(pooter.fabric)#folder="tinyboot")
     if args.build:
         p.build(pooter, do_program=True)
 

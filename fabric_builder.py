@@ -35,18 +35,12 @@ class FabricBuilder(Component):
         devices,
         name="fabric",
     ):
-        self.devices = devices
-
-        def div():
-            log.info("-" * 20)
-            log.info("")
-
-        log.info("")
-        log.info("Device Scan")
-        div()
-
         # generate unique name for memory bus
         name_dict = {}
+
+        def div():
+            log.debug("-" * 20)
+            log.debug("")
 
         def uniq_name(name):
             if name in name_dict:
@@ -55,49 +49,88 @@ class FabricBuilder(Component):
             else:
                 name_dict[name] = 0
                 return name
+    
+        self.devices = devices
+        self.name = name
+
+        log.info("Build fabric for".format(name))
+        log.info("Device Heirachy test")
+
+        # replaces a [] list with a sub fabric recursivly.
+        for pos,d in enumerate(self.devices):
+            #print(pos,d)
+            if isinstance(d,list):
+                log.critical("")
+                log.critical("ENTER SUB FABRIC >>")
+                #print(d)
+                fb2 = FabricBuilder(d,name=uniq_name(self.name))
+                #print(fb2)
+                self.devices[pos] = fb2
+                log.critical("<< LEAVE SUB FABRIC")
+                log.critical("")
+
+
+
+
+        log.debug("")
+        log.debug("Device Scan")
+        div()
+
+
 
         # add attrs to the python objects
-        for d in devices:
+        #print(self.devices)
+        for d in self.devices:
+            #print(d)
             d.name = uniq_name(d.__class__.__qualname__)
             d.width = d.bus.cmd.payload.addr.shape().width
-            log.info(f"{d.name} - {d.width}")
+            log.debug(f"{d.name} - {d.width}")
 
-        self.addr_width = addr_width = max(d.width for d in devices)
-        self.extra_bits = extra_bits = (len(devices) - 1).bit_length()
+        self.addr_width = addr_width = max(d.width for d in self.devices)
+        self.extra_bits = extra_bits = (len(self.devices) - 1).bit_length()
 
-        log.info("bus width %d (hw)", self.addr_width)
-        log.info("bus extra bits %d (hw)", self.extra_bits)
-        log.info(f"total width {addr_width+extra_bits} (hw)")
+        log.debug("bus width %d (hw)", self.addr_width)
+        log.debug("bus extra bits %d (hw)", self.extra_bits)
+        log.debug(f"total width {addr_width+extra_bits} (hw)")
         div()
 
         # Create the memory map for the fabric itself
         self.memory_map = memory_map = MemoryMap(
             addr_width=addr_width + extra_bits + 1,
             data_width=16,
-            name=name,
+            name=uniq_name(name),
             alignment=addr_width,
         )
 
         # build the memory map list
+        log.debug("Build the memory_map")
         for d in devices:
-            log.critical(d.name)
-            device_memory = MemoryMap(
-                addr_width=d.width + 1, data_width=16, name=d.name
-            )
-            device_memory.add_resource(d, name=(d.name,), size=2 ** (d.width + 1))
-            memory_map.add_window(device_memory)
+            log.debug(d.name)
+            if hasattr(d,"memory_map"):
+                log.critical("Device already has map")
+                log.critical(d)
+                memory_map.add_window(d.memory_map)
+            else:
+                device_memory = MemoryMap(
+                    addr_width=d.width + 1, data_width=16, name=uniq_name(d.name)
+                )
+                device_memory.add_resource(d, name=(d.name,), size=2 ** (d.width + 1))
+                memory_map.add_window(device_memory)
 
         # show the memory map
-        log.critical("")
         div()
         for i in self.memory_map.window_patterns():
-            log.critical(f"{i[0]} \t  {i[1][0]}, {len(i[1][0])}")
+            log.debug(f"{i[0]} \t  {i[1][0]}, {len(i[1][0])}")
         # show the resources
+        log.info("")
+        log.info("Resources")
         div()
         for i in self.memory_map.all_resources():
-            log.critical(f"{i.path[0]} \t{i.start} \t{i.end}")
+            log.info(f"{i.path} \t{i.start} \t{i.end}")
 
-        self.bus = BusPort(addr=addr_width - 1, data=16).flip().create()
+        self.bus = BusPort(addr=addr_width + extra_bits - 1, data=16).flip().create()
+        # if this is a sub fabric , this is reffered to .
+        # self.width = addr_width + extra_bits 
 
     def elaborate(self, platform):
         log.warning("Elaborate Bus")
