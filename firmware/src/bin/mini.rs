@@ -34,16 +34,16 @@ impl Ctx {
 #[no_mangle]
 pub extern "C" fn main() -> ! {
     // Delay
-    wait(60000);
+    wait(600);
     let intro = "Welcome to patina";
-    println!("{}", intro);
+    println!("{}\r\n", intro);
     println!("{}", PROMPT);
 
     let mut counter: u32 = 0;
     let mut ctx = Ctx::new();
     loop {
         use readline::ConsoleAction::*;
-        // get sometihng from the serial port
+        // get something from the serial port
         if let Some(val) = ctx.cons.process() {
             {
                 match val {
@@ -63,7 +63,7 @@ pub extern "C" fn main() -> ! {
                     Enter => {
                         run_command(&mut ctx);
                         ctx.cons.reset();
-                        println!("{}", PROMPT);
+                        println!("\n{}", PROMPT);
                     }
                     _ => println!("|{:?}", val),
                 }
@@ -73,7 +73,7 @@ pub extern "C" fn main() -> ! {
         }
         // bug out timer
         counter = counter + 1;
-        if counter > 6000_000_0 {
+        if counter > 6000_00_0 {
             println!("bye");
             reset();
         }
@@ -82,7 +82,7 @@ pub extern "C" fn main() -> ! {
 
 fn list() {
     for i in COMMANDS{
-        println!("{}\r\n",i.0);
+        println!(" -  {}\r\n",i.0);
     }
 }
 

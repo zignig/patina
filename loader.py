@@ -55,6 +55,13 @@ class MonTool:
             else:
                 return False
 
+    def _flush(self):
+        while True:
+            val = self.ser.read()
+            print(val)
+            if val == b'':
+                return
+    
     def _write_num(self, val):
         num = val.to_bytes(4, byteorder="little")
         self.ser.write(num)
@@ -73,6 +80,7 @@ class MonTool:
         self._write_num(val)
 
     def ping(self):
+        self._flush()
         self._cmd(Commands.ping)
         val = self._ack(exit=False)
         return val
@@ -91,7 +99,7 @@ class MonTool:
         self._cmd(Commands.read)
         self._ack()
         data = []
-        for pos in tqdm(range(count)):
+        for pos in range(count):
             val = self._read_num()
             data.append(val)
         return data

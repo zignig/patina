@@ -1,6 +1,6 @@
 use crate::println;
 use crate::uart::{Bind, DefaultSerial};
-use heapless::{String,Vec};
+use heapless::{String};
 use ufmt::derive::uDebug;
 
 const PROMPT: &str = ">>";
@@ -50,12 +50,9 @@ impl Buffer {
 
     // fn insert(&mut self, _c: char) {}
     fn push_str(&mut self, s: &str) {
-        self.data.push_str(s);
+        self.data.push_str(s).unwrap();
     }
 
-    fn push(&mut self, c: char) {
-        let _ = self.data.push(c);
-    }
 }
 
 pub struct Console {
@@ -212,7 +209,7 @@ impl Console {
                 b'\x09' => {
                     return Some(ConsoleAction::Tab);
                 }
-                b'\x0D' => {
+                b'\x0A' => {
                     // Enter
                     return Some(ConsoleAction::Enter);
                 }
