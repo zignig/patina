@@ -50,17 +50,38 @@ class GenRust:
         emit("")
 
     def extra(self,regions,emit):
-        ram = "mem" if "mem" in regions else "mem"
-        aliases = {
-            "REGION_TEXT":   ram,
-            "REGION_RODATA": ram,
-            "REGION_DATA":   ram,
-            "REGION_BSS":    ram,
-            "REGION_HEAP":   ram,
-            "REGION_STACK":  ram,
-        }
-        for alias, region in aliases.items():
-            emit(f"REGION_ALIAS(\"{alias}\", {region});")
+        chunk = """
+EXTERN(__start);
+ENTRY(__start);
+
+SECTIONS {{
+    PROVIDE(__stack_start = ORIGIN({mem}) + LENGTH({mem})-16);
+    PROVIDE(__stext = ORIGIN({mem}));
+
+    .text __stext : {{
+        *(.start);
+
+        *(.text .text.*);
+
+        . = ALIGN(4);
+        __etext = .;
+    }} > {mem}
+
+    .rodata : ALIGN(4) {{
+        . = ALIGN(4);
+        __srodata = .;
+        *(.rodata .rodata.*);
+        . = ALIGN(4);
+        __erodata = .;
+    }} > {mem}
+
+    .data :
+    {{
+    *(.data .data.*);
+    }} > {mem}
+}}
+        """
+        emit(chunk.format(mem="BASICMEMORY"))    
         
 class BootLoaderX(GenRust):
     def __init__(self,soc):
@@ -107,4 +128,4 @@ SECTIONS {{
     }}
 }}
     """
-        emit(chunk.format(mem="MEM",boot="BOOT"))
+        emit(chunk.format(mem="BASICMEMORY",boot="BOOTMEM"))

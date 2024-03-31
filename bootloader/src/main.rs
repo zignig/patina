@@ -98,8 +98,8 @@ fn put32(word: u32) {
     }
 }
 
-const UARTRX: *mut i16 = generated::SERIAL_ADDR as _;
-const UARTTX: *mut u16 = (generated::SERIAL_ADDR + 2) as _;
+const UARTRX: *mut i16 = generated::BIDIUART_ADDR as _;
+const UARTTX: *mut u16 = (generated::BIDIUART_ADDR + 2) as _;
 
 fn txbusy() -> bool {
     unsafe {

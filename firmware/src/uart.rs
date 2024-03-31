@@ -6,11 +6,14 @@ use core::convert::Infallible;
 
 use ufmt::uWrite;
 
+mod generated {
+    include!(concat!(env!("OUT_DIR"), "/generated.rs"));
+}
 
 // Build magic env in .cargo/cargo.toml defines this address
-pub type DefaultSerial = Serial<{ crate::generated::UART_ADDR }>;
+pub type DefaultSerial = Serial<{generated::BIDIUART_ADDR }>;
 
-pub struct Serial<const UART: i16>;
+pub struct Serial<const UART: u32>;
 
 pub trait Bind {
     const RX: *mut i16;
@@ -24,7 +27,7 @@ pub trait Bind {
     fn tget(&mut self) -> Option<u8>;
 }
 
-impl<const UART: i16> Bind for Serial<UART> {
+impl<const UART: u32> Bind for Serial<UART> {
     const RX: *mut i16 = UART as *mut i16;
     const TX: *mut u16 = (UART + 2) as *mut u16;
 

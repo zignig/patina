@@ -1,60 +1,18 @@
-use std::env;
-use std::fs;
 use std::path::PathBuf;
-use std::{env::VarError};
-use std::io::Write;
+use std::fs;
+use std::env;
 
 fn main() {
+    // Generate the files
+    println!("cargo:rerun-if-changed=memory.x");
+    println!("cargo:rerun-if-changed=generated.rs");
+
+    // generated file include
+    let output_path = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
+    fs::write(output_path.join("generated.rs"), include_bytes!("generated.rs")).unwrap();
+
+
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     // Put the linker script somewhere the linker can find it.
     fs::write(out_dir.join("memory.x"), include_bytes!("memory.x")).unwrap();
-    println!("cargo:rustc-link-search={}", out_dir.display());
-    println!("cargo:rerun-if-changed=memory.x");
-    println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-env-changed=UART_ADDR");
-    // serial port builder
-
-    let addr_input = match std::env::var("UART_ADDR") {
-        // Ugh why is this not an Option
-        Err(VarError::NotPresent) => None,
-        Ok(result) => Some(result),
-        e => panic!("{:?}", e),
-    };
-
-    let addr = match addr_input {
-        None => {
-            println!("cargo:warning=note: UART address not provided, defaulting to 0x200");
-            0x200
-        }
-        Some(text) => {
-            parse_int::parse::<u32>(&text).unwrap()
-        }
-    };
-
-    // Reset Vector
-    let reset_vector = match std::env::var("RESET_VECTOR") {
-        // Ugh why is this not an Option
-        Err(VarError::NotPresent) => None,
-        Ok(result) => Some(result),
-        e => panic!("{:?}", e),
-    };
-
-    let rv = match reset_vector {
-        None => {
-            println!("cargo:warning=note: RESET_VECTOR is not supplied");
-            0x8000
-        }
-        Some(text) => {
-            parse_int::parse::<u32>(&text).unwrap()
-        }
-    };
-
-    let mut out = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
-    out.push("peripherals.rs");
-
-    let mut f = std::fs::File::create(&out).unwrap();
-    writeln!(f,"#[allow(dead_code)]").unwrap();
-    writeln!(f, "pub const UART_ADDR: i16 = 0x{addr:x};").unwrap();
-    writeln!(f,"#[allow(dead_code)]").unwrap();
-    writeln!(f, "pub const RESET_VECTOR: i16 = 0x{rv:x};").unwrap();
 }

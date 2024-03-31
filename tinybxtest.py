@@ -65,6 +65,7 @@ class Computer(Elaboratable):
         self.led = OutputPort(1, read_back=True)
         self.input = InputPort(1)
         self.spi = SimpleSPI(fifo_depth=512)
+        self.warm = WarmBoot()
 
         # devices = [bootmem,self.led]
         # devices = [
@@ -75,7 +76,7 @@ class Computer(Elaboratable):
         # devices = [secondmem,mainmem,bootmem,self.bidi]
         # devices = [mainmem, bootmem, self.bidi, self.spi]
 
-        devices = [mainmem, bootmem, self.bidi]
+        devices = [mainmem, bootmem, self.bidi]#,self.warm]
         
         self.fabric = FabricBuilder(devices)
 
@@ -95,10 +96,12 @@ class Computer(Elaboratable):
             m.submodules.mainmem = mainmem = self.mainmem
             m.submodules.mem = bootmem = self.bootmem
             m.submodules.uart = uart = self.bidi
+            #m.submodules.warm = warm = self.warm
             m.submodules.iofabric = iofabric = SimpleFabric(
                 [
                     partial_decode(m, bootmem.bus, 11),  # 0x____0000
                     partial_decode(m, uart.bus, 11),  # 0x____1000
+                    #partial_decode(m, warm.bus, 11),  # 0x____2000
                 ]
             )
             m.submodules.fabric = fabric = SimpleFabric(
@@ -115,7 +118,7 @@ class Computer(Elaboratable):
         uart = True
         led = False
         flash = False
-        warm_boot = False
+        warm_boot = True
 
         if flash:
             spi_pins = platform.request("spi_flash_1x")
@@ -152,10 +155,8 @@ class Computer(Elaboratable):
 
         # # Attach the warmboot
         if warm_boot:
-            m.submodules.warm = warm = WarmBoot()
-
             boot = platform.request("boot", 0)
-            m.d.comb += [warm.loader.eq(boot.i)]
+            m.d.comb += [self.warm.loader.eq(boot.i)]
 
         return m
 
@@ -188,6 +189,8 @@ if __name__ == "__main__":
     parser.add_argument("-b", "--build", action="store_true")
     parser.add_argument("-m", "--mapping", action="store_true")
     parser.add_argument("-g", "--generate", action="store_true")
+    parser.add_argument("-l", "--loader", action="store_true")
+    
 
     args = parser.parse_args()
     if args.verbose == 1:
@@ -203,8 +206,13 @@ if __name__ == "__main__":
     pooter = Computer()
     # if args.verbose:
     #     pooter.memory_map = pooter.fabric.memory_map
+    if args.loader:
+        ra = RustArtifacts(pooter.fabric,folder="bootloader")
+        ra.make_bootloader()
     if args.generate:
-        ra = RustArtifacts(pooter.fabric)#folder="tinyboot")
+        ra = RustArtifacts(pooter.fabric,folder="firmware")
+        ra.make_firmware()
+    
     if args.build:
         p.build(pooter, do_program=True)
 
