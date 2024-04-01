@@ -96,7 +96,7 @@ class Computer(Elaboratable):
             m.submodules.mainmem = mainmem = self.mainmem
             m.submodules.mem = bootmem = self.bootmem
             m.submodules.uart = uart = self.bidi
-            #m.submodules.warm = warm = self.warm
+            m.submodules.warm = warm = self.warm
             m.submodules.iofabric = iofabric = SimpleFabric(
                 [
                     partial_decode(m, bootmem.bus, 11),  # 0x____0000
@@ -156,7 +156,7 @@ class Computer(Elaboratable):
         # # Attach the warmboot
         if warm_boot:
             boot = platform.request("boot", 0)
-            m.d.comb += [self.warm.loader.eq(boot.i)]
+            m.d.sync += [self.warm.external.eq(boot.i)]
 
         return m
 

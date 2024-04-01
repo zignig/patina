@@ -14,8 +14,8 @@ class WarmBoot(Component):
 
     def __init__(self):
         super().__init__()
-        self.loader = Signal()
         self.internal = Signal()
+        self.external = Signal()
 
     def elaborate(self, platform):
         m = Module()
@@ -34,16 +34,17 @@ class WarmBoot(Component):
         cmd = self.bus.cmd
 
         with m.If(cmd.valid & (cmd.payload.lanes == 3 )):
-            m.d.sync += self.loader.eq(1)
+            m.d.sync += self.internal.eq(1)
 
         # state machine to run the warmboot
         with m.FSM() as fsm:
             with m.State("WAIT"):
-                with m.If(self.loader):
+                with m.If(self.internal):
+                    m.next = "SWITCH"
+                with m.If(self.external):
                     m.next = "SWITCH"
 
             with m.State("SWITCH"):
-                
                 m.next = "START"
 
             with m.State("START"):
