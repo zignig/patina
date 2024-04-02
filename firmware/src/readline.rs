@@ -57,7 +57,7 @@ impl Buffer {
 
 pub struct Console {
     buffer: Buffer,
-    serial: crate::uart::DefaultSerial, //pub serial: crate::uart::Serial<ADDR>,
+    pub serial: crate::uart::DefaultSerial, //pub serial: crate::uart::Serial<ADDR>,
     //insert: bool,
     echo: bool,
 }

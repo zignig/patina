@@ -8,6 +8,7 @@ authors = [
 name = "patina-build"
 requires-python = ">=3.11"
 license = {text = "MIT"}
+
 dependencies = [
     "amaranth[builtin-yosys] @ git+https://github.com/amaranth-lang/amaranth",
     "amaranth_soc @ git+https://github.com/amaranth-lang/amaranth-soc",
@@ -15,15 +16,18 @@ dependencies = [
     "yowasp-yosys",
     "rich>=13.7.0",
     # "hapenny @ git+https://github.com/zignig/hapenny@qol",
-    "riscv-assembler>=1.2.1",
-    "tqdm>=4.66.2",
+    "yowasp-nextpnr-ice40",
 ]
 
 [build-system]
 requires = ["pdm-pep517>=1.0.0"]
 build-backend = "pdm.pep517.api"
 
-
+[tool.pdm.scripts]
+_.env_file = ".env.toolchain"
+tiny = { cmd = "./tinybxtest.py -vv" }
+prog = { cmd = "./tinybxtest.py -b" }
+gen = { cmd = "./tinybxtest.py -g" }
 
 [tool.pdm.dev-dependencies]
 dev = [

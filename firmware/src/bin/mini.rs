@@ -81,8 +81,8 @@ pub extern "C" fn main() -> ! {
 }
 
 fn list() {
-    for i in COMMANDS{
-        println!(" -  {}\r\n",i.0);
+    for i in COMMANDS {
+        println!(" -  {}\r\n", i.0);
     }
 }
 
@@ -91,7 +91,7 @@ fn run_command(ctx: &mut Ctx) {
     if let Some(cmd) = data.split_ascii_whitespace().next() {
         for (name, imp) in COMMANDS {
             if *name == cmd {
-                println!("\r");
+                println!("\r\n");
                 imp(ctx);
                 return;
             }
@@ -105,7 +105,6 @@ type Command = fn(&mut Ctx);
 
 static COMMANDS: &[(&str, Command)] = &[
     ("list", cmd_list),
-    ("r", cmd_other),
     ("help", cmd_help),
     ("?", cmd_help),
     ("demo", cmd_demo),
@@ -128,17 +127,22 @@ fn cmd_cls(ctx: &mut Ctx) {
     ctx.cons.clear_screen();
 }
 
-fn cmd_demo(_ctx: &mut Ctx) {
-    println!("demo WOO HOO!");
+fn cmd_demo(ctx: &mut Ctx) {
+    let mut counter: u32 = 16;
+    while counter > 0 {
+        for char in 32..126 {
+            ctx.cons.serial.putb(char)
+        }
+        println!("\r\n");
+        wait(20000);
+        counter -= 1;
+    }
 }
 
 fn cmd_reset(_ctx: &mut Ctx) {
     reset();
 }
 
-fn cmd_other(ctx: &mut Ctx) {
-    terminal::rectangle(ctx.counter, 10);
-}
 
 fn cmd_list(_ctx: &mut Ctx) {
     list();
