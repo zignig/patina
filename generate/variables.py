@@ -4,7 +4,7 @@ import datetime
 
 class RustLib:
     def __init__(self, soc):
-        self._soc = soc
+        self.soc = soc
 
     def gen_lib_rs(self, file=None):
 
@@ -20,7 +20,7 @@ class RustLib:
         emit(f" * Generated: {datetime.datetime.now()}.")
         emit(" */")
         emit("")
-        for i in self._soc.memory_map.all_resources():
+        for i in self.soc.fabric.memory_map.all_resources():
             res = i.resource
             name = i.resource.name
             start = i.start
@@ -34,3 +34,5 @@ class RustLib:
                 )
             )
             # log(res,name,start,sec_length)
+        # Reset vector
+        emit("pub const RESET_VECTOR: u32 = 0x{addr:01X}; // {addr}".format(addr = self.soc.cpu.reset_vector << 1))

@@ -89,7 +89,8 @@ class MonTool:
         self._write_a(addr)
         self._ack()
         self._cmd(Commands.call)
-        # does not return
+        self._ack()
+        # jumps to program and runs
 
     def read(self, addr, count):
         self._write_a(addr)

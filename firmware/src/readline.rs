@@ -226,78 +226,64 @@ impl Console {
                                 if let Some(c) = self.serial.tget() {
                                     match c {
                                         b'\x41' => {
-                                            //println!("up");
                                             return Some(ConsoleAction::Up);
                                         }
                                         b'\x42' => {
-                                            //println!("down");
                                             return Some(ConsoleAction::Down);
                                         }
                                         b'\x43' => {
-                                            //println!("right");
                                             return Some(ConsoleAction::Right);
                                         }
                                         b'\x44' => {
-                                            //println!("left");
                                             return Some(ConsoleAction::Left);
                                         }
                                         b'\x31' => {
                                             if let Some(_) = self.serial.tget() {
-                                                //println!("home{}", c);
                                                 return Some(ConsoleAction::Home);
                                             }
                                         }
                                         b'\x32' => {
                                             if let Some(_) = self.serial.tget() {
-                                                //println!("insert{}", c);
                                                 return Some(ConsoleAction::Insert);
                                             }
                                         }
                                         b'\x33' => {
                                             if let Some(_) = self.serial.tget() {
-                                                //println!("delete{}", c);
                                                 return Some(ConsoleAction::Delete);
                                             }
                                         }
                                         b'\x34' => {
                                             if let Some(_) = self.serial.tget() {
-                                                //println!("end{}", c);
                                                 return Some(ConsoleAction::End);
                                             }
                                         }
                                         b'\x35' => {
                                             if let Some(_) = self.serial.tget() {
-                                                //println!("pg up{}", c);
                                                 return Some(ConsoleAction::PgUp);
                                             }
                                         }
                                         b'\x36' => {
                                             if let Some(_) = self.serial.tget() {
-                                                //println!("pg down{}", c);
                                                 return Some(ConsoleAction::PgDown);
                                             }
                                         }
 
                                         _ => {
-                                            //println!("c, <{:x}>", c);
                                             return Some(ConsoleAction::Unknown);
                                         }
                                     }
                                 }
                             }
                             _ => {
-                                //println!("unknown, <{:x}>", c);
                                 return Some(ConsoleAction::Unknown);
                             }
                         }
                     } else {
-                        //println!("escape only")
                         return Some(ConsoleAction::Escape);
                     }
                 }
                 _ => {
                     //self.serial.putb(c);
-                    //println!(">{:x}<\r\n", c);
                     let _ = self.buffer.data.push(c as char);
                     self.buffer.cursor += 1;
                     return Some(ConsoleAction::Char(c));

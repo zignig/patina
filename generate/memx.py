@@ -35,7 +35,7 @@ class GenRust:
         # memory regions
         regions = set()
         emit("MEMORY {")
-        for i in self._soc.memory_map.all_resources():
+        for i in self._soc.fabric.memory_map.all_resources():
             res = i.resource
             name = i.resource.name.upper()
             start = i.start

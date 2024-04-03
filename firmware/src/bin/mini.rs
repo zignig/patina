@@ -2,24 +2,20 @@
 #![no_main]
 
 use rustv::init::{reset, wait};
-use rustv::println;
+use rustv::{generated, println};
 use rustv::readline;
-use rustv::terminal;
+//use rustv::terminal;
 use rustv::uart::{Bind, DefaultSerial};
+use rustv::warmboot::{ActualWarm,Warmboot};
 
-const PROMPT: &str = ">>";
-
-// Default reset from build system (.cargo/config.toml)
-// magic include.
-mod generated {
-    include!(concat!(env!("OUT_DIR"), "/peripherals.rs"));
-}
+const PROMPT: &str = ">";
 
 // Primary data construct
 // Add more to me and it is made available to commands
 struct Ctx {
     cons: readline::Console,
     counter: usize,
+    warm: ActualWarm
 }
 
 impl Ctx {
@@ -27,6 +23,7 @@ impl Ctx {
         Self {
             cons: readline::Console::new(),
             counter: 10,
+            warm: Warmboot::new()
         }
     }
 }
@@ -35,7 +32,7 @@ impl Ctx {
 pub extern "C" fn main() -> ! {
     // Delay
     wait(600);
-    let intro = "Welcome to patina";
+    let intro = " Welcome to patina";
     println!("{}\r\n", intro);
     println!("{}", PROMPT);
 
@@ -48,11 +45,7 @@ pub extern "C" fn main() -> ! {
             {
                 match val {
                     Tab => {
-                        // println!("\r\n");
-                        // println!("Commands: \r\n");
-                        // list();
                         ctx.cons.redraw_line();
-                        // ctx.cons.redraw();
                     }
                     Cancel => {
                         ctx.cons.clear_screen();
@@ -73,7 +66,7 @@ pub extern "C" fn main() -> ! {
         }
         // bug out timer
         counter = counter + 1;
-        if counter > 6000_00_0 {
+        if counter > 6000_000 {
             println!("bye");
             reset();
         }
@@ -112,11 +105,18 @@ static COMMANDS: &[(&str, Command)] = &[
     ("reset", cmd_reset),
     ("+", cmd_add),
     ("-", cmd_sub),
+    ("warm", cmd_warm)
 ];
+
+fn cmd_warm(ctx: &mut Ctx) {
+    println!("{}",ctx.warm.addr());
+    ctx.warm.write();
+}
 
 fn cmd_add(ctx: &mut Ctx) {
     ctx.counter += 10;
 }
+
 fn cmd_sub(ctx: &mut Ctx) {
     if ctx.counter > 11 {
         ctx.counter -= 10;
@@ -134,7 +134,6 @@ fn cmd_demo(ctx: &mut Ctx) {
             ctx.cons.serial.putb(char)
         }
         println!("\r\n");
-        wait(20000);
         counter -= 1;
     }
 }

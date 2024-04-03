@@ -20,7 +20,7 @@ class WarmBoot(Component):
     def elaborate(self, platform):
         m = Module()
         # Warm boot object
-        image_internal = Signal(2, init=0)
+        image_internal = Signal(2, init=1)
         boot_internal = Signal()
 
         m.submodules.wb = Instance(
@@ -38,20 +38,21 @@ class WarmBoot(Component):
 
         # state machine to run the warmboot
         with m.FSM() as fsm:
-            with m.State("WAIT"):
-                with m.If(self.internal):
-                    m.next = "SWITCH"
-                with m.If(self.external):
-                    m.next = "SWITCH"
+            with m.State("INIT"):
+                m.d.sync += boot_internal.eq(0)
+                m.next = "WAIT"
 
-            with m.State("SWITCH"):
-                m.next = "START"
+            with m.State("WAIT"):
+                with m.If(self.internal == 1):
+                    m.next = "START"
+                # with m.If(self.external):
+                #     m.next = "START"
 
             with m.State("START"):
                 m.d.sync += image_internal.eq(0)
                 m.next = "BOOT"
 
             with m.State("BOOT"):
+                #.next = "BOOT"
                 m.d.sync += boot_internal.eq(1)
-
         return m

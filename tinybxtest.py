@@ -64,7 +64,7 @@ class Computer(Elaboratable):
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
         self.led = OutputPort(1, read_back=True)
         self.input = InputPort(1)
-        self.spi = SimpleSPI(fifo_depth=512)
+        #self.spi = SimpleSPI(fifo_depth=512)
         self.warm = WarmBoot()
 
         # devices = [bootmem,self.led]
@@ -76,7 +76,7 @@ class Computer(Elaboratable):
         # devices = [secondmem,mainmem,bootmem,self.bidi]
         # devices = [mainmem, bootmem, self.bidi, self.spi]
 
-        devices = [mainmem, bootmem, self.bidi]#,self.warm]
+        devices = [mainmem, bootmem, self.bidi,self.warm]
         
         self.fabric = FabricBuilder(devices)
 
@@ -156,7 +156,7 @@ class Computer(Elaboratable):
         # # Attach the warmboot
         if warm_boot:
             boot = platform.request("boot", 0)
-            m.d.sync += [self.warm.external.eq(boot.i)]
+            m.d.comb += [self.warm.external.eq(boot.i)]
 
         return m
 
@@ -207,10 +207,10 @@ if __name__ == "__main__":
     # if args.verbose:
     #     pooter.memory_map = pooter.fabric.memory_map
     if args.loader:
-        ra = RustArtifacts(pooter.fabric,folder="bootloader")
+        ra = RustArtifacts(pooter,folder="bootloader")
         ra.make_bootloader()
     if args.generate:
-        ra = RustArtifacts(pooter.fabric,folder="firmware")
+        ra = RustArtifacts(pooter,folder="firmware")
         ra.make_firmware()
     
     if args.build:

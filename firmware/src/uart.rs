@@ -6,12 +6,12 @@ use core::convert::Infallible;
 
 use ufmt::uWrite;
 
-mod generated {
-    include!(concat!(env!("OUT_DIR"), "/generated.rs"));
-}
+// mod generated {
+//     include!(concat!(env!("OUT_DIR"), "/generated.rs"));
+// }
 
 // Build magic env in .cargo/cargo.toml defines this address
-pub type DefaultSerial = Serial<{generated::BIDIUART_ADDR }>;
+pub type DefaultSerial = Serial<{crate::generated::BIDIUART_ADDR }>;
 
 pub struct Serial<const UART: u32>;
 
