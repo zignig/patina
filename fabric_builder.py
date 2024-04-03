@@ -86,6 +86,7 @@ class FabricBuilder(Component):
             d.width = d.bus.cmd.payload.addr.shape().width
             log.debug(f"{d.name} - {d.width}")
 
+        log.critical("BIT ADDED HERE !")
         self.addr_width = addr_width = max(d.width for d in self.devices) +1
         self.extra_bits = extra_bits = (len(self.devices) - 1).bit_length()
 
