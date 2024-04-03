@@ -176,7 +176,7 @@ if __name__ == "__main__":
         # use command line as override
         for i in args_dict.keys():
             if args_dict[i] is not None:
-                print("override",i)
+                #print("override",i)
                 conf_dict[i] = args_dict[i]
         
         # create new args
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     except:
         print("no config")
    
-    print(args)
+    #print(args)
     #print(conf_dict)
     
     # spin up the monitor

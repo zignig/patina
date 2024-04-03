@@ -61,7 +61,7 @@ class Computer(Elaboratable):
 
         # these are attached to self so they can be altered in elaboration.
 
-        self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
+        self.bidi = BidiUart(baud_rate=57600, oversample=8, clock_freq=F)
         self.led = OutputPort(1, read_back=True)
         self.input = InputPort(1)
         #self.spi = SimpleSPI(fifo_depth=512)
@@ -80,7 +80,7 @@ class Computer(Elaboratable):
         
         self.fabric = FabricBuilder(devices)
 
-        self.cpu = Cpu(reset_vector=4096, addr_width=14)  # 4096 in half words
+        self.cpu = Cpu(reset_vector=4096, addr_width=15)  # 4096 in half words
 
     def elaborate(self, platform):
         m = Module()
@@ -97,17 +97,22 @@ class Computer(Elaboratable):
             m.submodules.mem = bootmem = self.bootmem
             m.submodules.uart = uart = self.bidi
             m.submodules.warm = warm = self.warm
-            m.submodules.iofabric = iofabric = SimpleFabric(
-                [
-                    partial_decode(m, bootmem.bus, 11),  # 0x____0000
-                    partial_decode(m, uart.bus, 11),  # 0x____1000
-                    #partial_decode(m, warm.bus, 11),  # 0x____2000
-                ]
-            )
+            # m.submodules.iofabric = iofabric = SimpleFabric(
+            #     [
+            #         partial_decode(m, bootmem.bus, 11),  # 0x____0000
+            #         partial_decode(m, uart.bus, 11),  # 0x____1000
+            #         partial_decode(m, warm.bus, 11),  # 0x____2000
+            #     ]
+            # ) 
+            bus_width = 12
             m.submodules.fabric = fabric = SimpleFabric(
                 [
-                    mainmem.bus,
-                    partial_decode(m, iofabric.bus, 12),
+                    partial_decode(m,mainmem.bus,bus_width),
+                    partial_decode(m, bootmem.bus,bus_width),  # 0x____0000
+                    partial_decode(m, uart.bus,bus_width),  # 0x____1000
+                    partial_decode(m, warm.bus,bus_width),  # 0x____2000
+
+                    # partial_decode(m, iofabric.bus, 13),
                 ]
             )
             connect(m, self.cpu.bus, fabric.bus)

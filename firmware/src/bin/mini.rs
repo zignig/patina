@@ -32,8 +32,9 @@ impl Ctx {
 pub extern "C" fn main() -> ! {
     // Delay
     wait(600);
-    let intro = " Welcome to patina";
+    let intro = "Welcome to patina";
     println!("{}\r\n", intro);
+    println!("{}\r\n",generated::DATE_STAMP);
     println!("{}", PROMPT);
 
     let mut counter: u32 = 0;
@@ -66,7 +67,7 @@ pub extern "C" fn main() -> ! {
         }
         // bug out timer
         counter = counter + 1;
-        if counter > 6000_000 {
+        if counter > 6_000_000 {
             println!("bye");
             reset();
         }
@@ -109,7 +110,9 @@ static COMMANDS: &[(&str, Command)] = &[
 ];
 
 fn cmd_warm(ctx: &mut Ctx) {
-    println!("{}",ctx.warm.addr());
+    println!("0x{:x}",ctx.warm.addr());
+    // wait for the the chars to spool out before rebooting
+    wait(10000);
     ctx.warm.write();
 }
 

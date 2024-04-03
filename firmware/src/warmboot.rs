@@ -3,13 +3,13 @@ pub type ActualWarm = Warmboot<{crate::generated::WARMBOOT_ADDR }>;
 pub struct Warmboot<const WARM: u32>;
 
 impl<const WARM: u32> Warmboot<WARM> {
-    pub const ADDR: *mut i16 = WARM as *mut i16;
+    pub const ADDR: *mut u32 = WARM as *mut u32;
     pub fn new() -> Self {
         Self {}
     }
 
-    pub fn addr(&mut self) -> i16 { 
-        return Self::ADDR as i16 ;
+    pub fn addr(&mut self) -> u32 { 
+        return Self::ADDR as u32 ;
     }
 
     pub fn write(&mut self) {
