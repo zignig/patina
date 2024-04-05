@@ -72,6 +72,7 @@ pub extern "C" fn main() -> ! {
         counter = counter + 1;
         if counter > 6_000_000 {
             println!("bye");
+            wait(10000);       
             reset();
         }
     }
@@ -79,8 +80,9 @@ pub extern "C" fn main() -> ! {
 
 fn list() {
     for i in COMMANDS {
-        println!(" -  {}\r\n", i.0);
+        println!("{} ", i.0);
     }
+    println!("\r\n");
 }
 
 fn run_command(ctx: &mut Ctx) {
@@ -111,7 +113,8 @@ static COMMANDS: &[(&str, Command)] = &[
     ("-", cmd_sub),
     ("warm", cmd_warm),
     ("on",cmd_on),
-    ("off",cmd_off)
+    ("off",cmd_off),
+    ("blink",cmd_blink)
 ];
 
 fn cmd_on(ctx: &mut Ctx) {
@@ -120,6 +123,16 @@ fn cmd_on(ctx: &mut Ctx) {
 
 fn cmd_off(ctx: &mut Ctx) {
     ctx.led.off();
+}
+
+fn cmd_blink(ctx: &mut Ctx){
+    const DELAY:u32 = 50_000;
+    for _ in 0..10 {
+        wait(DELAY);
+        ctx.led.on();
+        wait(DELAY);
+        ctx.led.off();
+    }
 }
 
 fn cmd_warm(ctx: &mut Ctx) {
