@@ -61,9 +61,9 @@ class Computer(Elaboratable):
 
         # these are attached to self so they can be altered in elaboration.
 
-        self.bidi = BidiUart(baud_rate=57600, oversample=8, clock_freq=F)
+        self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
         self.led = OutputPort(1, read_back=True)
-        self.input = InputPort(1)
+        #self.input = InputPort(1)
         #self.spi = SimpleSPI(fifo_depth=512)
         self.warm = WarmBoot()
 
@@ -76,11 +76,11 @@ class Computer(Elaboratable):
         # devices = [secondmem,mainmem,bootmem,self.bidi]
         # devices = [mainmem, bootmem, self.bidi, self.spi]
 
-        devices = [mainmem, bootmem, self.bidi,self.warm]
+        devices = [mainmem, bootmem, self.bidi,self.warm,self.led]
         
         self.fabric = FabricBuilder(devices)
 
-        self.cpu = Cpu(reset_vector=4096, addr_width=15)  # 4096 in half words
+        self.cpu = Cpu(reset_vector=4096, addr_width=16)  # 4096 in half words
 
     def elaborate(self, platform):
         m = Module()
@@ -97,6 +97,7 @@ class Computer(Elaboratable):
             m.submodules.mem = bootmem = self.bootmem
             m.submodules.uart = uart = self.bidi
             m.submodules.warm = warm = self.warm
+            m.submodules.led = led = self.led
             # m.submodules.iofabric = iofabric = SimpleFabric(
             #     [
             #         partial_decode(m, bootmem.bus, 11),  # 0x____0000
@@ -111,7 +112,7 @@ class Computer(Elaboratable):
                     partial_decode(m, bootmem.bus,bus_width),  # 0x____0000
                     partial_decode(m, uart.bus,bus_width),  # 0x____1000
                     partial_decode(m, warm.bus,bus_width),  # 0x____2000
-
+                    partial_decode(m,led.bus,bus_width)
                     # partial_decode(m, iofabric.bus, 13),
                 ]
             )
@@ -121,7 +122,7 @@ class Computer(Elaboratable):
             self.cpu.build(m)
 
         uart = True
-        led = False
+        led = True
         flash = False
         warm_boot = True
 
@@ -161,7 +162,7 @@ class Computer(Elaboratable):
         # # Attach the warmboot
         if warm_boot:
             boot = platform.request("boot", 0)
-            m.d.comb += [self.warm.external.eq(boot.i)]
+            m.d.comb += self.warm.external.eq(0)#boot.i)
 
         return m
 
@@ -177,8 +178,8 @@ p.add_resources(
         UARTResource(
             0, rx="A8", tx="B8", attrs=Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
         ),
-        Resource("boot", 0, Pins("A9", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
-        Resource("user", 0, Pins("H2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
+        Resource("boot", 0, Pins("H2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
+        Resource("user", 0, Pins("A2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
     ]
 )
 

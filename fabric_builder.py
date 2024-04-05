@@ -130,8 +130,8 @@ class FabricBuilder(Component):
             log.info(f"{i.path} \t{i.start} \t{i.end}")
 
         self.bus = BusPort(addr=addr_width + extra_bits - 1, data=16).flip().create()
-        # if this is a sub fabric , this is reffered to .
-        # self.width = addr_width + extra_bits 
+        # if this is a sub fabric , this is used to configure the cpu
+        self.width = addr_width + extra_bits 
 
     def elaborate(self, platform):
         log.warning("Elaborate Bus")

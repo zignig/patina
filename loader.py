@@ -58,7 +58,6 @@ class MonTool:
     def _flush(self):
         while True:
             val = self.ser.read()
-            print(val)
             if val == b'':
                 return
     
@@ -133,8 +132,9 @@ class MonTool:
 
     def run(self, file_name):
         print("Loading ", file_name)
-        firm = m.load(file_name)
-        m.write(0, firm)
+        firm = self.load(file_name)
+        self.write(0, firm)
+        data = self.read(0,len(firm))
         m.call(0)
         m.attach()
 

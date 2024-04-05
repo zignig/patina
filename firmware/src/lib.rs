@@ -10,3 +10,4 @@ pub mod uart;
 pub mod readline;
 pub mod terminal;
 pub mod warmboot;
+pub mod led;

@@ -39,14 +39,10 @@ class WarmBoot(Component):
         # state machine to run the warmboot
         with m.FSM() as fsm:
             with m.State("INIT"):
-                m.d.sync += boot_internal.eq(0)
-                m.next = "WAIT"
-
-            with m.State("WAIT"):
                 with m.If(self.internal == 1):
                     m.next = "START"
-                # with m.If(self.external):
-                #     m.next = "START"
+                with m.If(self.external):
+                    m.next = "START"
 
             with m.State("START"):
                 m.d.sync += image_internal.eq(0)

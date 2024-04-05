@@ -7,6 +7,7 @@ use rustv::readline;
 //use rustv::terminal;
 use rustv::uart::{Bind, DefaultSerial};
 use rustv::warmboot::{ActualWarm,Warmboot};
+use rustv::led::{ActualLed,Led};  
 
 const PROMPT: &str = ">";
 
@@ -15,7 +16,8 @@ const PROMPT: &str = ">";
 struct Ctx {
     cons: readline::Console,
     counter: usize,
-    warm: ActualWarm
+    warm: ActualWarm,
+    led: ActualLed
 }
 
 impl Ctx {
@@ -23,7 +25,8 @@ impl Ctx {
         Self {
             cons: readline::Console::new(),
             counter: 10,
-            warm: Warmboot::new()
+            warm: Warmboot::new(),
+            led: Led::new()
         }
     }
 }
@@ -106,8 +109,18 @@ static COMMANDS: &[(&str, Command)] = &[
     ("reset", cmd_reset),
     ("+", cmd_add),
     ("-", cmd_sub),
-    ("warm", cmd_warm)
+    ("warm", cmd_warm),
+    ("on",cmd_on),
+    ("off",cmd_off)
 ];
+
+fn cmd_on(ctx: &mut Ctx) {
+    ctx.led.on();
+}
+
+fn cmd_off(ctx: &mut Ctx) {
+    ctx.led.off();
+}
 
 fn cmd_warm(ctx: &mut Ctx) {
     println!("0x{:x}",ctx.warm.addr());
