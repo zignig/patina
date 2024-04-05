@@ -135,8 +135,12 @@ class MonTool:
         firm = self.load(file_name)
         self.write(0, firm)
         data = self.read(0,len(firm))
-        m.call(0)
-        m.attach()
+        if data == firm:
+            print("OK")
+            m.call(0)
+            m.attach()
+        else:
+            print("failed upload")
 
 
 if __name__ == "__main__":

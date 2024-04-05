@@ -9,7 +9,7 @@ use rustv::uart::{Bind, DefaultSerial};
 use rustv::warmboot::{ActualWarm,Warmboot};
 use rustv::led::{ActualLed,Led};  
 
-const PROMPT: &str = ">";
+const PROMPT: &str = "|patina>";
 
 // Primary data construct
 // Add more to me and it is made available to commands
@@ -42,6 +42,10 @@ pub extern "C" fn main() -> ! {
 
     let mut counter: u32 = 0;
     let mut ctx = Ctx::new();
+    ctx.led.on();
+    wait(10000);
+    ctx.led.off();
+
     loop {
         use readline::ConsoleAction::*;
         // get something from the serial port
@@ -177,7 +181,7 @@ fn cmd_list(_ctx: &mut Ctx) {
 }
 
 fn cmd_help(_ctx: &mut Ctx) {
+    println!("\r\nThis is a simple readline for hapenny\r\n\r\n");
     println!("Available commands\r\n\r\n");
     list();
-    println!("\r\nThis is a simple readline for hapenny\r\n");
 }
