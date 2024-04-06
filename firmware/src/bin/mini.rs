@@ -136,6 +136,7 @@ fn cmd_blink(ctx: &mut Ctx){
         ctx.led.on();
         wait(DELAY);
         ctx.led.off();
+        println!("#");
     }
 }
 
