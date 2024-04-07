@@ -2,14 +2,15 @@
 #![no_main]
 
 use rustv::init::{reset, wait};
-use rustv::{generated, println};
 use rustv::readline;
+use rustv::{generated, println};
 //use rustv::terminal;
+use rustv::input::{ActualInput, Input};
+use rustv::led::{ActualLed, Led};
 use rustv::uart::{Bind, DefaultSerial};
-use rustv::warmboot::{ActualWarm,Warmboot};
-use rustv::led::{ActualLed,Led};  
+use rustv::warmboot::{ActualWarm, Warmboot};
 
-const PROMPT: &str = "|patina>";
+const PROMPT: &str = "|>";
 
 // Primary data construct
 // Add more to me and it is made available to commands
@@ -17,7 +18,8 @@ struct Ctx {
     cons: readline::Console,
     counter: usize,
     warm: ActualWarm,
-    led: ActualLed
+    led: ActualLed,
+    input: ActualInput,
 }
 
 impl Ctx {
@@ -26,7 +28,8 @@ impl Ctx {
             cons: readline::Console::new(),
             counter: 10,
             warm: Warmboot::new(),
-            led: Led::new()
+            led: Led::new(),
+            input: Input::new(),
         }
     }
 }
@@ -37,7 +40,7 @@ pub extern "C" fn main() -> ! {
     wait(600);
     let intro = "Welcome to patina";
     println!("{}\r\n", intro);
-    println!("{}\r\n",generated::DATE_STAMP);
+    println!("{}\r\n", generated::DATE_STAMP);
     println!("{}", PROMPT);
 
     let mut counter: u32 = 0;
@@ -76,7 +79,7 @@ pub extern "C" fn main() -> ! {
         counter = counter + 1;
         if counter > 6_000_000 {
             println!("bye");
-            wait(10000);       
+            wait(10000);
             reset();
         }
     }
@@ -116,10 +119,23 @@ static COMMANDS: &[(&str, Command)] = &[
     ("+", cmd_add),
     ("-", cmd_sub),
     ("warm", cmd_warm),
-    ("on",cmd_on),
-    ("off",cmd_off),
-    ("blink",cmd_blink)
+    ("on", cmd_on),
+    ("off", cmd_off),
+    ("blink", cmd_blink),
+    ("read", cmd_read),
 ];
+
+fn cmd_read(ctx: &mut Ctx) {
+
+    loop {
+        let val: u16 = ctx.input.read();
+        if let Some(_c) = ctx.cons.serial.get() {
+            return;
+        }
+        println!("{}", val);
+        wait(10000);
+    }
+}
 
 fn cmd_on(ctx: &mut Ctx) {
     ctx.led.on();
@@ -129,8 +145,8 @@ fn cmd_off(ctx: &mut Ctx) {
     ctx.led.off();
 }
 
-fn cmd_blink(ctx: &mut Ctx){
-    const DELAY:u32 = 50_000;
+fn cmd_blink(ctx: &mut Ctx) {
+    const DELAY: u32 = 50_000;
     for _ in 0..10 {
         wait(DELAY);
         ctx.led.on();
@@ -141,7 +157,7 @@ fn cmd_blink(ctx: &mut Ctx){
 }
 
 fn cmd_warm(ctx: &mut Ctx) {
-    println!("0x{:x}",ctx.warm.addr());
+    println!("0x{:x}", ctx.warm.addr());
     // wait for the the chars to spool out before rebooting
     wait(10000);
     ctx.warm.write();
@@ -175,7 +191,6 @@ fn cmd_demo(ctx: &mut Ctx) {
 fn cmd_reset(_ctx: &mut Ctx) {
     reset();
 }
-
 
 fn cmd_list(_ctx: &mut Ctx) {
     list();

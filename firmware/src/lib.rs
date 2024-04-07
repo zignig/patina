@@ -11,3 +11,4 @@ pub mod readline;
 pub mod terminal;
 pub mod warmboot;
 pub mod led;
+pub mod input;

@@ -1,6 +1,6 @@
-
+// Siggle led driven as an output port
 pub type ActualLed = Led<{crate::generated::OUTPUTPORT_ADDR }>;
-pub struct Led<const WARM: u32>;
+pub struct Led<const LED: u32>;
 
 impl<const LED: u32> Led<LED> {
     pub const ADDR: *mut u32 = LED as *mut u32;

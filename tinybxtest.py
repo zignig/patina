@@ -54,30 +54,21 @@ class Computer(Elaboratable):
         super().__init__()
 
         self.mainmem = mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
-        #self.othermem = othermem = BasicMemory(depth=512 * 3)
-        #secondmem = SpramMemory()
-        #thirdmem = SpramMemory()
+        # self.othermem = othermem = BasicMemory(depth=512 * 3)
+        # secondmem = SpramMemory()
+        # thirdmem = SpramMemory()
         self.bootmem = bootmem = BootMem(boot_image)
 
         # these are attached to self so they can be altered in elaboration.
 
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
         self.led = OutputPort(1, read_back=True)
-        #self.input = InputPort(1)
-        #self.spi = SimpleSPI(fifo_depth=512)
+        self.input = InputPort(5)
+        # self.spi = SimpleSPI(fifo_depth=512)
         self.warm = WarmBoot()
 
-        # devices = [bootmem,self.led]
-        # devices = [
-        #     secondmem,
-        #     [thirdmem, mainmem, othermem],
-        #     [bootmem, [self.bidi, self.spi], [self.led, self.input]],
-        # ]
-        # devices = [secondmem,mainmem,bootmem,self.bidi]
-        # devices = [mainmem, bootmem, self.bidi, self.spi]
+        devices = [mainmem, bootmem, self.bidi, self.warm, self.led,self.input]  # ,self.spi]
 
-        devices = [mainmem, bootmem, self.bidi,self.warm,self.led]
-        
         self.fabric = FabricBuilder(devices)
 
         self.cpu = Cpu(reset_vector=4096, addr_width=16)  # 4096 in half words
@@ -98,22 +89,18 @@ class Computer(Elaboratable):
             m.submodules.uart = uart = self.bidi
             m.submodules.warm = warm = self.warm
             m.submodules.led = led = self.led
-            # m.submodules.iofabric = iofabric = SimpleFabric(
-            #     [
-            #         partial_decode(m, bootmem.bus, 11),  # 0x____0000
-            #         partial_decode(m, uart.bus, 11),  # 0x____1000
-            #         partial_decode(m, warm.bus, 11),  # 0x____2000
-            #     ]
-            # ) 
+            m.submodules.input = input =  self.input
             bus_width = 12
+            
             m.submodules.fabric = fabric = SimpleFabric(
                 [
-                    partial_decode(m,mainmem.bus,bus_width),
-                    partial_decode(m, bootmem.bus,bus_width),  # 0x____0000
-                    partial_decode(m, uart.bus,bus_width),  # 0x____1000
-                    partial_decode(m, warm.bus,bus_width),  # 0x____2000
-                    partial_decode(m,led.bus,bus_width)
-                    # partial_decode(m, iofabric.bus, 13),
+                    partial_decode(m, mainmem.bus, bus_width),
+                    partial_decode(m, bootmem.bus, bus_width),  # 0x____0000
+                    partial_decode(m, uart.bus, bus_width),  # 0x____1000
+                    partial_decode(m, warm.bus, bus_width),  # 0x____2000
+                    partial_decode(m, led.bus, bus_width),
+                    partial_decode(m, input.bus, bus_width),
+                    # partial_decode(m,spi.bus,bus_width)
                 ]
             )
             connect(m, self.cpu.bus, fabric.bus)
@@ -125,6 +112,7 @@ class Computer(Elaboratable):
         led = True
         flash = False
         warm_boot = True
+        input_pins = True
 
         if flash:
             spi_pins = platform.request("spi_flash_1x")
@@ -159,10 +147,26 @@ class Computer(Elaboratable):
             user = platform.request("led", 0)
             m.d.comb += user.o.eq(self.led.pins[0])
 
+        if input_pins:
+            pin1 = platform.request("boot",0)
+            pin2 = platform.request("user",0)
+            
+            boot_post_sync = Signal()
+
+            m.submodules.boot_sync = amaranth.lib.cdc.FFSynchronizer(
+                i=pin1.i,
+                o=boot_post_sync,
+                o_domain="sync",
+                init=1,
+                stages=2,
+            )
+            m.d.comb += self.input.pins[0].eq(boot_post_sync)
+            m.d.comb += self.input.pins[1].eq(pin2.i)
+            
         # # Attach the warmboot
-        if warm_boot:
-            boot = platform.request("boot", 0)
-            m.d.comb += self.warm.external.eq(0)#boot.i)
+        # if warm_boot:
+        #     boot = platform.request("boot", 0)
+        #     m.d.comb += self.warm.external.eq(0)  # boot.i)
 
         return m
 
@@ -172,14 +176,14 @@ from amaranth_boards.tinyfpga_bx import TinyFPGABXPlatform
 p = TinyFPGABXPlatform()
 
 # 3.3V FTDI connected to the tinybx.
-# pico running micro python to run
+# pico running micro python to run external comms 
 p.add_resources(
     [
         UARTResource(
             0, rx="A8", tx="B8", attrs=Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
         ),
-        Resource("boot", 0, Pins("H2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
-        Resource("user", 0, Pins("A2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
+        Resource("boot", 0, Pins("H2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS",PULLUP=1)),
+        Resource("user", 0, Pins("J1", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
     ]
 )
 
@@ -196,7 +200,6 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--mapping", action="store_true")
     parser.add_argument("-g", "--generate", action="store_true")
     parser.add_argument("-l", "--loader", action="store_true")
-    
 
     args = parser.parse_args()
     if args.verbose == 1:
@@ -213,12 +216,12 @@ if __name__ == "__main__":
     # if args.verbose:
     #     pooter.memory_map = pooter.fabric.memory_map
     if args.loader:
-        ra = RustArtifacts(pooter,folder="bootloader")
+        ra = RustArtifacts(pooter, folder="bootloader")
         ra.make_bootloader()
     if args.generate:
-        ra = RustArtifacts(pooter,folder="firmware")
+        ra = RustArtifacts(pooter, folder="firmware")
         ra.make_firmware()
-    
+
     if args.build:
         p.build(pooter, do_program=True)
 
