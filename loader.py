@@ -37,8 +37,8 @@ class MonTool:
         print("Attach console ^] to exit.")
         term.start()
         term.join(True)
-        # send exit (control d)
-        self.ser.write([0x04])
+        # send exit (ESC key)
+        self.ser.write([0x1b])
         print("exit console")
 
     def _cmd(self, cmd):

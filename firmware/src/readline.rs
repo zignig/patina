@@ -24,6 +24,7 @@ pub enum ConsoleAction {
     Reset,
     Enter,
     BackSpace,
+    CtlZ,
     Unknown,
 }
 

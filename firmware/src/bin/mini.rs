@@ -38,8 +38,8 @@ impl Ctx {
 pub extern "C" fn main() -> ! {
     // Delay
     wait(600);
-    let intro = "Welcome to patina";
-    println!("{}\r\n", intro);
+    println!("Welcome to patina\r\n");
+    println!("press esc to return to bootloader\r\n");
     println!("{}\r\n", generated::DATE_STAMP);
     println!("{}", PROMPT);
 
@@ -61,7 +61,8 @@ pub extern "C" fn main() -> ! {
                     Cancel => {
                         ctx.cons.clear_screen();
                     }
-                    Reset => {
+                    Escape => {
+                        println!("EXIT");
                         reset();
                     }
                     Enter => {
