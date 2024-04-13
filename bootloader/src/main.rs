@@ -142,6 +142,9 @@ fn panic(_info: &core::panic::PanicInfo<'_>) -> ! {
     }
 }
 
+// generated.rs is built by the python script from 
+// a memory map in fhe fabric.
+#[allow(unused)]
 mod generated {
     include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 }

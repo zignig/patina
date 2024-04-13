@@ -95,9 +95,9 @@ class Computer(Elaboratable):
             m.submodules.fabric = fabric = SimpleFabric(
                 [
                     partial_decode(m, mainmem.bus, bus_width),
-                    partial_decode(m, bootmem.bus, bus_width),
-                    partial_decode(m, uart.bus, bus_width),
-                    partial_decode(m, warm.bus, bus_width),
+                    partial_decode(m, bootmem.bus, bus_width),  # 0x____0000
+                    partial_decode(m, uart.bus, bus_width),  # 0x____1000
+                    partial_decode(m, warm.bus, bus_width),  # 0x____2000
                     partial_decode(m, led.bus, bus_width),
                     partial_decode(m, input.bus, bus_width),
                     # partial_decode(m,spi.bus,bus_width)

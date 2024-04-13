@@ -113,7 +113,7 @@ class MonTool:
         self._ack()
         self._cmd(Commands.write)
         for (count,val) in enumerate(data):
-            if count % 20 == 0:
+            if count % 64 == 0:
                 print('#',end='')
             self._write_num(val)
         print()

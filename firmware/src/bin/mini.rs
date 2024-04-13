@@ -39,7 +39,7 @@ pub extern "C" fn main() -> ! {
     // Delay
     wait(600);
     println!("Welcome to patina\r\n");
-    println!("press esc to return to bootloader\r\n");
+    println!("press esc to return to bootloader\r\n\r\n");
     println!("{}\r\n", generated::DATE_STAMP);
     println!("{}", PROMPT);
 

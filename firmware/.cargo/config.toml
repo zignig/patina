@@ -8,6 +8,8 @@ runner = "cargo objdump --release --bin mini -- --disassemble --no-show-raw-insn
 rustflags = [
  "-C", "relocation-model=pie",
  "-C", "link-arg=-Tmemory.x",
+ "-C", "embed-bitcode=y",
+ "-C", "lto=fat",
 ]
 
 [env]

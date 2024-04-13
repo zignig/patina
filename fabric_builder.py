@@ -74,6 +74,7 @@ class FabricBuilder(Component):
 
         log.debug("")
         log.debug("Device Scan")
+        log.debug("address in halfwords")
         div()
 
 
@@ -90,9 +91,9 @@ class FabricBuilder(Component):
         self.addr_width = addr_width = max(d.width for d in self.devices) +1
         self.extra_bits = extra_bits = (len(self.devices) - 1).bit_length()
 
-        log.debug("bus width %d (hw)", self.addr_width)
-        log.debug("bus extra bits %d (hw)", self.extra_bits)
-        log.debug(f"total width {addr_width+extra_bits} (hw)")
+        log.debug("bus width %d ", self.addr_width)
+        log.debug("bus extra bits %d ", self.extra_bits)
+        log.debug(f"total width {addr_width+extra_bits}")
         div()
 
         # Create the memory map for the fabric itself

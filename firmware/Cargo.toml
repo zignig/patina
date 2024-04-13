@@ -17,10 +17,9 @@ panic = "abort"
 
 [profile.release]
 panic = "abort"
-#strip = true
-opt-level = 's'
-debug = false 
-# mir-opt-level = 0
+opt-level = 'z'
+debug = false
+test = false
 
 [build-dependencies]
 #riscv-target = "0.1.2"
