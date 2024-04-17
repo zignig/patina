@@ -64,20 +64,30 @@ class Computer(Elaboratable):
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
         self.led = OutputPort(1, read_back=True)
         self.input = InputPort(5)
-        # self.spi = SimpleSPI(fifo_depth=512)
+        self.spi = SimpleSPI(fifo_depth=512)
         self.warm = WarmBoot()
 
-        devices = [mainmem, bootmem, self.bidi, self.warm, self.led,self.input]  # ,self.spi]
+        devices = [
+            mainmem,
+            bootmem,
+            self.bidi,
+            self.warm,
+            self.led,
+            self.input,
+            self.spi,
+        ]
 
-        self.fabric = FabricBuilder(devices)
+        self.fabric = fabric = FabricBuilder(devices)
 
-        self.cpu = Cpu(reset_vector=4096, addr_width=17)  # 4096 in half words
+        self.cpu = Cpu(
+            reset_vector=fabric.reset_vector, addr_width=fabric.addr_width
+        )  # 4096 in half words
 
     def elaborate(self, platform):
         m = Module()
 
         # This creates and binds all the devices
-        old = True
+        old = False
         if old:
             # cliffs default bus layout
             log.warning("Build  the bus")
@@ -89,9 +99,10 @@ class Computer(Elaboratable):
             m.submodules.uart = uart = self.bidi
             m.submodules.warm = warm = self.warm
             m.submodules.led = led = self.led
-            m.submodules.input = input =  self.input
-            bus_width = 13
-            
+            m.submodules.input = input = self.input
+
+            bus_width = self.fabric.decoder_width
+
             m.submodules.fabric = fabric = SimpleFabric(
                 [
                     partial_decode(m, mainmem.bus, bus_width),
@@ -105,14 +116,20 @@ class Computer(Elaboratable):
             )
             connect(m, self.cpu.bus, fabric.bus)
         else:
-            # New bus !! broken !!
-            self.cpu.build(m)
+            # Add the CPU
+            m.submodules.cpu = self.cpu
+            # Add the fabric
+            m.submodules.fabric = self.fabric
+            # Bind the fabric (weird semantics in elaborate)
+            self.fabric.bind(m)
+            # Connect the cpu and the fabric
+            connect(m, self.cpu.bus, self.fabric.bus)
 
         uart = True
-        led = True
+        led = False
         flash = False
         warm_boot = True
-        input_pins = True
+        input_pins = False
 
         if flash:
             spi_pins = platform.request("spi_flash_1x")
@@ -148,9 +165,9 @@ class Computer(Elaboratable):
             m.d.comb += user.o.eq(self.led.pins[0])
 
         if input_pins:
-            pin1 = platform.request("boot",0)
-            pin2 = platform.request("user",0)
-            
+            pin1 = platform.request("boot", 0)
+            pin2 = platform.request("user", 0)
+
             boot_post_sync = Signal()
 
             m.submodules.boot_sync = amaranth.lib.cdc.FFSynchronizer(
@@ -162,7 +179,7 @@ class Computer(Elaboratable):
             )
             m.d.comb += self.input.pins[0].eq(boot_post_sync)
             m.d.comb += self.input.pins[1].eq(pin2.i)
-            
+
         # # Attach the warmboot
         # if warm_boot:
         #     boot = platform.request("boot", 0)
@@ -176,13 +193,15 @@ from amaranth_boards.tinyfpga_bx import TinyFPGABXPlatform
 p = TinyFPGABXPlatform()
 
 # 3.3V FTDI connected to the tinybx.
-# pico running micro python to run external comms 
+# pico running micro python to run external comms
 p.add_resources(
     [
         UARTResource(
             0, rx="A8", tx="B8", attrs=Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
         ),
-        Resource("boot", 0, Pins("H2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS",PULLUP=1)),
+        Resource(
+            "boot", 0, Pins("H2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
+        ),
         Resource("user", 0, Pins("J1", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
     ]
 )

@@ -42,7 +42,7 @@ root_logger.setLevel(logging.ERROR)
 log = root_logger.getChild("computer")
 
 # tiny-bootloader is written in a high-level language and needs to have a stack,
-bootloader = Path("boot12k.bin").read_bytes()
+bootloader = Path("boot8k.bin").read_bytes()
 boot_image = struct.unpack("<" + "h" * (len(bootloader) // 2), bootloader)
 
 log.info("image_size {}", 2 ** (len(boot_image)).bit_length())
@@ -53,7 +53,7 @@ class Computer(Elaboratable):
         F = 16e6  # Hz
         super().__init__()
 
-        self.mainmem = mainmem = BasicMemory(depth=512 * 12)  # 16bit cells
+        self.mainmem = mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
         # self.othermem = othermem = BasicMemory(depth=512 * 3)
         # secondmem = SpramMemory()
         # thirdmem = SpramMemory()

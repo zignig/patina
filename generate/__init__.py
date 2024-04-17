@@ -2,70 +2,46 @@ from .memx import GenRust
 from .memx import BootLoaderX
 from .variables import RustLib
 
-import os 
+import os
+
 
 class RustArtifacts:
-    def __init__(self,soc,folder=None):
-        self.soc =  soc 
-        self.folder = folder 
+    def __init__(self, soc, folder=None):
+        self.soc = soc
+        self.folder = folder
 
-        bloader = BootLoaderX(soc)
-        #bloader.generate_memory_x()
-
-        firmware = GenRust(soc)
-        #firmware.generate_memory_x()
-
-        rustlib = RustLib(soc)
-        #rustlib.gen_lib_rs()
-
-        # if folder is not None:
-        #     print(folder)
-        #     try:
-        #         os.stat(folder)
-        #     except:
-        #         os.mkdir(folder)
-        #     memx = open(folder+os.sep+"memory.x",'w')
-        #     bloader.generate_memory_x(memx)
-        #     libx = open(folder+os.sep+"generated.rs",'w')
-        #     rustlib.gen_lib_rs(libx)
-        # else:
-        #     bloader.generate_memory_x()
-        #     rustlib.gen_lib_rs()
-        
     def make_bootloader(self):
         folder = self.folder
-        
+
         rustlib = RustLib(self.soc)
         bloader = BootLoaderX(self.soc)
 
-        print("Generate Files")
+        print("Generate Bootloader Files in ", folder)
         try:
             os.stat(folder)
         except:
             os.mkdir(folder)
-        memx = open(folder+os.sep+"memory.x",'w')
+        memx = open(folder + os.sep + "memory.x", "w")
         bloader.generate_memory_x(memx)
-        libx = open(folder+os.sep+"generated.rs",'w')
+        libx = open(folder + os.sep + "generated.rs", "w")
         rustlib.gen_lib_rs(libx)
-        
+
     def make_firmware(self):
         folder = self.folder
-        
+
         rustlib = RustLib(self.soc)
         bloader = GenRust(self.soc)
 
-        print("Generate Files")
+        print("Generate Firmwar Files in ",folder)
         if folder is not None:
             try:
                 os.stat(folder)
             except:
                 os.mkdir(folder)
-            memx = open(folder+os.sep+"memory.x",'w')
-            libx = open(folder+os.sep+"generated.rs",'w')
+            memx = open(folder + os.sep + "memory.x", "w")
+            libx = open(folder + os.sep + "generated.rs", "w")
             bloader.generate_memory_x(memx)
             rustlib.gen_lib_rs(libx)
         else:
             bloader.generate_memory_x()
             rustlib.gen_lib_rs()
-
-

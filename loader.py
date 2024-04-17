@@ -140,6 +140,7 @@ class MonTool:
             m.call(0)
             m.attach()
         else:
+            print(data,firm)
             print("failed upload")
 
 

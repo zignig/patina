@@ -3,6 +3,11 @@ use crate::uart::{Bind, DefaultSerial};
 
 const BOX: &[&str] = &["┌─┬┐", "│ ││", "├─┼┤", "└─┴┘"];
 
+pub fn show_boxen() { 
+    for i in BOX{
+        println!("{}",i);
+    }
+}
 pub fn rectangle(w: usize, h: usize) {
     let top = BOX[0];
     per(top, 0);
@@ -29,7 +34,7 @@ pub fn rectangle(w: usize, h: usize) {
     per(bottom, 3);
 }
 
-#[inline(never)]
+//#[inline(never)]
 fn per(s: &str, i: usize) {
     println!("{}", s.chars().nth(i).unwrap());
 }

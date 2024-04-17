@@ -3,6 +3,7 @@
 
 use rustv::init::{reset, wait};
 use rustv::readline;
+use rustv::terminal::{rectangle, show_boxen};
 use rustv::{generated, println};
 //use rustv::terminal;
 use rustv::input::{ActualInput, Input};
@@ -80,7 +81,7 @@ pub extern "C" fn main() -> ! {
         counter = counter + 1;
         if counter > 6_000_000 {
             println!("bye");
-            wait(10000);
+            wait(100_000);
             reset();
         }
     }
@@ -124,7 +125,13 @@ static COMMANDS: &[(&str, Command)] = &[
     ("off", cmd_off),
     ("blink", cmd_blink),
     ("read", cmd_read),
+    ("rect",cmd_rect),
 ];
+
+fn cmd_rect(_ctx: &mut Ctx) {
+    //rectangle(ctx.counter, ctx.counter);
+    //show_boxen();
+}
 
 fn cmd_read(ctx: &mut Ctx) {
 
