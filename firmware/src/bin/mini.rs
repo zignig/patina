@@ -1,9 +1,10 @@
 #![no_std]
 #![no_main]
 
+use rustv::flash::Flash;
 use rustv::init::{reset, wait};
 use rustv::readline;
-use rustv::terminal::{rectangle, show_boxen};
+//use rustv::terminal::{rectangle, show_boxen};
 use rustv::{generated, println};
 //use rustv::terminal;
 use rustv::input::{ActualInput, Input};
@@ -35,6 +36,10 @@ impl Ctx {
     }
 }
 
+//https://github.com/tinyfpga/TinyFPGA-Bootloader/blob/master/README.md
+// flash address and data range
+pub type TinyFlash = Flash<{ crate::generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
+
 #[no_mangle]
 pub extern "C" fn main() -> ! {
     // Delay
@@ -49,6 +54,12 @@ pub extern "C" fn main() -> ! {
     ctx.led.on();
     wait(10000);
     ctx.led.off();
+
+    // Flash testing
+    let mut flash: TinyFlash = Flash::new();
+    flash.wakeup();
+    let jedec_id = flash.read_jedec();
+    println!("{:?}",jedec_id);
 
     loop {
         use readline::ConsoleAction::*;
@@ -125,7 +136,7 @@ static COMMANDS: &[(&str, Command)] = &[
     ("off", cmd_off),
     ("blink", cmd_blink),
     ("read", cmd_read),
-    ("rect",cmd_rect),
+    ("rect", cmd_rect),
 ];
 
 fn cmd_rect(_ctx: &mut Ctx) {
@@ -134,7 +145,6 @@ fn cmd_rect(_ctx: &mut Ctx) {
 }
 
 fn cmd_read(ctx: &mut Ctx) {
-
     loop {
         let val: u16 = ctx.input.read();
         if let Some(_c) = ctx.cons.serial.get() {

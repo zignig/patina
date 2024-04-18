@@ -5,6 +5,7 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+
 [dependencies]
 cfg-if = "1.0.0"
 heapless = { version = "0.8.0" }
@@ -18,7 +19,6 @@ panic = "abort"
 panic = "abort"
 opt-level = 'z'
 debug = false
-test = false
 
 [build-dependencies]
 #riscv-target = "0.1.2"

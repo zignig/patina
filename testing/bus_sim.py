@@ -11,9 +11,10 @@ from amaranth.lib.wiring import *
 from amaranth.lib.enum import *
 
 from hapenny.cpu import Cpu
-from hapenny.bus import BusPort, partial_decode, SimpleFabric, SMCFabric
+from hapenny.bus import BusPort, partial_decode, SimpleFabric
 from hapenny import *
-from hapenny.mem import BasicMemory, BootMem
+from hapenny.mem import BasicMemory
+
 from hapenny.gpio import OutputPort
 import logging
 from rich.logging import RichHandler
@@ -25,76 +26,12 @@ import logging
 log = logging.getLogger(__name__)
 
 
-from riscv_assembler.convert import AssemblyConverter as AC
-
-asm = """
-nop
-nop
-nop
-nop
-nop
-nop
-
-
-li a0, 8192 # control register 
-li a1, 8194 # data register 
-
-li a5, 36865  # 0b1001000000000001 # write 
-ori a5, a5, 2 # 1 byte
-sw a5, 0(a0)
-
-li a7, 20
-tx_wait:
-    addi a7,a7,-1
-    bge x0,a7, tx_wait
-
-li a5,1024
-sw a5, 0(a1)
-
-
-
-# Change to read register
-li a5, 5
-sw a5, 0(a0) # read
-
-lw a6, 0(a1)
-lw a6, 0(a1)
-lw a6, 0(a1)
-lw a6, 0(a1)
-lw a6, 0(a1)
-
-# spin
-loop:
-j loop
-
-"""
-
-cnv = AC(output_mode="a", hex_mode=True)
-data = cnv(asm)
-
-boot_file = []
-for i in data:
-    as_num = int(i, base=16)
-    lower = as_num & 0xFFFF
-    upper = as_num >> 16
-    # print(hex(as_num))
-    print(hex(upper), hex(lower))
-    boot_file.append(lower)
-    boot_file.append(upper)
-
-print(boot_file)
-
-
 RAM_WORDS = 256
 RAM_ADDR_BITS = (RAM_WORDS - 1).bit_length()
 BUS_ADDR_BITS = RAM_ADDR_BITS + 1
 
 bootloader = Path("tinybx8k.bin").read_bytes()
 boot_image = struct.unpack("<" + "h" * (len(bootloader) // 2), bootloader)
-
-
-
-
 
 def write_mem(addr, value):
     yield fabric.bus.cmd.payload.addr.eq(addr)
