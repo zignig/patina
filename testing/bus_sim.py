@@ -16,6 +16,9 @@ from hapenny import *
 from hapenny.mem import BasicMemory
 
 from hapenny.gpio import OutputPort
+from patina.spi import SimpleSPI
+from patina.fabric_builder import FabricBuilder
+
 import logging
 from rich.logging import RichHandler
 
@@ -32,43 +35,6 @@ BUS_ADDR_BITS = RAM_ADDR_BITS + 1
 
 bootloader = Path("tinybx8k.bin").read_bytes()
 boot_image = struct.unpack("<" + "h" * (len(bootloader) // 2), bootloader)
-
-def write_mem(addr, value):
-    yield fabric.bus.cmd.payload.addr.eq(addr)
-    yield fabric.bus.cmd.payload.data.eq(value & 0xFFFF)
-    yield fabric.bus.cmd.payload.lanes.eq(0b11)
-    yield fabric.bus.cmd.valid.eq(1)
-    yield
-    yield fabric.bus.cmd.payload.addr.eq(addr + 1)
-    yield fabric.bus.cmd.payload.data.eq(value >> 16)
-    yield fabric.bus.cmd.payload.lanes.eq(0b11)
-    yield fabric.bus.cmd.valid.eq(1)
-    yield
-    yield fabric.bus.cmd.payload.lanes.eq(0)
-    yield fabric.bus.cmd.valid.eq(0)
-
-
-def read_mem(addr):
-    yield fabric.bus.cmd.payload.addr.eq(addr)
-    yield fabric.bus.cmd.payload.lanes.eq(0)
-    yield fabric.bus.cmd.valid.eq(1)
-    yield
-    yield fabric.bus.cmd.payload.addr.eq(addr + 1)
-    yield fabric.bus.cmd.valid.eq(1)
-    yield
-    bottom = yield fabric.bus.resp
-    yield
-    yield fabric.bus.cmd.valid.eq(0)
-    yield
-    top = yield fabric.bus.resp
-    # print(">>", top, bottom)
-    return bottom | (top << 16)
-
-
-class State(Enum):
-    WRITE = 0
-    READ = 1
-
 
 if __name__ == "__main__":
     m = Module()

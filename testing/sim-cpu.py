@@ -32,7 +32,6 @@ class TestMemory(BasicMemory):
         super().__init__(
             contents = contents,
             depth = 256,
-            name = name
         )
 
         # make a second bus port
@@ -274,17 +273,13 @@ if __name__ == "__main__":
     mem2 = TestMemory([
         0b00000000000000000000_00000_1101111, # JAL x0, .
     ],name="mem2")
-    uut.add_device([mem,mem2])
-    uut.build(m)
-    uut.show()
 
     phase = Signal(TestPhase)
     cycle_counter = Signal(32)
     m.d.sync += cycle_counter.eq(cycle_counter + 1)
-
-    # m.submodules.bus = fabric = SimpleFabric([
-    #     partial_decode(m, mem.bus, 31),
-    # ])
+    m.submodules.bus = fabric = SimpleFabric([
+         partial_decode(m, mem.bus, 31),
+     ])
 
     # connect(m, uut.bus, fabric.bus)
 

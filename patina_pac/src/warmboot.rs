@@ -1,5 +1,4 @@
 
-pub type ActualWarm = Warmboot<{crate::generated::WARMBOOT_ADDR }>;
 pub struct Warmboot<const WARM: u32>;
 
 impl<const WARM: u32> Warmboot<WARM> {

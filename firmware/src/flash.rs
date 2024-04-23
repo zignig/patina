@@ -25,13 +25,16 @@
 //              6-0: remaining bits of char, if RX fifo is not empty in read mode
 
 use core::ops::{BitAnd, BitOr};
+use core::u32;
 
-use crate::init::wait;
+use crate::uart::{Bind, DefaultSerial};
+use crate::{init::wait, println};
 
 #[repr(u8)]
 enum Commands {
     Wakeup = 0xAB,
     Jedec = 0x9F,
+    FastRead = 0x0B,
 }
 pub struct Flash<const ADDR: u32, const START: u32, const SIZE: u32>;
 
@@ -47,18 +50,24 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         Self {}
     }
 
-    fn txn_running(&mut self) -> bool{
+    // Get status bit from the spi device
+    fn txn_running(&mut self) -> bool {
         let mut val = unsafe { Self::STATUS.read_volatile() };
+        println!(">{:X}<\r\n", val);
         val = val.bitand(0x8000);
-        val != 0
+        val == 0x8000
     }
-    
-    fn txn_wait(&mut self) { 
-        while self.txn_running(){ 
+
+    // Wait until the transaction has finished
+    fn txn_wait(&mut self) {
+        println!("wait\r\n {}", self.txn_running());
+        while self.txn_running() {
+            println!("spinning\r\n");
             // spin
         }
     }
 
+    // Start a write transaction
     fn txn_write(&mut self, len: u16, assert: bool) {
         // make it a write
         let mut val: u16 = 1 << 15;
@@ -68,12 +77,14 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         }
         // set the length of the transaction
         val += len;
+        println!("tx-{}\r\n", val);
         unsafe {
             Self::STATUS.write_volatile(val);
         }
     }
 
-    fn txn_read(&mut self, len: u16, assert: bool){
+    // Start a read transaction
+    fn txn_read(&mut self, len: u16, assert: bool) {
         let mut val: u16 = 0;
         if assert {
             val = val.bitor(1 << 12);
@@ -84,37 +95,70 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         }
     }
 
+    // Write a byte into the data fifo.
     fn write_data(&mut self, data: u8) {
+        println!("write data {:X}", data as u16);
         unsafe {
             Self::DATA.write_volatile(data as u16);
         }
     }
 
-    fn read_data(&mut self) -> u8{
+    // Read a byte out of the fifo
+    // Register has some layout for fifo status
+    // Check the top of  the file
+    // TODO , check the timeout loop
+    fn read_data(&mut self) -> u8 {
         let mut val = unsafe { Self::DATA.read_volatile() };
+        println!("read = 0x{:X}\r\n", val);
         val = val.rotate_left(1).bitand(0x00FF);
         val as u8
     }
 
+    // Send wake up to the flash
     pub fn wakeup(&mut self) {
         self.txn_write(1, true);
         self.write_data(Commands::Wakeup as u8);
         self.txn_wait();
-        // wait for the
-        wait(1000);
+        // wait for the flash to wake up.
+        wait(10000);
     }
 
-    pub fn read_jedec(&mut self) -> [u8;3]{
-        let mut id: [u8;3] = [0;3];
+    // Read the JEDEC code from the flash chip
+    pub fn read_jedec(&mut self) -> [u8; 3] {
+        let mut id: [u8; 3] = [0; 3];
 
-        self.txn_write(1,false);
+        self.txn_write(1, false);
         self.write_data(Commands::Jedec as u8);
         self.txn_wait();
-        self.txn_read(3,true);
-        for pos in 0..3{
+        self.txn_read(3, true);
+
+        for pos in 0..3 {
+            println!("status {}\r\n", self.txn_running());
             id[pos] = self.read_data();
         }
-        return id
+
+        return id;
     }
 
+    // Write the address of the read write to the flash
+    // Must be inside a transaction
+    pub fn write_address(&mut self, addr: u32) {
+        for octet in addr.to_be_bytes() {
+            println!("addr:{:x}\r\n", octet);
+            self.write_data(octet);
+        }
+    }
+
+    pub fn read_block(&mut self, addr: u32, len: u16) {
+        self.txn_write(5, false);
+        self.write_data(Commands::FastRead as u8);
+        println!("\r\n");
+        self.write_address(addr << 12);
+        self.txn_wait();
+        self.txn_read(len, true);
+        for _i in 0..len {
+            let data = self.read_data() as char;
+            println!("{}", data);
+        }
+    }
 }

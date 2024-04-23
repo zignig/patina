@@ -19,13 +19,13 @@ from hapenny.serial import BidiUart
 from hapenny.mem import BasicMemory, SpramMemory
 from hapenny.gpio import OutputPort, InputPort
 
-from warmboot import WarmBoot
+from patina.warmboot import WarmBoot
 
-from spi import SimpleSPI
+from patina.spi import SimpleSPI
 
 from generate import *
 
-from fabric_builder import FabricBuilder, BootMem
+from patina.fabric_builder import FabricBuilder, BootMem
 
 # Logging
 import logging
@@ -137,7 +137,7 @@ class Computer(Elaboratable):
             m.d.comb += [
                 # peripheral to outside world
                 spi_pins.clk.o.eq(self.spi.clk),
-                spi_pins.cs.o.eq(~self.spi.cs),
+                spi_pins.cs.o.eq(self.spi.cs),
                 spi_pins.copi.o.eq(self.spi.copi),
                 self.spi.cipo.eq(spi_pins.cipo.i),
             ]
@@ -181,9 +181,9 @@ class Computer(Elaboratable):
             m.d.comb += self.input.pins[1].eq(pin2.i)
 
         # # Attach the warmboot
-        # if warm_boot:
-        #     boot = platform.request("boot", 0)
-        #     m.d.comb += self.warm.external.eq(0)  # boot.i)
+        if warm_boot:
+            boot = platform.request("boot", 0)
+            m.d.comb += self.warm.external.eq(boot.i)
 
         return m
 

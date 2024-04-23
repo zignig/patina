@@ -7,7 +7,7 @@ use core::ops::BitAnd;
 // Make the struct
 pub struct Input<const INPUT: u32>;
 // Refence the Fixed address
-pub type ActualInput = Input<{ crate::generated::INPUTPORT_ADDR }>;
+
 
 impl<const INPUT: u32> Input<INPUT> {
     pub const ADDR: *mut u16 = INPUT as *mut u16;

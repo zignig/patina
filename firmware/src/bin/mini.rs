@@ -1,18 +1,24 @@
 #![no_std]
 #![no_main]
 
-use rustv::flash::Flash;
-use rustv::init::{reset, wait};
-use rustv::readline;
-//use rustv::terminal::{rectangle, show_boxen};
-use rustv::{generated, println};
-//use rustv::terminal;
-use rustv::input::{ActualInput, Input};
-use rustv::led::{ActualLed, Led};
+use rustv::{
+    flash::Flash,
+    generated,
+    init::{reset, wait},
+    println, readline,
+};
+
+use patina_pac::{input::Input, led::Led, warmboot::Warmboot};
+
 use rustv::uart::{Bind, DefaultSerial};
-use rustv::warmboot::{ActualWarm, Warmboot};
 
 const PROMPT: &str = "|>";
+
+// Actual devices
+pub type TinyFlash = Flash<{ generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
+pub type ActualLed = Led<{ generated::OUTPUTPORT_ADDR }>;
+pub type ActualInput = Input<{ crate::generated::INPUTPORT_ADDR }>;
+pub type ActualWarm = Warmboot<{ crate::generated::WARMBOOT_ADDR }>;
 
 // Primary data construct
 // Add more to me and it is made available to commands
@@ -22,6 +28,7 @@ struct Ctx {
     warm: ActualWarm,
     led: ActualLed,
     input: ActualInput,
+    flash: TinyFlash,
 }
 
 impl Ctx {
@@ -32,13 +39,10 @@ impl Ctx {
             warm: Warmboot::new(),
             led: Led::new(),
             input: Input::new(),
+            flash: Flash::new(),
         }
     }
 }
-
-//https://github.com/tinyfpga/TinyFPGA-Bootloader/blob/master/README.md
-// flash address and data range
-pub type TinyFlash = Flash<{ crate::generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
 
 #[no_mangle]
 pub extern "C" fn main() -> ! {
@@ -50,16 +54,16 @@ pub extern "C" fn main() -> ! {
     println!("{}", PROMPT);
 
     let mut counter: u32 = 0;
+    // Create the main context
     let mut ctx = Ctx::new();
+
     ctx.led.on();
     wait(10000);
     ctx.led.off();
 
-    // Flash testing
-    let mut flash: TinyFlash = Flash::new();
-    flash.wakeup();
-    let jedec_id = flash.read_jedec();
-    println!("{:?}",jedec_id);
+    ctx.flash.wakeup();
+
+    //cmd_flash(&mut ctx);
 
     loop {
         use readline::ConsoleAction::*;
@@ -90,7 +94,7 @@ pub extern "C" fn main() -> ! {
         }
         // bug out timer
         counter = counter + 1;
-        if counter > 6_000_000 {
+        if counter > 60_000_000 {
             println!("bye");
             wait(100_000);
             reset();
@@ -137,7 +141,14 @@ static COMMANDS: &[(&str, Command)] = &[
     ("blink", cmd_blink),
     ("read", cmd_read),
     ("rect", cmd_rect),
+    ("fl", cmd_flash),
 ];
+
+fn cmd_flash(ctx: &mut Ctx) {
+    let id = ctx.flash.read_jedec();
+    println!("{:?}", id);
+    //ctx.flash.read_block(0x00000, 256);
+}
 
 fn cmd_rect(_ctx: &mut Ctx) {
     //rectangle(ctx.counter, ctx.counter);

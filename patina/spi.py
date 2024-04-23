@@ -137,7 +137,7 @@ class SimpleSPI(Component):
                                 read_data[:7].eq(fifo.r_data[1:]),
                             ]
         # write
-        with m.Elif(cmd.valid & (cmd.payload.lanes == 3 )):
+        with m.Elif(cmd.valid & (cmd.payload.lanes.any())):
             with m.Switch(cmd.payload.addr):
                 with m.Case(0):  # transaction start register
                     with m.If(~r0_txn_active.value):

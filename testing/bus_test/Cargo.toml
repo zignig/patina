@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+patina_pac = { version = "0.1.0", path = "../../patina_pac" }
 
 [profile.release]
 panic = "abort"

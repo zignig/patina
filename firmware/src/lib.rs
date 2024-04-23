@@ -9,7 +9,4 @@ pub mod init;
 pub mod uart;
 pub mod readline;
 pub mod terminal;
-pub mod warmboot;
-pub mod led;
-pub mod input;
 pub mod flash;

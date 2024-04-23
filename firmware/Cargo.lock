@@ -164,6 +164,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "patina_pac"
+version = "0.1.0"
+
+[[package]]
 name = "percent-encoding"
 version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -195,6 +199,7 @@ dependencies = [
  "cfg-if",
  "heapless",
  "parse_int",
+ "patina_pac",
  "ufmt",
 ]
 

@@ -3,12 +3,5 @@
 version = 3
 
 [[package]]
-name = "bus_test"
-version = "0.1.0"
-dependencies = [
- "patina_pac",
-]
-
-[[package]]
 name = "patina_pac"
 version = "0.1.0"
