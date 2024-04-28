@@ -8,5 +8,7 @@ runner = "cargo objdump --release --bin bus_test -- --disassemble --no-show-raw-
 rustflags = [
  "-C", "relocation-model=pie",
  "-C", "link-arg=-Tmemory.x",
+ "-C", "embed-bitcode=y",
+ "-C", "lto=fat",
 ]
 

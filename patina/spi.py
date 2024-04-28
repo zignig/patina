@@ -82,7 +82,7 @@ class SimpleSPI(Component):
     copi: Out(1)
     cipo: In(1)
 
-    def __init__(self,fifo_depth=16):
+    def __init__(self, fifo_depth=16):
 
         super().__init__()
 
@@ -115,7 +115,7 @@ class SimpleSPI(Component):
         m.d.sync += self.bus.resp.eq(read_data)
 
         # read
-        with m.If(cmd.valid & (cmd.payload.lanes == 0) ):
+        with m.If(cmd.valid & (cmd.payload.lanes == 0)):
             with m.Switch(cmd.payload.addr):
                 with m.Case(0):  # status register
                     m.d.comb += [
