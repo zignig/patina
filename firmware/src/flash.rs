@@ -109,7 +109,7 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
     // TODO , check the timeout loop
     fn read_data(&mut self) -> u8 {
         let mut val = unsafe { Self::DATA.read_volatile() };
-        println!("read = 0x{:X}\r\n", val);
+        //println!("read = 0x{:X}\r\n", val);
         val = val.rotate_left(1).bitand(0x00FF);
         val as u8
     }
@@ -158,7 +158,7 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         self.txn_read(len, true);
         for _i in 0..len {
             let data = self.read_data() as char;
-            println!("{}", data);
+            println!("{:X}", data as u8);
         }
     }
 }

@@ -145,9 +145,9 @@ static COMMANDS: &[(&str, Command)] = &[
 ];
 
 fn cmd_flash(ctx: &mut Ctx) {
-    let id = ctx.flash.read_jedec();
-    println!("{:?}", id);
-    //ctx.flash.read_block(0x00000, 256);
+    //let id = ctx.flash.read_jedec();
+    //println!("{:?}", id);
+    ctx.flash.read_block(0x00000, 2048);
 }
 
 fn cmd_rect(_ctx: &mut Ctx) {
