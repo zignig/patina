@@ -97,7 +97,7 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
 
     // Write a byte into the data fifo.
     fn write_data(&mut self, data: u8) {
-        println!("write data {:X}", data as u16);
+        //println!("write data {:X}", data as u16);
         unsafe {
             Self::DATA.write_volatile(data as u16);
         }
@@ -133,8 +133,8 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         self.txn_read(3, true);
 
         for pos in 0..3 {
-            println!("status {}\r\n", self.txn_running());
             id[pos] = self.read_data();
+            println!("{:X}",id[pos]);
         }
 
         return id;
@@ -143,22 +143,24 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
     // Write the address of the read write to the flash
     // Must be inside a transaction
     pub fn write_address(&mut self, addr: u32) {
+        println!("addr :");
         for octet in addr.to_be_bytes() {
-            println!("addr:{:x}\r\n", octet);
+            println!("|{:x}|", octet);
             self.write_data(octet);
         }
+        println!("\r\n");
     }
 
     pub fn read_block(&mut self, addr: u32, len: u16) {
         self.txn_write(5, false);
         self.write_data(Commands::FastRead as u8);
         println!("\r\n");
-        self.write_address(addr << 12);
+        self.write_address(addr << 8);
         self.txn_wait();
         self.txn_read(len, true);
         for _i in 0..len {
             let data = self.read_data() as char;
-            println!("{:X}", data as u8);
+            println!("{}", data);
         }
     }
 }

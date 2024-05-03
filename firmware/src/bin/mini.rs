@@ -62,6 +62,7 @@ pub extern "C" fn main() -> ! {
     ctx.led.off();
 
     ctx.flash.wakeup();
+    ctx.flash.read_block(0x50000, 145);
 
     //cmd_flash(&mut ctx);
 
@@ -142,12 +143,20 @@ static COMMANDS: &[(&str, Command)] = &[
     ("read", cmd_read),
     ("rect", cmd_rect),
     ("fl", cmd_flash),
+    ("jdec",cmd_jedec)
 ];
 
 fn cmd_flash(ctx: &mut Ctx) {
-    //let id = ctx.flash.read_jedec();
-    //println!("{:?}", id);
-    ctx.flash.read_block(0x00000, 2048);
+    ctx.flash.read_block(0x50000, 145);
+    //let addr = 0;
+    // for i in 0..50{
+    //     ctx.flash.read_block(i*2048, 2048);
+    // }
+}
+
+fn cmd_jedec(ctx: &mut Ctx) {
+    let jd = ctx.flash.read_jedec();
+    println!("{:?}",jd);
 }
 
 fn cmd_rect(_ctx: &mut Ctx) {
