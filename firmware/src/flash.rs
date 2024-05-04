@@ -25,7 +25,6 @@
 //              6-0: remaining bits of char, if RX fifo is not empty in read mode
 
 use core::ops::{BitAnd, BitOr};
-use core::u32;
 
 use crate::uart::{Bind, DefaultSerial};
 use crate::{init::wait, println};
@@ -36,7 +35,19 @@ enum Commands {
     Jedec = 0x9F,
     FastRead = 0x0B,
 }
-pub struct Flash<const ADDR: u32, const START: u32, const SIZE: u32>;
+
+
+/// The interface to the flash device on the SOC
+pub struct Flash<const ADDR: u32, const START: u32, const SIZE: u32>{
+    byte_counter: u16,
+    in_transaction: bool
+}
+
+impl<const ADDR: u32, const START: u32, const SIZE: u32>Default for Flash<ADDR, START, SIZE> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE> {
     // Registers
@@ -45,24 +56,27 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
     // Address Limits
     // const START: *mut u32 = START as *mut u32;
     // const SIZE: *mut u32 = SIZE as *mut u32;
-
+    
     pub fn new() -> Self {
-        Self {}
+        Self {
+            byte_counter: 0,
+            in_transaction: false
+        }
     }
 
     // Get status bit from the spi device
     fn txn_running(&mut self) -> bool {
         let mut val = unsafe { Self::STATUS.read_volatile() };
-        println!(">{:X}<\r\n", val);
+        //println!(">{:X}<\r\n", val);
         val = val.bitand(0x8000);
         val == 0x8000
     }
 
     // Wait until the transaction has finished
     fn txn_wait(&mut self) {
-        println!("wait\r\n {}", self.txn_running());
+        //println!("wait\r\n {}", self.txn_running());
         while self.txn_running() {
-            println!("spinning\r\n");
+            //println!("spinning\r\n");
             // spin
         }
     }
@@ -77,10 +91,11 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         }
         // set the length of the transaction
         val += len;
-        println!("tx-{}\r\n", val);
+        //println!("tx-{}\r\n", val);
         unsafe {
             Self::STATUS.write_volatile(val);
         }
+        self.in_transaction = true;
     }
 
     // Start a read transaction
@@ -109,8 +124,15 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
     // TODO , check the timeout loop
     fn read_data(&mut self) -> u8 {
         let mut val = unsafe { Self::DATA.read_volatile() };
+        val = val.rotate_left(1);
+        // if the last bit is set, the fifo is empty
+        // we  should wait
+        while val.bitand(0x8000) == 0x8000 {
+            // spin
+        }
         //println!("read = 0x{:X}\r\n", val);
-        val = val.rotate_left(1).bitand(0x00FF);
+        val = val.bitand(0x00FF);
+        //wait(1000);
         val as u8
     }
 
@@ -131,36 +153,70 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         self.write_data(Commands::Jedec as u8);
         self.txn_wait();
         self.txn_read(3, true);
-
-        for pos in 0..3 {
-            id[pos] = self.read_data();
-            println!("{:X}",id[pos]);
+        //self.txn_wait();
+        for item in &mut id { 
+            *item = self.read_data();
         }
-
-        return id;
+        
+        id
     }
 
     // Write the address of the read write to the flash
     // Must be inside a transaction
     pub fn write_address(&mut self, addr: u32) {
-        println!("addr :");
+        //println!("addr :");
         for octet in addr.to_be_bytes() {
-            println!("|{:x}|", octet);
+            //println!("|{:x}|", octet);
             self.write_data(octet);
         }
-        println!("\r\n");
+        //println!("\r\n");
     }
 
     pub fn read_block(&mut self, addr: u32, len: u16) {
+        // Start a FastRead transaction
         self.txn_write(5, false);
         self.write_data(Commands::FastRead as u8);
-        println!("\r\n");
         self.write_address(addr << 8);
         self.txn_wait();
+        // Do some length calculations
+        // Chunk the transaction ( 12bit len on the spi)
+        const CHUNK_SIZE: u16 = 64; // 2048 actual, small for testing
+        let chunks = len / CHUNK_SIZE;
+        let remainder = len % CHUNK_SIZE;
+
+        println!("{} in {} = {} rem {}\r\n", len, CHUNK_SIZE, chunks, remainder);
+        for chunk in 0..chunks {
+            println!("chunk {}\r\n", chunk);
+            if (chunk == chunks - 1) & (remainder == 0) {
+                println!("LAST");
+            } else {
+                println!(" more ");
+            }
+        }
+        if remainder > 0 {
+            println!("rem = {}", remainder)
+        }
+        println!("\r\n");
         self.txn_read(len, true);
         for _i in 0..len {
             let data = self.read_data() as char;
             println!("{}", data);
         }
+        println!("\r\n");
+    }
+}
+
+// Impliment iterator for reads (maybe)
+
+impl<const ADDR: u32, const START: u32, const SIZE: u32> Iterator for Flash<ADDR, START, SIZE> {
+    type Item = u8;
+    
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.byte_counter > 0 
+        { 
+            self.byte_counter -= 1;
+            return Some(self.read_data()) ;
+        } 
+        None
     }
 }

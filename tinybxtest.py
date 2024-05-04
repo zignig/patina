@@ -126,7 +126,7 @@ class Computer(Elaboratable):
             connect(m, self.cpu.bus, self.fabric.bus)
 
         uart = True
-        led = False
+        led = True
         flash = True
         warm_boot = True
         input_pins = False

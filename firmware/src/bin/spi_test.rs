@@ -5,23 +5,17 @@ use rustv::{
     flash::Flash,
     generated,
     init::reset,
-    uart::{Bind, DefaultSerial},
 };
 
 #[no_mangle]
 pub extern "C" fn main() -> ! {
-    let mut ds = DefaultSerial::new();
     pub type TinyFlash = Flash<{ generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
     let mut flash: TinyFlash = Flash::new();
-
+    
+    flash.wakeup();
+        
     loop {
-        ds.putb('w' as u8);
-        flash.wakeup();
-        ds.putb('j' as u8);
-        let jd = flash.read_jedec();
-        for i in jd{
-            ds.putb(i);
-        }
+        flash.read_block(0x50000, 1290);
         reset();
     }
 }

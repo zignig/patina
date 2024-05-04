@@ -1,6 +1,6 @@
 use crate::println;
 use crate::uart::{Bind, DefaultSerial};
-use heapless::{String};
+use heapless::String;
 use ufmt::derive::uDebug;
 
 const PROMPT: &str = ">>";
@@ -53,7 +53,12 @@ impl Buffer {
     fn push_str(&mut self, s: &str) {
         self.data.push_str(s).unwrap();
     }
+}
 
+impl Default for Console {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 pub struct Console {
@@ -85,7 +90,7 @@ impl Console {
         if let Some(act) = self.read_key_board() {
             match act {
                 ConsoleAction::Char(c) => {
-                    if self.echo{
+                    if self.echo {
                         println!("{}", (c as char));
                     }
                     None
@@ -124,7 +129,7 @@ impl Console {
                 ConsoleAction::Enter => {
                     // Bubble up the enter
                     Some(act)
-                },
+                }
                 ConsoleAction::BackSpace => {
                     //self.backspace();
                     None
@@ -183,6 +188,7 @@ impl Console {
             self.buffer.push_str(end);
         }
     }
+
     pub fn redraw_line(&mut self) {
         //Clear line
         println!("\x1b[2K");
@@ -239,32 +245,32 @@ impl Console {
                                             return Some(ConsoleAction::Left);
                                         }
                                         b'\x31' => {
-                                            if let Some(_) = self.serial.tget() {
+                                            if self.serial.tget().is_some() {
                                                 return Some(ConsoleAction::Home);
                                             }
                                         }
                                         b'\x32' => {
-                                            if let Some(_) = self.serial.tget() {
+                                            if self.serial.tget().is_some() {
                                                 return Some(ConsoleAction::Insert);
                                             }
                                         }
                                         b'\x33' => {
-                                            if let Some(_) = self.serial.tget() {
+                                            if self.serial.tget().is_some() {
                                                 return Some(ConsoleAction::Delete);
                                             }
                                         }
                                         b'\x34' => {
-                                            if let Some(_) = self.serial.tget() {
+                                            if self.serial.tget().is_some() {
                                                 return Some(ConsoleAction::End);
                                             }
                                         }
                                         b'\x35' => {
-                                            if let Some(_) = self.serial.tget() {
+                                            if self.serial.tget().is_some() {
                                                 return Some(ConsoleAction::PgUp);
                                             }
                                         }
                                         b'\x36' => {
-                                            if let Some(_) = self.serial.tget() {
+                                            if self.serial.tget().is_some() {
                                                 return Some(ConsoleAction::PgDown);
                                             }
                                         }

@@ -78,7 +78,7 @@ impl<const UART: u32> Bind for Serial<UART> {
             if status >= 0 {
                 return Some(status as u8);
             }
-            counter = counter + 1;
+            counter += 1;
             if counter > 500{ 
                 return None
             }
