@@ -1,7 +1,7 @@
 target/
 test.bin
-hapenny-montool
 build/
+firmware/*.bin
 __pycache__/
 sim-cpu.v
 test.vcd
