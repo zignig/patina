@@ -36,7 +36,6 @@ enum Commands {
     FastRead = 0x0B,
 }
 
-
 /// The interface to the flash device on the SOC
 pub struct Flash<const ADDR: u32, const START: u32, const SIZE: u32>{
     byte_counter: u16,
@@ -170,6 +169,26 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
             self.write_data(octet);
         }
         //println!("\r\n");
+    }
+
+    pub fn simple_read(&mut self, addr: u32, len: u16) {
+        let mut ds = DefaultSerial::new();
+        // Start a FastRead transaction
+        self.txn_write(5, false);
+        self.write_data(Commands::FastRead as u8);
+        self.write_address(addr << 8);
+        self.txn_wait();
+        // let mut counter = len;
+        self.txn_read(len, true);
+        self.byte_counter = len;
+        for i in self{ 
+            ds.putb(i)
+        }
+        // while counter > 0 {
+        //     counter -= 1;
+        //     //println !("{}",self.read_data() as char);
+        //     ds.putb(self.read_data() as u8);
+        // }
     }
 
     pub fn read_block(&mut self, addr: u32, len: u16) {
