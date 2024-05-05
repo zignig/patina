@@ -1,6 +1,8 @@
 // Flash  driver
 // taken from
 // https://github.com/tpwrules/ice_panel/commit/147969bdeedb5d4990045fcd4976b2f95704ad4c
+//
+// this rust code operates patina/spi.py
 
 // Converted from boneless assembly
 
@@ -23,6 +25,7 @@
 //           bit 14: 1 if RX fifo is empty, 0 otherwise (in read mode)
 //                   1 if TX fifo is full, 0 otherwise (in write mode)
 //              6-0: remaining bits of char, if RX fifo is not empty in read mode
+
 
 use core::ops::{BitAnd, BitOr};
 
@@ -71,7 +74,7 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Iterator for Flash<ADDR
                 self.bytes_left -= Self::CHUNK_SIZE;
                 self.chunk_bytes = Self::CHUNK_SIZE;
                 // Do not drop the CS as the transaction continues
-                self.txn_read(Self::CHUNK_SIZE,false);
+                self.txn_read(Self::CHUNK_SIZE, false);
             } else {
                 // Last chunk, drop the CS at the end
                 self.txn_read(self.bytes_left, true);
@@ -103,7 +106,7 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
     // const SIZE: u32 = SIZE;
 
     // Internal Constants
-    const CHUNK_SIZE: u16 = 256; // will be 2048 after testing.
+    const CHUNK_SIZE: u16 = 2048; // will be 2048 after testing.
 
     /// Make a new flash device
     pub fn new() -> Self {
@@ -236,23 +239,6 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         self.bytes_left = len;
         // Return self as an iterator for bytes
         self.into_iter()
-    }
-
-    // Depreciate
-    pub fn simple_read(&mut self, addr: u32, len: u16) {
-        let mut ds = DefaultSerial::new();
-        // Start a FastRead transaction
-        self.txn_write(5, false);
-        self.write_data(Commands::FastRead as u8);
-        self.write_address(addr);
-        self.txn_wait();
-        // Read the bytes
-        self.txn_read(len, true);
-        self.byte_counter = len;
-        // So dodgy , self as an iterator
-        for i in self {
-            ds.putb(i)
-        }
     }
 
     // Depreciate

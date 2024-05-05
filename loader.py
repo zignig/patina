@@ -2,7 +2,6 @@
 # Serial interface for uploading firmware to the hapenny
 # bootloader
 
-
 from serial.tools.miniterm import Miniterm
 import serial
 
@@ -14,6 +13,7 @@ import configparser
 import os
 
 class Commands(Enum):
+    " Hapenny serial bootloader "
     call = 0
     write = 1
     read = 2
@@ -24,6 +24,13 @@ class Commands(Enum):
 
 class MonTool:
     def __init__(self, port="/dev/ttyUSB0", baud=57600):
+        """
+        Make a new connection to an hapenny SOC,
+
+        Subclass this and override attach(self): to bind to your own
+        interface.
+
+        """
         self.port = port
         self.baud = baud
         self.ser = serial.serial_for_url(port, baud, timeout=0.1)
@@ -112,8 +119,8 @@ class MonTool:
         self._write_c(count)
         self._ack()
         self._cmd(Commands.write)
-        for (count,val) in enumerate(data):
-            if count % 64 == 0:
+        for (chunks,val) in enumerate(data):
+            if chunks % 64 == 0:
                 print('#',end='')
             self._write_num(val)
         print()

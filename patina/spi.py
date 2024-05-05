@@ -74,6 +74,11 @@ class SetReset(Elaboratable):
 
 
 class SimpleSPI(Component):
+    """
+    SimpleSPI provides a nifty spi interface in gateware
+
+
+    """
     # hapenny bus
     bus: In(BusPort(addr=1, data=16))
     # Spi
@@ -83,15 +88,7 @@ class SimpleSPI(Component):
     cipo: In(1)
 
     def __init__(self, fifo_depth=16):
-
         super().__init__()
-
-        # SPI signals
-        # self.clk = Signal()
-        # self.cs = Signal()  # inverted, like usual
-        # self.mosi = Signal()
-        # self.miso = Signal()
-
         self.fifo = SyncFIFOBuffered(width=8, depth=fifo_depth)
 
     def elaborate(self, platform):
@@ -105,15 +102,13 @@ class SimpleSPI(Component):
         r0_deassert_cs = Signal()
         r0_txn_length = Signal(12)
 
-        # handle the boneless bus.
+        # register the bus response
         read_data = Signal(16)  # it expects one cycle of read latency
-        # m.d.sync += self.bus.resp.eq(read_data)
+        m.d.sync += self.bus.resp.eq(read_data)
 
         # bus cmd shorthand
         cmd = self.bus.cmd
-
-        m.d.sync += self.bus.resp.eq(read_data)
-
+        
         # read
         with m.If(cmd.valid & (cmd.payload.lanes == 0)):
             with m.Switch(cmd.payload.addr):

@@ -1,6 +1,5 @@
 #![no_std]
 #![no_main]
-
 #![feature(iter_array_chunks)]
 
 use rustv::{
@@ -20,35 +19,21 @@ pub extern "C" fn main() -> ! {
 
     flash.wakeup();
 
-    // const SIZE:u16 = 1290; 
-    const SIZE:u16 = 65000; 
+    //const SIZE: u16 = 1290;
+    const SIZE:u16 = 65000;
+
     loop {
-        for data in flash.read_iter(0x50000,SIZE){ 
+        for data in flash.read_iter(0x50100, 1290) {
             //println!("{:X}",data);
             ds.putb(data);
         }
-        //get_words(&mut flash,10);
+        println!("\r\n");
+        for words in flash.read_iter(0x50000,64).array_chunks::<4>(){
+            //println!("{:?}\r\n",words);
+            let num: u32 = u32::from_le_bytes(words);
+            println!("{:?}\r\n",num);
+        }
         println!("\r\ndone\r\n");
         reset();
     }
 }
-
-//#[inline(never)]
-// fn get_words(flash: &mut TinyFlash, mut words: u16) {
-//     let count = words << 2;
-//     let looper = flash.read_iter(0x50000, count);
-//     let mut l2 = looper.array_chunks::<4>();
-//     while words > 0 { 
-//         let val = u32::from_le_bytes(l2.next().unwrap());
-//         words -= 1;
-//     }
-
-//     // while words > 0 {
-//     //     let mut word = u32::from(looper.next().unwrap());
-//     //     word |= u32::from(looper.next().unwrap()) << 8;
-//     //     word |= u32::from(looper.next().unwrap()) << 16;
-//     //     word |= u32::from(looper.next().unwrap()) << 24;
-//     //     println!("{:X}\r\n", word);
-//     //     words -= 1;
-//     // }
-// }

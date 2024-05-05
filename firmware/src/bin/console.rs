@@ -20,17 +20,22 @@ use rustv::uart::{Bind, DefaultSerial};
 const PROMPT: &str = "|>";
 
 // Actual devices
+
 /// Flash connected to the board ( uses spi.py interface)
+/// ( start address , segment lenth )
 pub type TinyFlash = Flash<{ generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
+
 /// Single led on the tinybox board
 pub type ActualLed = Led<{ generated::OUTPUTPORT_ADDR }>;
-/// Input pind
+
+/// Input pins
 pub type ActualInput = Input<{ crate::generated::INPUTPORT_ADDR }>;
+
 /// Internal warmboot device on the ice40
 pub type ActualWarm = Warmboot<{ crate::generated::WARMBOOT_ADDR }>;
 
-// Primary data construct
-// Add more to me and it is made available to commands
+/// Primary data construct
+/// Add more to me and it is made available to commands
 struct Ctx {
     cons: readline::Console,
     counter: usize,
@@ -40,6 +45,7 @@ struct Ctx {
     flash: TinyFlash,
 }
 
+/// Make a clean context.
 impl Ctx {
     fn new() -> Self {
         Self {
@@ -58,24 +64,29 @@ impl Ctx {
 pub extern "C" fn main() -> ! {
     // Delay
     wait(600);
+
     println!("Welcome to patina\r\n");
     println!("press esc to return to bootloader\r\n\r\n");
     println!("{}\r\n", generated::DATE_STAMP);
     
-
     let mut counter: u32 = 0;
+
     // Create the main context
     let mut ctx = Ctx::new();
 
+    // Working blinky.
     ctx.led.on();
     wait(10000);
     ctx.led.off();
 
+    // Hello flash, why are you sleeping ? 
     ctx.flash.wakeup();
-    // ctx.flash.read_block(0x50000, 1290);
-    println!("{}", PROMPT);
+
+    // Dump a block.
     cmd_flash(&mut ctx);
 
+    println!("{}", PROMPT);
+    
     loop {
         // get something from the serial port
         if let Some(val) = ctx.cons.process() {

@@ -1,9 +1,7 @@
-# firmware testing 
+# Firmware
 
-it seems to be possible to run on qemu
+This is basically my test space for an interface test SOC.
 
-- qemu-system-riscv32 -machine virt -m 128 -device ramfb -serial stdio -bios none -kernel
-- https://github.com/SimonSapin/riscv-qemu-demos
 
 # Flash testing
 
