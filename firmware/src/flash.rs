@@ -40,7 +40,7 @@ enum Commands {
 pub struct Flash<const ADDR: u32, const START: u32, const SIZE: u32> {
     byte_counter: u16,
     chunk_bytes: u16,
-    total_bytes: u16, // temp for testing
+    bytes_left: u16,
     in_transaction: bool,
 }
 
@@ -63,25 +63,21 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Iterator for Flash<ADDR
         // Goes a little like this.
 
         // Chunk counter empty.
-        if (self.chunk_bytes == 0) & (self.total_bytes > 0) {
+        if (self.chunk_bytes == 0) & (self.bytes_left > 0) {
             // if the counter is larger than CHUNK_SIZE
-            if self.total_bytes > Self::CHUNK_SIZE {
-                println!("@");
+            if self.bytes_left > Self::CHUNK_SIZE {
+                //println!("@");
                 // There is at least one more chunck
-                self.total_bytes -= Self::CHUNK_SIZE;
+                self.bytes_left -= Self::CHUNK_SIZE;
                 self.chunk_bytes = Self::CHUNK_SIZE;
                 // Do not drop the CS as the transaction continues
-
-                //self.txn_read(Self::CHUNK_SIZE,false);
-
-                //println!("({},{})\r\n",self.byte_counter,self.total_bytes);
+                self.txn_read(Self::CHUNK_SIZE,false);
             } else {
                 // Last chunk, drop the CS at the end
-
-                //self.txn_read(self.total_bytes, true)
-                println!("<lastchunk> {}",self.total_bytes);
-                self.chunk_bytes = self.total_bytes;
-                self.total_bytes = 0;
+                self.txn_read(self.bytes_left, true);
+                //println!("|");
+                self.chunk_bytes = self.bytes_left;
+                self.bytes_left = 0;
             }
         }
 
@@ -107,18 +103,19 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
     // const SIZE: u32 = SIZE;
 
     // Internal Constants
-    const CHUNK_SIZE: u16 = 64; // will be 2048 after testing.
+    const CHUNK_SIZE: u16 = 256; // will be 2048 after testing.
 
+    /// Make a new flash device
     pub fn new() -> Self {
         Self {
             byte_counter: 0,
             in_transaction: false,
             chunk_bytes: 0,
-            total_bytes: 0,
+            bytes_left: 0,
         }
     }
 
-    // Get status bit from the spi device
+    /// Get status bit from the spi device
     fn txn_running(&mut self) -> bool {
         let mut val = unsafe { Self::STATUS.read_volatile() };
         //println!(">{:X}<\r\n", val);
@@ -126,7 +123,7 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         val == 0x8000
     }
 
-    // Wait until the transaction has finished
+    /// Wait until the transaction has finished
     // ? Timeout counter
     fn txn_wait(&mut self) {
         while self.txn_running() {
@@ -134,7 +131,7 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         }
     }
 
-    // Start a write transaction
+    /// Start a write transaction
     fn txn_write(&mut self, len: u16, assert: bool) {
         // make it a write
         let mut val: u16 = 1 << 15;
@@ -149,7 +146,7 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         }
     }
 
-    // Start a read transaction
+    /// Start a read transaction
     fn txn_read(&mut self, len: u16, assert: bool) {
         let mut val: u16 = 0;
         // if true drop the CS pin after the read
@@ -163,14 +160,14 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         self.in_transaction = true;
     }
 
-    // Write a byte into the data fifo.
+    /// Write a byte into the data fifo.
     fn write_data(&mut self, data: u8) {
         unsafe {
             Self::DATA.write_volatile(data as u16);
         }
     }
 
-    // Read a byte out of the fifo
+    /// Read a byte out of the fifo
     // Register has some layout for fifo status
     // Check the top of the file
     // TODO , check the timeout loop
@@ -212,11 +209,11 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         id
     }
 
-    // Write the address of the read write to the flash
-    // Must be inside a transaction
+    /// Write the address of the read write to the flash
+    /// Must be inside a transaction
     fn write_address(&mut self, mut addr: u32) {
-        // Shift the data from 24 bit + padding byte.
-        addr = addr << 8;
+        // Shift the data to 24 bit + padding byte.
+        addr <<= 8;
         //println!("addr :");
         for octet in addr.to_be_bytes() {
             //println!("|{:x}|", octet);
@@ -234,10 +231,9 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         self.txn_wait();
         // Set up the counters for the iterator
         // TODO move this to the iterator
-        self.txn_read(len, true);
+        //self.txn_read(len, true);
         self.byte_counter = len;
-        // temp for testing
-        self.total_bytes = len;
+        self.bytes_left = len;
         // Return self as an iterator for bytes
         self.into_iter()
     }
