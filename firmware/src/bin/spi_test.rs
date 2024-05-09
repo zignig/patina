@@ -20,19 +20,20 @@ pub extern "C" fn main() -> ! {
     flash.wakeup();
 
     //const SIZE: u16 = 1290;
+    const START:u32 = 0x50000;
     const SIZE:u16 = 65000;
 
     loop {
-        for data in flash.read_iter(0x50100, 1290) {
+        for data in flash.read_iter(START, SIZE) {
             //println!("{:X}",data);
             ds.putb(data);
         }
         println!("\r\n");
-        for words in flash.read_iter(0x50000,64).array_chunks::<4>(){
-            //println!("{:?}\r\n",words);
-            let num: u32 = u32::from_le_bytes(words);
-            println!("{:?}\r\n",num);
-        }
+        // for words in flash.read_iter(0x50000,64).array_chunks::<4>(){
+        //     //println!("{:?}\r\n",words);
+        //     let num: u32 = u32::from_le_bytes(words);
+        //     println!("{:?}\r\n",num);
+        // }
         println!("\r\ndone\r\n");
         reset();
     }

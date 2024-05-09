@@ -83,7 +83,7 @@ pub extern "C" fn main() -> ! {
     ctx.flash.wakeup();
 
     // Dump a block.
-    cmd_flash(&mut ctx);
+    //cmd_flash(&mut ctx);
 
     println!("{}", PROMPT);
     
@@ -99,6 +99,7 @@ pub extern "C" fn main() -> ! {
                     }
                     Cancel => {
                         ctx.cons.clear_screen();
+                        println!("\n{}", PROMPT);
                     }
                     Escape => {
                         println!("EXIT");
@@ -178,6 +179,10 @@ fn cmd_flash(ctx: &mut Ctx) {
 
 fn cmd_jedec(ctx: &mut Ctx) {
     let jd = ctx.flash.read_jedec();
+    // for i in jd{
+    //     println!("{:X} ",i);
+    // }
+    // println!("\r\n");
     println!("{:?}",jd);
 }
 
