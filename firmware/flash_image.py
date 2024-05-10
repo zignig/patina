@@ -15,12 +15,34 @@
 import argparse
 import struct
 import os
+from pathlib import Path
 
 def build_header(prog_length):
     # 256 byte block
     # TODO , version , checksum , stuff
-    header = bytes(256)
-    struct.pack
-    
+    header = bytearray(256)
+    struct.pack_into("<I",header,0,prog_length)
+    return header
+
+def load(file_name):
+    bootloader = Path(file_name).read_bytes()
+    boot_image = struct.unpack("<" + "I" * (len(bootloader) // 4), bootloader)
+    return bytearray(bootloader)
+
 if __name__  == "__main__":
-    print('flash builder for patina')
+    parser = argparse.ArgumentParser(
+        prog="Flash image builder",
+        description="takes a binary and prepares it for flash upload",
+        epilog="woohoo"
+    )
+    parser.add_argument('filename')
+
+    args = parser.parse_args()
+    print(args)
+    boot_image = load(args.filename)
+    header = build_header(len(boot_image))
+    full = header + boot_image
+    print(full)
+    f = open('test.bit','wb')
+    f.write(full)
+    f.close()
