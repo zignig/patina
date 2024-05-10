@@ -10,6 +10,9 @@
 import datetime
 import logging
 from hapenny.mem import BasicMemory,SpramMemory
+from ..fabric_builder import BootMem
+
+log = logging.getLogger("Rust Resources Files")
 
 class GenRust:
     def __init__(self, soc):
@@ -35,14 +38,35 @@ class GenRust:
         # memory regions
         regions = set()
         emit("MEMORY {")
+        # Consolidate memory
+        is_start = False
+        start_addr = 0
+        end_addr = 0
+        for i in self._soc.fabric.memory_map.all_resources():
+            res = i.resource
+            if not isinstance(res,(BasicMemory,SpramMemory)):
+                continue
+            if isinstance(res,BootMem):
+                continue
+            #log.critical(res.name)
+            #log.critical(f"{i.start:08x} -> {i.end:08x}")
+            if not is_start:
+                start_addr = i.start
+                is_start = True
+            end_addr = i.end
+        #log.critical(f" Range {start_addr:08x} -> {end_addr:08x}")
+        emit(f"    MEMORY : ORIGIN = 0x{start_addr:08x}, LENGTH = 0x{(end_addr-start_addr):0x}")
+
+        # Add bootmem if it exists
         for i in self._soc.fabric.memory_map.all_resources():
             res = i.resource
             name = i.resource.name.upper()
             start = i.start
             sec_length = i.end - i.start
+            if isinstance(res,(BootMem)):
+                emit(f"    {name} : ORIGIN = 0x{start:08x}, LENGTH = 0x{sec_length:0x}")
             if not isinstance(res,(BasicMemory,SpramMemory)):
                 continue
-            emit(f"    {name} : ORIGIN = 0x{start:08x}, LENGTH = 0x{sec_length:0x}")
             regions.add(name)
         emit("}")
         emit("")   
@@ -81,7 +105,7 @@ SECTIONS {{
     }} > {mem}
 }}
         """
-        emit(chunk.format(mem="BASICMEMORY"))    
+        emit(chunk.format(mem="MEMORY"))    
         
 class BootLoaderX(GenRust):
     def __init__(self,soc):

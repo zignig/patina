@@ -42,7 +42,7 @@ root_logger.setLevel(logging.ERROR)
 log = root_logger.getChild("computer")
 
 # tiny-bootloader is written in a high-level language and needs to have a stack,
-bootloader = Path("boot12k.bin").read_bytes()
+bootloader = Path("bootloader/small.bin").read_bytes()
 boot_image = struct.unpack("<" + "h" * (len(bootloader) // 2), bootloader)
 
 log.info("image_size {}", 2 ** (len(boot_image)).bit_length())
@@ -50,83 +50,58 @@ log.info("image_size {}", 2 ** (len(boot_image)).bit_length())
 
 class Computer(Elaboratable):
     def __init__(self):
-        F = 16e6  # Hz
+        F = 12e6  # Hz
         super().__init__()
 
-        mainmem = BasicMemory(depth=512 * 12)  # 16bit cells
-        bootmem = BootMem(boot_image)
+        self.mainmem = mainmem = BasicMemory(depth=512 * 4)  # 16bit cells
+        # self.othermem = othermem = BasicMemory(depth=512 * 3)
+        # secondmem = SpramMemory()
+        # thirdmem = SpramMemory()
+        mem1 = SpramMemory()
+        mem2 = SpramMemory()
+        mem3 = SpramMemory()
+        mem4 = SpramMemory()
+        
+        self.bootmem = bootmem = BootMem(boot_image)
 
         # these are attached to self so they can be altered in elaboration.
 
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
-        self.led = OutputPort(1, read_back=True)
-        self.input = InputPort(5)
         self.spi = SimpleSPI(fifo_depth=512)
         self.warm = WarmBoot()
 
         devices = [
-            mainmem,
+            mem1,
+            mem2,
+            mem3,
+            mem4,
             bootmem,
             self.bidi,
-            self.warm,
-            self.led,
-            self.input,
             self.spi,
+            #self.warm,
         ]
 
         self.fabric = fabric = FabricBuilder(devices)
 
         self.cpu = Cpu(
             reset_vector=fabric.reset_vector, addr_width=fabric.addr_width
-        )  # 4096 in half words
+        )
 
     def elaborate(self, platform):
         m = Module()
 
         # This creates and binds all the devices
-        old = False
-        if old:
-            # cliffs default bus layout
-            log.warning("Build  the bus")
-            log.warning("")
-            # old style bus
-            m.submodules.cpu = self.cpu
-            m.submodules.mainmem = mainmem = self.mainmem
-            m.submodules.mem = bootmem = self.bootmem
-            m.submodules.uart = uart = self.bidi
-            m.submodules.warm = warm = self.warm
-            m.submodules.led = led = self.led
-            m.submodules.input = input = self.input
-
-            bus_width = self.fabric.decoder_width
-
-            m.submodules.fabric = fabric = SimpleFabric(
-                [
-                    partial_decode(m, mainmem.bus, bus_width),
-                    partial_decode(m, bootmem.bus, bus_width),
-                    partial_decode(m, uart.bus, bus_width),
-                    partial_decode(m, warm.bus, bus_width),
-                    partial_decode(m, led.bus, bus_width),
-                    partial_decode(m, input.bus, bus_width),
-                    # partial_decode(m,spi.bus,bus_width)
-                ]
-            )
-            connect(m, self.cpu.bus, fabric.bus)
-        else:
-            # Add the CPU
-            m.submodules.cpu = self.cpu
-            # Add the fabric
-            m.submodules.fabric = self.fabric
-            # Bind the fabric (weird semantics in elaborate)
-            self.fabric.bind(m)
-            # Connect the cpu and the fabric
-            connect(m, self.cpu.bus, self.fabric.bus)
+        # Add the CPU
+        m.submodules.cpu = self.cpu
+        # Add the fabric
+        m.submodules.fabric = self.fabric
+        # Bind the fabric (weird semantics in elaborate)
+        self.fabric.bind(m)
+        # Connect the cpu and the fabric
+        connect(m, self.cpu.bus, self.fabric.bus)
 
         uart = True
-        led = True
         flash = True
-        warm_boot = True
-        input_pins = False
 
         if flash:
             spi_pins = platform.request("spi_flash_1x")
@@ -156,52 +131,11 @@ class Computer(Elaboratable):
                 uartpins.tx.o.eq(self.bidi.tx),
                 self.bidi.rx.eq(rx_post_sync),
             ]
-
-        if led:
-            user = platform.request("led", 0)
-            m.d.comb += user.o.eq(self.led.pins[0])
-
-        if input_pins:
-            pin1 = platform.request("boot", 0)
-            pin2 = platform.request("user", 0)
-
-            boot_post_sync = Signal()
-
-            m.submodules.boot_sync = amaranth.lib.cdc.FFSynchronizer(
-                i=pin1.i,
-                o=boot_post_sync,
-                o_domain="sync",
-                init=1,
-                stages=2,
-            )
-            m.d.comb += self.input.pins[0].eq(boot_post_sync)
-            m.d.comb += self.input.pins[1].eq(pin2.i)
-
-        # # Attach the warmboot
-        if warm_boot:
-            boot = platform.request("boot", 0)
-            m.d.comb += self.warm.external.eq(boot.i)
-
         return m
 
 
-from amaranth_boards.tinyfpga_bx import TinyFPGABXPlatform
-
-p = TinyFPGABXPlatform()
-
-# 3.3V FTDI connected to the tinybx.
-# pico running micro python to run external comms
-p.add_resources(
-    [
-        UARTResource(
-            0, rx="A8", tx="B8", attrs=Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
-        ),
-        Resource(
-            "boot", 0, Pins("H2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
-        ),
-        Resource("user", 0, Pins("J1", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
-    ]
-)
+from amaranth_boards.icebreaker import ICEBreakerPlatform
+p = ICEBreakerPlatform()
 
 
 if __name__ == "__main__":
@@ -240,9 +174,3 @@ if __name__ == "__main__":
 
     if args.build:
         p.build(pooter, do_program=True)
-
-# TINYBOOT_UART_ADDR=12288 cargo objcopy --release -- -O binary ../tinybx8k.bin
-# MEMORY {
-#    PROGMEM (rwx): ORIGIN = 0x2000, LENGTH = 512
-#    RAM (rw): ORIGIN = 0x0000, LENGTH = 8192
-# }

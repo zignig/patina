@@ -32,7 +32,7 @@ class RustArtifacts:
         rustlib = RustLib(self.soc)
         bloader = GenRust(self.soc)
 
-        print("Generate Firmwar Files in ",folder)
+        print("Generate Firmware Files in ",folder)
         if folder is not None:
             try:
                 os.stat(folder)

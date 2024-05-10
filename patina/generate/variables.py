@@ -35,5 +35,5 @@ class RustLib:
             )
             # log(res,name,start,sec_length)
         # Reset vector
-        emit("pub const RESET_VECTOR: u32 = 0x{addr:01X}; // {addr}".format(addr = self.soc.cpu.reset_vector << 1))
+        emit("pub const RESET_VECTOR: u32 = 0x{addr:01X}; // {addr}".format(addr = self.soc.fabric.reset_vector << 1))
         emit('pub const DATE_STAMP: &str = "{}";'.format(datetime.datetime.now()))

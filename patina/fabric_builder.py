@@ -54,7 +54,7 @@ class FabricBuilder(Component):
         self.name = name
 
         log.info("Build fabric for".format(name))
-        log.info("Device Heirachy test")
+        log.info("Device hierarchy test")
 
         # replaces a [] list with a sub fabric recursivly.
         for pos, d in enumerate(self.devices):
@@ -74,9 +74,11 @@ class FabricBuilder(Component):
         log.debug("address in halfwords")
         div()
 
-        # Check for boot device save for address extraction
-
+        # Check for devices save for address extraction
+        # used to build the firmware name
         boot_device = None
+        uart_device = None
+        last_mem = None
         # add attrs to the python objects
         for d in self.devices:
             d.name = uniq_name(d.__class__.__qualname__)
@@ -141,6 +143,7 @@ class FabricBuilder(Component):
 
         self.addr_width = addr_width + extra_bits
         self.decoder_width = addr_width - 1
+
 
         if boot_device != None:
             # in half words
