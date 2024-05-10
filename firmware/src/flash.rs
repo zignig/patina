@@ -40,6 +40,7 @@ enum Commands {
 }
 
 /// The interface to the flash device on the SOC
+/// TODO COnvert all of this to u32
 pub struct Flash<const ADDR: u32, const START: u32, const SIZE: u32> {
     byte_counter: u16,
     chunk_bytes: u16,
