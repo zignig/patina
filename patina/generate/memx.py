@@ -152,4 +152,4 @@ SECTIONS {{
     }}
 }}
     """
-        emit(chunk.format(mem="BASICMEMORY",boot="BOOTMEM"))
+        emit(chunk.format(mem="MEMORY",boot="BOOTMEM"))

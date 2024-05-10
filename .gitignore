@@ -6,3 +6,4 @@ __pycache__/
 sim-cpu.v
 test.vcd
 test.gtkw
+*.code-workspace
