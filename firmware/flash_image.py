@@ -7,6 +7,8 @@
 # and the layout is as follows.
 # header = 256 bytes (1 page of flash)
 #   (0-3) program length (4 byte little endian) of the program
+#   (4-8) banner pos in words
+#   (9-13) banner length
 #   (4 - 256) - don't care , the rest of the header is empty for now
 
 # +256 - length
@@ -17,11 +19,12 @@ import struct
 import os
 from pathlib import Path
 
-def build_header(prog_length):
+def build_header(prog_length,banner_length):
     # 256 byte block
     # TODO , version , checksum , stuff
     header = bytearray(256)
     struct.pack_into("<I",header,0,prog_length)
+    struct.pack_into("<I",header,4,banner_length)
     return header
 
 def load(file_name):

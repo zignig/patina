@@ -1,3 +1,18 @@
+# Stolen Bootloader
+
+I have stolen this bootloader from cbiffle, who has stolen it from Mr Sergeant.
+
+It was his and in turn his below and now it is mine, THIS IS THE WAY.
+
+@cbiffle wrote a riscv32i core in some spare time waiting for other things, bless.
+it worked and I have grabbed it and made a feeble attempt to make it more user friendly.
+
+I have made one attempt to post my changes up to him but I understand that RT(tm) and 
+other things get in the way. That said, this is my attempt at making an FPGA based
+computer that is easy to use and does what it is told.
+
+If anybody finds the usefull please do a happy dance and give a stranger a free hug.
+
 # hapenny tinyboot
 
 This is a minimal boot ROM and monitor written in Rust. It interacts with a host
@@ -8,6 +23,8 @@ This is directly inspired by Frank Sergeant's "3-Instruction Forth;" like that
 system, this is not Forth.
 
 ## Building
+
+TODO , update to patina generated.
 
 `cargo build --release`
 

@@ -118,7 +118,7 @@ pub extern "C" fn main() -> ! {
         }
         // bug out timer
         counter += 1;
-        if counter > 60_000_000 {
+        if counter > 120_000_000 {
             println!("bye");
             wait(100_000);
             reset();

@@ -1,0 +1,6 @@
+This document is loaded into flash by the flash_loader.py script.
+
+It is referenced by reading word (1) for pos and word (2) for length.
+
+This has some awesome insights into how this all works; and a picture of a turrle
+saying patina.

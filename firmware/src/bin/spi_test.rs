@@ -2,6 +2,15 @@
 #![no_main]
 #![feature(iter_array_chunks)]
 
+//! this is a test bootstrap for spi boot
+//! read the first word (4 bytes) from flash.
+//! FF to 256 bytes , 1 page and load words into
+//! ram from flash.
+//! 
+//! The extended boot loader should have standard serial bootloader 
+//! time out after ~seconds(ish) and read from flash
+//! 
+
 use rustv::{
     flash::Flash,
     generated,
@@ -9,6 +18,8 @@ use rustv::{
     println,
     uart::{Bind, DefaultSerial},
 };
+
+// This is board specific , add the address and length to flash .rs
 
 pub type TinyFlash = Flash<{ generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
 
@@ -24,16 +35,15 @@ pub extern "C" fn main() -> ! {
     const SIZE:u16 = 65000;
 
     loop {
-        for data in flash.read_iter(START, SIZE) {
-            //println!("{:X}",data);
-            ds.putb(data);
-        }
-        println!("\r\n");
-        // for words in flash.read_iter(0x50000,64).array_chunks::<4>(){
-        //     //println!("{:?}\r\n",words);
-        //     let num: u32 = u32::from_le_bytes(words);
-        //     println!("{:?}\r\n",num);
-        // }
+        // Load the first word from flash 
+        // length for now
+        // FF 256 bytes , read words into ram
+        // ... and boot
+        // 
+
+        // Load first word
+        let length: u32 = flash.read_word(0x0);
+        
         println!("\r\ndone\r\n");
         reset();
     }
