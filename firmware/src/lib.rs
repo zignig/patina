@@ -1,4 +1,6 @@
 #![no_std]
+#![feature(iter_array_chunks)]
+#![feature(iter_next_chunk)]
 
 pub mod generated {
     use core::{include,concat,env};

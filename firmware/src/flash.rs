@@ -242,6 +242,12 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         self.into_iter()
     }
 
+    
+    /// Read a 32 bit numbers from an address
+    pub fn read_words(&mut self, addr: u32,len: u16) -> impl Iterator<Item = u32> + '_ {
+        self.read_iter(addr,len * 4).array_chunks::<4>().map(|data|u32::from_be_bytes(data))
+    }
+
     // Depreciate
     pub fn read_block(&mut self, addr: u32, len: u16) {
         // Start a FastRead transaction

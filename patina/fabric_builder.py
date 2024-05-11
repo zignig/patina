@@ -167,8 +167,12 @@ class FabricBuilder(Component):
         self.bus = fabric.bus
 
     def elaborate(self, platform):
+        """
+        This just adds submodules and does @cbiffles simple fabric
+        
+        TODO use a multiplexer instead rather than the simple fabric build
+        """
         m = Module()
-        log.critical("rewrite into multiplexor~")
         for dev in self.devices:
             m.submodules[dev.name] = dev
         return m

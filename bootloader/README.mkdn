@@ -4,12 +4,8 @@ I have stolen this bootloader from cbiffle, who has stolen it from Mr Sergeant.
 
 It was his and in turn his below and now it is mine, THIS IS THE WAY.
 
-@cbiffle wrote a riscv32i core in some spare time waiting for other things, bless.
-it worked and I have grabbed it and made a feeble attempt to make it more user friendly.
-
-I have made one attempt to post my changes up to him but I understand that RT(tm) and 
-other things get in the way. That said, this is my attempt at making an FPGA based
-computer that is easy to use and does what it is told.
+@cbiffle wrote a riscv32i core in some spare time waiting for other things.
+It worked and I have grabbed it and made a feeble attempt to make it more user friendly.
 
 If anybody finds the usefull please do a happy dance and give a stranger a free hug.
 
@@ -24,25 +20,7 @@ system, this is not Forth.
 
 ## Building
 
-TODO , update to patina generated.
-
-`cargo build --release`
-
-This will generate an ELF file. Extracting a binary file suitable for handing to
-the SoC generator:
-
-```
-riscv32-elf-objcopy -Obinary \
-    target/riscv32i-unknown-none-elf/release/tinyboot \
-    path-to-your-output-file.bin
-```
-
-In practice, you probably want to override the UART address. You can do that
-like this:
-
-```
-TINYBOOT_UART_ADDR=0x01_0000 cargo build --release
-```
+Patina can generate a memory.x file and a generated.rs file containing the memory map and rust constants for the peripheral devices. 
 
 ## Serial protocol
 
@@ -52,7 +30,8 @@ change this if you like -- it's in the HDL, not the Rust code.
 The protocol is a very simple command-response scheme implementing five
 commands. It's a binary protocol; examples below will be shown in hex, but
 typing hex digits into the serial port won't do what you want. See the `montool`
-in this same repo for a portable command line tool.
+
+in this same repo for a portable command line tool, patina also has a loader.py script that can talk to the bootloader from python and will drop into a serial console.
 
 ### Call (0x00)
 
@@ -115,15 +94,3 @@ Send: `05`
 Response: `AA`
 
 Basic verification that the bootloader is responding.
-
-## Configuring for your board
-
-The environment variable `TINYBOOT_UART_ADDR` determines the location of the
-UART in the address space, which is currently the only configurable part of the
-bootloader.
-
-The binary itself is position-independent so the location of your boot ROM
-doesn't matter...except for the following.
-
-**Note:** The linker script currently assumes that there is useful stack memory
-located _immediately below_ the location where tinyboot is loaded.

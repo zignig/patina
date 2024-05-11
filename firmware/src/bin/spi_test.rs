@@ -6,10 +6,10 @@
 //! read the first word (4 bytes) from flash.
 //! FF to 256 bytes , 1 page and load words into
 //! ram from flash.
-//! 
-//! The extended boot loader should have standard serial bootloader 
+//!
+//! The extended boot loader should have standard serial bootloader
 //! time out after ~seconds(ish) and read from flash
-//! 
+//!
 
 use rustv::{
     flash::Flash,
@@ -26,25 +26,33 @@ pub type TinyFlash = Flash<{ generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
 #[no_mangle]
 pub extern "C" fn main() -> ! {
     let mut flash: TinyFlash = Flash::new();
-    let mut ds = DefaultSerial::new();
+    //let mut ds = DefaultSerial::new();
 
     flash.wakeup();
 
-    //const SIZE: u16 = 1290;
-    const START:u32 = 0x50000;
-    const SIZE:u16 = 65000;
-
+    // const START: u32 = 0x50000;
+    // const SIZE: u16 = 65000;
+    let mut dst: *mut u32 = core::ptr::null_mut();
+    dst = 0x1800 as _;
+    let flash_len: u16; 
     loop {
-        // Load the first word from flash 
+        for word in flash.read_words(0x50000 + 256,10){
+            unsafe {
+                dst.write_volatile(word);
+                dst = dst.add(1);
+            }
+            println!("{}\r\n",word);
+        }
+        // for words in flash.read_iter(0x50000, 4).array_chunks::<4>() {
+        //     //println!("{:?}\r\n",words);
+        //     let num: u32 = u32::from_le_bytes(words);
+        //     println!("{:?}\r\n", num);
+        // }
+        // Load the first word from flash
         // length for now
         // FF 256 bytes , read words into ram
         // ... and boot
-        // 
-
-        // Load first word
-        let length: u32 = flash.read_word(0x0);
-        
-        println!("\r\ndone\r\n");
+        //
         reset();
     }
 }
