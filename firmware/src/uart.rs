@@ -1,4 +1,4 @@
-// Simple uart functions
+//! Simple uart functions
 
 // The uart address is generted by the build script
 use core::option::*;
@@ -6,24 +6,31 @@ use core::convert::Infallible;
 
 use ufmt::uWrite;
 
-// mod generated {
-//     include!(concat!(env!("OUT_DIR"), "/generated.rs"));
-// }
-
-// Build magic env in .cargo/cargo.toml defines this address
+/// Bind a alias that points to the UART address
 pub type DefaultSerial = Serial<{crate::generated::BIDIUART_ADDR }>;
 
+/// Generic serial port struct
 pub struct Serial<const UART: u32>;
 
+/// Define a trait for all the basic serial port actions
 pub trait Bind {
+    /// Address of the recieve register
     const RX: *mut i16;
+    /// Address of the transmit register
     const TX: *mut u16;
+    /// Create a new serial port struct
     fn new() -> Self;
+    /// Check if the serial port is busy
     fn txbusy(&mut self) -> bool;
+    /// Wait for the TX to be empty
     fn flush(&mut self);
+    /// Put a character into the UART
     fn putb(&mut self, b: u8);
+    /// Get a char off the UART , blocking
     fn getc(&mut self) -> u8;
+    /// Get an Option for a char of the UART
     fn get(&mut self) -> Option<u8>;
+    /// Get a char with a timeout
     fn tget(&mut self) -> Option<u8>;
 }
 
@@ -102,14 +109,7 @@ impl uWrite for DefaultSerial{
     }
 }
 
-pub fn writer(s: &str){
-    let mut ds = DefaultSerial::new();
-    for c in s.as_bytes() { 
-        ds.putb(*c);
-    }
-}
-
-
+/// Formatted printing
 #[macro_export]
 macro_rules! println
 {

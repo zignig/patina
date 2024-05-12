@@ -2,6 +2,7 @@
 #![no_main]
 #![feature(iter_array_chunks)]
 
+
 //! this is a test bootstrap for spi boot
 //! read the first word (4 bytes) from flash.
 //! FF to 256 bytes , 1 page and load words into
@@ -14,15 +15,16 @@
 use rustv::{
     flash::Flash,
     generated,
-    init::reset,
+    //init::reset,
     println,
     uart::{Bind, DefaultSerial},
 };
 
-// This is board specific , add the address and length to flash .rs
-
+/// This constant is board specific , add the address and length to flash .rs
 pub type TinyFlash = Flash<{ generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
 
+
+/// Main entry point
 #[no_mangle]
 pub extern "C" fn main() -> ! {
     let mut flash: TinyFlash = Flash::new();
@@ -33,26 +35,41 @@ pub extern "C" fn main() -> ! {
     // const START: u32 = 0x50000;
     // const SIZE: u16 = 65000;
     let mut dst: *mut u32 = core::ptr::null_mut();
-    dst = 0x1800 as _;
-    let flash_len: u16; 
+    dst = 0x1800 as _ ;
     loop {
-        for word in flash.read_words(0x50000 + 256,10){
+        let flash_len = flash.read_words(0x50000, 1).next().is_some();
+        println!("{}",flash_len);
+        for word in flash.read_words(0x50000 + 256, (flash_len) as u16) {
             unsafe {
                 dst.write_volatile(word);
                 dst = dst.add(1);
             }
             println!("{}\r\n",word);
         }
-        // for words in flash.read_iter(0x50000, 4).array_chunks::<4>() {
-        //     //println!("{:?}\r\n",words);
-        //     let num: u32 = u32::from_le_bytes(words);
-        //     println!("{:?}\r\n", num);
-        // }
+
         // Load the first word from flash
         // length for now
         // FF 256 bytes , read words into ram
         // ... and boot
         //
-        reset();
+        dst = 0x1800 as _ ;
+        call(dst);
+        //reset();
+    }
+}
+
+fn call(addr: *mut u32) {
+    unsafe {
+        core::arch::asm!(
+            "
+        # restart monitor if program returns.
+     1: auipc ra, %pcrel_hi(__start)
+        addi ra, ra, %pcrel_lo(1b)
+
+        jr a0               # activate routine
+        ",
+            in("a0") addr,
+            options(noreturn),
+        );
     }
 }

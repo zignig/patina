@@ -13,6 +13,8 @@
 
 # +256 - length
 # the program in little endian words
+# need a better layout for multiple types data,
+# programs , docs , etc ...
 
 import argparse
 import struct
@@ -23,13 +25,13 @@ def build_header(prog_length,banner_length):
     # 256 byte block
     # TODO , version , checksum , stuff
     header = bytearray(256)
-    struct.pack_into("<I",header,0,prog_length)
+    struct.pack_into("<I",header,0,prog_length // 4) # length in 32 bit words
     struct.pack_into("<I",header,4,banner_length)
     return header
 
 def load(file_name):
     bootloader = Path(file_name).read_bytes()
-    boot_image = struct.unpack("<" + "I" * (len(bootloader) // 4), bootloader)
+    #boot_image = struct.unpack("<" + "I" * (len(bootloader) // 4), bootloader)
     return bytearray(bootloader)
 
 if __name__  == "__main__":
@@ -43,9 +45,8 @@ if __name__  == "__main__":
     args = parser.parse_args()
     print(args)
     boot_image = load(args.filename)
-    header = build_header(len(boot_image))
+    header = build_header(len(boot_image),100)
     full = header + boot_image
-    print(full)
     f = open('test.bit','wb')
     f.write(full)
     f.close()

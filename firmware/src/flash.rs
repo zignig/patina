@@ -1,30 +1,30 @@
-// Flash  driver
-// taken from
-// https://github.com/tpwrules/ice_panel/commit/147969bdeedb5d4990045fcd4976b2f95704ad4c
-//
-// this rust code operates patina/spi.py
+//! Flash  driver
+//! taken from
+//! https://github.com/tpwrules/ice_panel/commit/147969bdeedb5d4990045fcd4976b2f95704ad4c
+//!
+//! this rust code operates patina/spi.py
 
-// Converted from boneless assembly
+//! Converted from boneless assembly
 
-//  Register Map
+//!  Register Map
 
-//  0x0: (W) Transaction Start / (R) Status
-//    Write: writing starts a transaction. it is only legal to start a transaction
-//           when one is not already in progress.
-//           bit 15: 1 for write transaction, 0 for read transaction
-//            14-13: bus mode: 0 = previous, 1 = 1 bit, 2 = 2 bit, 3 = 4 bit
-//               12: 1 if chip select should be deasserted at txn end
-//             11-0: transaction length
-//     Read: bit 15: 1 if transaction in progress, 0 otherwise. the transaction
-//                   FIFO is empty/full and the bus is idle iff this bit is 0
-//            14:13: current bus mode
+//!  0x0: (W) Transaction Start / (R) Status
+//!    Write: writing starts a transaction. it is only legal to start a transaction
+//!           when one is not already in progress.
+//!          bit 15: 1 for write transaction, 0 for read transaction
+//!            14-13: bus mode: 0 = previous, 1 = 1 bit, 2 = 2 bit, 3 = 4 bit
+//!               12: 1 if chip select should be deasserted at txn end
+//!             11-0: transaction length
+//!     Read: bit 15: 1 if transaction in progress, 0 otherwise. the transaction
+//!                   FIFO is empty/full and the bus is idle iff this bit is 0
+//!            14:13: current bus mode
 
-//  0x1: (W) Queue Write / (R) Receive Read/FIFO status
-//  Write:      7-0: character to write on bus. only legal if in write mode.
-//   Read:   bit 15: bit 0 of read character, if RX FIFO is not empty in read mode
-//           bit 14: 1 if RX fifo is empty, 0 otherwise (in read mode)
-//                   1 if TX fifo is full, 0 otherwise (in write mode)
-//              6-0: remaining bits of char, if RX fifo is not empty in read mode
+//!  0x1: (W) Queue Write / (R) Receive Read/FIFO status
+//!  Write:      7-0: character to write on bus. only legal if in write mode.
+//!   Read:   bit 15: bit 0 of read character, if RX FIFO is not empty in read mode
+//!           bit 14: 1 if RX fifo is empty, 0 otherwise (in read mode)
+//!                   1 if TX fifo is full, 0 otherwise (in write mode)
+//!              6-0: remaining bits of char, if RX fifo is not empty in read mode
 
 
 use core::ops::{BitAnd, BitOr};
@@ -245,45 +245,13 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
     
     /// Read a 32 bit numbers from an address
     pub fn read_words(&mut self, addr: u32,len: u16) -> impl Iterator<Item = u32> + '_ {
-        self.read_iter(addr,len * 4).array_chunks::<4>().map(|data|u32::from_be_bytes(data))
+        self.read_iter(addr,len * 4).array_chunks::<4>().map(|data|u32::from_le_bytes(data))
     }
 
-    // Depreciate
+    /// Read a block out of flash and print
     pub fn read_block(&mut self, addr: u32, len: u16) {
-        // Start a FastRead transaction
-        self.txn_write(5, false);
-        self.write_data(Commands::FastRead as u8);
-        self.write_address(addr);
-        self.txn_wait();
-        // Do some length calculations
-        // Chunk the transaction ( 12bit len on the spi)
-        let chunks = len / Self::CHUNK_SIZE;
-        let remainder = len % Self::CHUNK_SIZE;
-
-        println!(
-            "{} in {} = {} rem {}\r\n",
-            len,
-            Self::CHUNK_SIZE,
-            chunks,
-            remainder
-        );
-        for chunk in 0..chunks {
-            println!("chunk {}\r\n", chunk);
-            if (chunk == chunks - 1) & (remainder == 0) {
-                println!("LAST");
-            } else {
-                println!(" more ");
-            }
-        }
-
-        if remainder > 0 {
-            println!("rem = {}", remainder)
-        }
-        println!("\r\n");
-        self.txn_read(len, true);
-        for _i in 0..len {
-            let data = self.read_data() as char;
-            println!("{}", data);
+        for val in self.read_iter(addr, len){ 
+            println!("{}",val);
         }
         println!("\r\n");
     }

@@ -1,6 +1,7 @@
 //! some asm to set up the risc-v machine
-use crate::println;
-use crate::uart::{Bind, DefaultSerial};
+
+//use crate::println;
+//use crate::uart::{Bind, DefaultSerial};
 use core::arch::asm;
 use core::arch::global_asm;
 
@@ -21,7 +22,7 @@ global_asm! {
     "
 }
 
-// Crappy wait
+/// Crappy wait , just wastes tiime
 #[inline(never)]
 pub fn wait(dur: u32) {
     for _ in 0..dur {
@@ -31,6 +32,7 @@ pub fn wait(dur: u32) {
     }
 }
 
+/// Jump to the reset vector (reboot the processor)
 #[allow(unused_assignments)]
 pub fn reset() {
     // return to the bootloader
@@ -55,7 +57,7 @@ fn DefaultInterruptHandler() {}
 #[panic_handler]
 unsafe fn my_panic(_info: &core::panic::PanicInfo) -> ! {
     loop {
-        println!("GURU MEDITATION\r\n");
+        //println!("GURU MEDITATION\r\n");
         reset();
     }
 }

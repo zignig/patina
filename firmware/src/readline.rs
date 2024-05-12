@@ -1,3 +1,5 @@
+//! Reader and decoder for an ANSI terminal.
+
 use crate::println;
 use crate::uart::{Bind, DefaultSerial};
 use heapless::String;
@@ -5,26 +7,47 @@ use ufmt::derive::uDebug;
 
 const PROMPT: &str = ">>";
 
+
+/// An enumeration of actions that come from the console
 #[derive(uDebug)]
 pub enum ConsoleAction {
+    /// Single Char
     Char(u8),
+    /// Up cursor key
     Up,
+    /// Down cursor
     Down,
+    /// Left key
     Left,
+    /// Right key
     Right,
+    /// Home key
     Home,
+    /// End key
     End,
+    /// Insert key
     Insert,
+    /// Delete key
     Delete,
+    /// Page up key
     PgUp,
+    /// Page down key
     PgDown,
+    /// Escape key by itself
     Escape,
+    /// Tab Key
     Tab,
+    /// Control C
     Cancel,
+    /// Control D
     Reset,
+    /// Enter Key
     Enter,
+    /// Back space
     BackSpace,
+    /// Control Z
     CtlZ,
+    /// Unknown key strokes
     Unknown,
 }
 
@@ -61,14 +84,17 @@ impl Default for Console {
     }
 }
 
+/// Struct for the console
 pub struct Console {
     buffer: Buffer,
+    /// point to the serial device
     pub serial: crate::uart::DefaultSerial, //pub serial: crate::uart::Serial<ADDR>,
     //insert: bool,
     echo: bool,
 }
 
 impl Console {
+    /// Create a new console
     pub fn new() -> Self {
         Self {
             buffer: Buffer::new(),
@@ -78,14 +104,17 @@ impl Console {
         }
     }
 
+    /// Return the buffer as a string
     pub fn as_str(&mut self) -> &str {
         return self.buffer.data.as_str();
     }
 
+    /// Reset the buffer
     pub fn reset(&mut self) {
         self.buffer.reset();
     }
 
+    /// Process a key stroke
     pub fn process(&mut self) -> Option<ConsoleAction> {
         if let Some(act) = self.read_key_board() {
             match act {
@@ -143,6 +172,7 @@ impl Console {
         }
     }
 
+    /// Send some chars back to the attched console
     pub fn reply(&mut self, action: ConsoleAction) {
         if let Some(val) = match action {
             // ConsoleAction::Char(_) => todo!(),
@@ -168,11 +198,13 @@ impl Console {
         }
     }
 
+    /// Process backspce key
     pub fn backspace(&mut self) {
         //        let _ = self.buffer.data.remove(self.buffer.cursor);
         self.redraw_line();
     }
 
+    /// Split the buffer into words
     pub fn split_list(&mut self) {
         // this is unsafe beacuse the full split uses the full unicode libs
         // and the firmware blows out by 7Kb.
@@ -189,6 +221,7 @@ impl Console {
         }
     }
 
+    /// Clear and redraw the current buffer
     pub fn redraw_line(&mut self) {
         //Clear line
         println!("\x1b[2K");
@@ -198,10 +231,12 @@ impl Console {
         println!("{}", self.buffer.data.as_str());
     }
 
+    /// Clean the entire screen
     pub fn clear_screen(&mut self) {
         println!("\x1b[2J\x1b[H"); // clear screen and home
     }
 
+    /// Process a keystroke(s)
     pub fn read_key_board(&mut self) -> Option<ConsoleAction> {
         if let Some(c) = self.serial.get() {
             match c {

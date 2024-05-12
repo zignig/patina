@@ -1,13 +1,18 @@
+//! Start of terminal line drawing in an ascii terminal 
+
 use crate::println;
 use crate::uart::{Bind, DefaultSerial};
 
 const BOX: &[&str] = &["┌─┬┐", "│ ││", "├─┼┤", "└─┴┘"];
 
+/// Show the box char array 
 pub fn show_boxen() { 
     for i in BOX{
         println!("{}",i);
     }
 }
+
+/// Draw a rectangle
 pub fn rectangle(w: usize, h: usize) {
     let top = BOX[0];
     per(top, 0);
