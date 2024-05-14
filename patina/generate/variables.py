@@ -28,6 +28,7 @@ class RustLib:
             # exclude the storage memory
             if isinstance(res, (BasicMemory, SpramMemory)):
                 continue
+            emit("/// {name}".format(name=name))
             emit(
                 "pub const {name}: u32 = 0x{addr:01X} ; // {addr}".format(
                     name=name.upper()+"_ADDR", addr=i.start
@@ -35,5 +36,7 @@ class RustLib:
             )
             # log(res,name,start,sec_length)
         # Reset vector
+        emit("/// Reset Vector")
         emit("pub const RESET_VECTOR: u32 = 0x{addr:01X}; // {addr}".format(addr = self.soc.fabric.reset_vector << 1))
+        emit("/// Date stamp when this file was generated")
         emit('pub const DATE_STAMP: &str = "{}";'.format(datetime.datetime.now()))
