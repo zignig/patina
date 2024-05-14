@@ -20,6 +20,7 @@ from hapenny.mem import BasicMemory, SpramMemory
 from hapenny.gpio import OutputPort, InputPort
 
 from patina.warmboot import WarmBoot
+from patina.watchdog import Watchdog
 
 from patina.spi import SimpleSPI
 
@@ -63,6 +64,7 @@ class Computer(Elaboratable):
         self.input = InputPort(5)
         self.spi = SimpleSPI(fifo_depth=512)
         self.warm = WarmBoot()
+        self.watchdog = Watchdog()
 
         devices = [
             mainmem,
@@ -72,13 +74,16 @@ class Computer(Elaboratable):
             self.led,
             self.input,
             self.spi,
+            self.watchdog
         ]
 
         self.fabric = fabric = FabricBuilder(devices)
 
+        # TODO perhaps this should be in the interior.
         self.cpu = Cpu(
             reset_vector=fabric.reset_vector, addr_width=fabric.addr_width
-        )  # 4096 in half words
+        )
+
 
     def elaborate(self, platform):
         m = Module()
@@ -113,6 +118,7 @@ class Computer(Elaboratable):
             )
             connect(m, self.cpu.bus, fabric.bus)
         else:
+            # TODO clean me.
             # Add the CPU
             m.submodules.cpu = self.cpu
             # Add the fabric

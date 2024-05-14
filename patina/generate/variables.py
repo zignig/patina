@@ -34,6 +34,7 @@ class RustLib:
                     name=name.upper()+"_ADDR", addr=i.start
                 )
             )
+            emit("")
             # log(res,name,start,sec_length)
         # Reset vector
         emit("/// Reset Vector")
