@@ -201,6 +201,7 @@ if __name__ == "__main__":
     
     # spin up the monitor
     m = MonTool(port=args.port, baud=args.baud)
+    m._flush()
     if m.ping():
         m.run(args.firmware)
     else:

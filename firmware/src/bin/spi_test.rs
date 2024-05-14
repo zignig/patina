@@ -33,7 +33,7 @@ pub extern "C" fn main() -> ! {
     // const START: u32 = 0x50000;
     // const SIZE: u16 = 65000;
     let mut dst: *mut u32 = core::ptr::null_mut();
-    dst = 0x1800 as _;
+    dst = 0x1000 as _;
     // Load the first word from flash
     // length for now
     // FF 256 bytes , read words into ram
@@ -51,7 +51,7 @@ pub extern "C" fn main() -> ! {
             //println!(".")
         }
 
-        dst = 0x1800 as _;
+        dst = 0x1000 as _;
         call(dst);
         //reset();
     }

@@ -47,6 +47,7 @@ if __name__  == "__main__":
     boot_image = load(args.filename)
     header = build_header(len(boot_image),100)
     full = header + boot_image
+    print(len(full)," bytes in image")
     f = open('test.bit','wb')
     f.write(full)
     f.close()
