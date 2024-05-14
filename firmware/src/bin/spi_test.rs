@@ -2,7 +2,6 @@
 #![no_main]
 #![feature(iter_array_chunks)]
 
-
 //! this is a test bootstrap for spi boot
 //! read the first word (4 bytes) from flash.
 //! FF to 256 bytes , 1 page and load words into
@@ -15,14 +14,13 @@
 use rustv::{
     flash::Flash,
     generated,
-    //init::reset,
+    init::reset,
     println,
     uart::{Bind, DefaultSerial},
 };
 
 /// This constant is board specific , add the address and length to flash .rs
 pub type TinyFlash = Flash<{ generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
-
 
 /// Main entry point
 #[no_mangle]
@@ -35,24 +33,25 @@ pub extern "C" fn main() -> ! {
     // const START: u32 = 0x50000;
     // const SIZE: u16 = 65000;
     let mut dst: *mut u32 = core::ptr::null_mut();
-    dst = 0x1800 as _ ;
+    dst = 0x1800 as _;
+    // Load the first word from flash
+    // length for now
+    // FF 256 bytes , read words into ram
+    // ... and boot
+    //
     loop {
-        let flash_len = flash.read_words(0x50000, 1).next().is_some();
-        println!("{}",flash_len);
+        let flash_len = flash.read_words(0x50000, 1).next().unwrap();
+        //println!("{}", flash_len);
         for word in flash.read_words(0x50000 + 256, (flash_len) as u16) {
             unsafe {
                 dst.write_volatile(word);
                 dst = dst.add(1);
             }
-            println!("{}\r\n",word);
+            //println!("{}\r\n", word);
+            //println!(".")
         }
 
-        // Load the first word from flash
-        // length for now
-        // FF 256 bytes , read words into ram
-        // ... and boot
-        //
-        dst = 0x1800 as _ ;
+        dst = 0x1800 as _;
         call(dst);
         //reset();
     }
