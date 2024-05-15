@@ -185,8 +185,8 @@ class Computer(Elaboratable):
 
         # # Attach the warmboot
         if warm_boot:
-            boot = platform.request("boot", 0)
-            m.d.comb += self.warm.external.eq(boot.i)
+            #boot = platform.request("boot", 0)
+            m.d.comb += self.warm.external.eq(self.watchdog.activate)
 
         return m
 

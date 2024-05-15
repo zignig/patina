@@ -42,13 +42,16 @@ class WarmBoot(Component):
                 with m.If(self.internal == 1):
                     m.next = "START"
                 with m.If(self.external):
-                    m.next = "START"
+                    m.next = "USER"
 
             with m.State("START"):
                 m.d.sync += image_internal.eq(0)
                 m.next = "BOOT"
 
+            with m.State("USER"):
+                m.d.sync += image_internal.eq(1)
+                m.next = "BOOT"
+
             with m.State("BOOT"):
-                #.next = "BOOT"
                 m.d.sync += boot_internal.eq(1)
         return m

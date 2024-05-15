@@ -17,3 +17,4 @@ pub mod uart;
 pub mod readline;
 pub mod terminal;
 pub mod flash;
+pub mod watchdog;

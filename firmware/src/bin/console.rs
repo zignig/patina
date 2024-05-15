@@ -9,7 +9,7 @@ use rustv::{
     flash::Flash,
     generated,
     init::{reset, wait},
-    println, readline,
+    println, readline, watchdog::Watchdog,
 };
 
 
@@ -34,6 +34,9 @@ pub type ActualInput = Input<{ crate::generated::INPUTPORT_ADDR }>;
 /// Internal warmboot device on the ice40
 pub type ActualWarm = Warmboot<{ crate::generated::WARMBOOT_ADDR }>;
 
+/// Watch dog 
+pub type ActualWD = Watchdog<{crate::generated::WATCHDOG_ADDR}>;
+
 /// Primary data construct
 /// Add more to me and it is made available to commands
 struct Ctx {
@@ -43,6 +46,7 @@ struct Ctx {
     led: ActualLed,
     input: ActualInput,
     flash: TinyFlash,
+    watchdog: ActualWD
 }
 
 /// Make a clean context.
@@ -55,6 +59,7 @@ impl Ctx {
             led: Led::new(),
             input: Input::new(),
             flash: Flash::new(),
+            watchdog: Watchdog::new()
         }
     }
 }
@@ -166,8 +171,21 @@ static COMMANDS: &[(&str, Command)] = &[
     ("read", cmd_read),
     ("rect", cmd_rect),
     ("fl", cmd_flash),
-    ("jdec",cmd_jedec)
+    ("jdec",cmd_jedec),
+    ("poke",cmd_watchdog),
+    ("count",cmd_count)
 ];
+
+
+fn cmd_count(ctx: &mut Ctx) {
+    println!("{}",ctx.watchdog.read());
+}
+
+fn cmd_watchdog(ctx: &mut Ctx) {
+
+    ctx.watchdog.poke();
+}
+
 
 fn cmd_flash(ctx: &mut Ctx) {
     ctx.flash.read_block(0x50000, 1290);
