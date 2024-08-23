@@ -7,9 +7,8 @@ The base is minimual rust but if you insist on writing C++ or C  that will work 
 There appears to be a lot of stuff to do. My brain has stalled,
 so I should probably write a list.
 
-1. reset on spi boot broken
+
 1. fix print! and println! , rework.
-1. rework the bootloader to timeout on serial and load from flash
 1. Rewrite the simple fabric to a multiplexer
 1. write an amaranth_soc <-> hapenny bus bridge.
 1. look into the svd exporter (for embeded-hal)
@@ -21,6 +20,8 @@ so I should probably write a list.
    1.  add byte array loader
    1.  write unlock
    1.  address start offset and size guardrails
+1. reset on spi boot broken
+1. rework the bootloader to timeout on serial and load from flash
 
 
 # TO-DONE

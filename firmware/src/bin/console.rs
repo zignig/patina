@@ -1,6 +1,5 @@
 #![no_std]
 #![no_main]
-
 #![deny(missing_docs)]
 
 //! riscv32i rust target.
@@ -9,9 +8,9 @@ use rustv::{
     flash::Flash,
     generated,
     init::{reset, wait},
-    println, readline, watchdog::Watchdog,
+    println, readline,
+    watchdog::Watchdog,
 };
-
 
 use patina_pac::{input::Input, led::Led, warmboot::Warmboot};
 
@@ -34,8 +33,8 @@ pub type ActualInput = Input<{ crate::generated::INPUTPORT_ADDR }>;
 /// Internal warmboot device on the ice40
 pub type ActualWarm = Warmboot<{ crate::generated::WARMBOOT_ADDR }>;
 
-/// Watch dog 
-pub type ActualWD = Watchdog<{crate::generated::WATCHDOG_ADDR}>;
+/// Watch dog
+pub type ActualWD = Watchdog<{ crate::generated::WATCHDOG_ADDR }>;
 
 /// Primary data construct
 /// Add more to me and it is made available to commands
@@ -46,7 +45,7 @@ struct Ctx {
     led: ActualLed,
     input: ActualInput,
     flash: TinyFlash,
-    watchdog: ActualWD
+    watchdog: ActualWD,
 }
 
 /// Make a clean context.
@@ -59,7 +58,7 @@ impl Ctx {
             led: Led::new(),
             input: Input::new(),
             flash: Flash::new(),
-            watchdog: Watchdog::new()
+            watchdog: Watchdog::new(),
         }
     }
 }
@@ -73,7 +72,7 @@ pub extern "C" fn main() -> ! {
     println!("Welcome to patina\r\n");
     println!("press esc to return to bootloader\r\n\r\n");
     println!("{}\r\n", generated::DATE_STAMP);
-    
+
     let mut counter: u32 = 0;
 
     // Create the main context
@@ -84,14 +83,14 @@ pub extern "C" fn main() -> ! {
     wait(10000);
     ctx.led.off();
 
-    // Hello flash, why are you sleeping ? 
+    // Hello flash, why are you sleeping ?
     ctx.flash.wakeup();
 
     // Dump a block.
     //cmd_flash(&mut ctx);
 
     println!("{}", PROMPT);
-    
+
     loop {
         // get something from the serial port
         if let Some(val) = ctx.cons.process() {
@@ -118,16 +117,16 @@ pub extern "C" fn main() -> ! {
                     _ => println!("|{:?}", val),
                 }
                 // Stuff happened.
-                counter = 0;
+                // counter = 0;
             }
         }
         // bug out timer
-        counter += 1;
-        if counter > 120_000_000 {
-            println!("bye");
-            wait(100_000);
-            reset();
-        }
+        // counter += 1;
+        // if counter > 120_000_000 {
+        //     println!("bye");
+        //     wait(100_000);
+        //     reset();
+        // }
     }
 }
 
@@ -171,21 +170,25 @@ static COMMANDS: &[(&str, Command)] = &[
     ("read", cmd_read),
     ("rect", cmd_rect),
     ("fl", cmd_flash),
-    ("jdec",cmd_jedec),
-    ("poke",cmd_watchdog),
-    ("count",cmd_count)
+    ("jdec", cmd_jedec),
+    ("poke", cmd_watchdog),
+    ("count", cmd_count),
 ];
 
-
 fn cmd_count(ctx: &mut Ctx) {
-    println!("{}",ctx.watchdog.read());
+    // This will turn it on and start the watch dog.
+    ctx.watchdog.poke();
+    //let mut count: u32 = 0;
+    loop {
+        //println!("{}\r\n", count);
+        //count += 1;
+        println!("{}\r\n",ctx.watchdog.read());
+    }
 }
 
 fn cmd_watchdog(ctx: &mut Ctx) {
-
     ctx.watchdog.poke();
 }
-
 
 fn cmd_flash(ctx: &mut Ctx) {
     ctx.flash.read_block(0x50000, 1290);
@@ -201,7 +204,7 @@ fn cmd_jedec(ctx: &mut Ctx) {
     //     println!("{:X} ",i);
     // }
     // println!("\r\n");
-    println!("{:?}",jd);
+    println!("{:?}", jd);
 }
 
 fn cmd_rect(_ctx: &mut Ctx) {

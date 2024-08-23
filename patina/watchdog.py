@@ -46,5 +46,4 @@ class Watchdog(Component):
         with m.If(self.counter == 0):
             m.d.sync += self.activate.eq(1)
 
-        # ok do nothing for now
         return m
