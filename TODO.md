@@ -7,6 +7,10 @@ The base is minimual rust but if you insist on writing C++ or C  that will work 
 There appears to be a lot of stuff to do. My brain has stalled,
 so I should probably write a list.
 
+# Gateware
+
+
+# Firmware
 
 1. fix print! and println! , rework.
 1. Rewrite the simple fabric to a multiplexer

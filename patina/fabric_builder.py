@@ -8,9 +8,12 @@ from amaranth.lib.coding import Encoder, Decoder
 from amaranth_soc.memory import MemoryMap
 
 from hapenny import StreamSig, AlwaysReady, treeduce
+from hapenny.serial import BidiUart
 from hapenny.bus import SimpleFabric, partial_decode, BusPort
 from hapenny.mem import BasicMemory
 
+import subprocess
+import os
 import logging
 
 log = logging.getLogger(__name__)
@@ -19,12 +22,39 @@ log = logging.getLogger(__name__)
 class BootMem(BasicMemory):
     """A subclass of the Basic mem for the bootloader"""
 
-    def __init__(self, boot_image, image_size=None):
-        if image_size == None:
-            image_size = 2 ** (len(boot_image)).bit_length()
-        else:
-            image_size = image_size
-        super().__init__(depth=image_size, read_only=True, contents=boot_image)
+    def __init__(self, image_size=None):
+        # if image_size == None:
+        #     image_size = 2 ** (len(boot_image)).bit_length()
+        # else:
+        #     image_size = image_size
+        # super().__init__(depth=image_size, read_only=True, contents=boot_image)
+        super().__init__(depth=image_size, read_only=True, size=512)
+
+    # Name is set below in the
+    def set_name(self, stack_start, uart_start):
+        self.file_name = f"bootloader/bl-{stack_start}-{uart_start}.bin"
+        log.critical(self.file_name)
+
+    def build(self):
+        # build the firmware
+        # split into two 
+
+        file_parts = self.file_name.split(os.sep)
+        self.folder = file_parts[0]
+        self.bin_name = file_parts[1]
+        log.critical(file_parts)
+        r = subprocess.run(["cargo", "build", "--release"], cwd=self.folder)
+        if r.returncode != 0:
+            return False
+        # convert to binary
+        r = subprocess.run(
+            ["cargo", "objcopy", "--release", "--", "-O", "binary", self.bin_name],
+            cwd="bootloader",
+        )
+        log.critical(r.returncode)
+        if r.returncode != 0: 
+            return False
+        return True
 
 
 class FabricBuilder(Component):
@@ -86,10 +116,12 @@ class FabricBuilder(Component):
             log.debug(f"{d.name} - {d.width}")
             if isinstance(d, BootMem):
                 boot_device = d
+            if isinstance(d, BidiUart):
+                uart_device = d
 
         # Add extra bit to the address space for reasons
         self.addr_width = addr_width = max(d.width for d in self.devices) + 1
-        # How many devices 
+        # How many devices
         self.extra_bits = extra_bits = (len(self.devices) - 1).bit_length()
 
         log.debug("----")
@@ -120,7 +152,7 @@ class FabricBuilder(Component):
                     addr_width=d.width + 1, data_width=16, name=uniq_name(d.name)
                 )
                 # the size of the window may not be the same as the resource
-                # memory may have less address values than bits that it has 
+                # memory may have less address values than bits that it has
                 # (after much prognostication) :) , tell me how I know.
                 # it does have a bus width though...
                 # TODO fold back into happenny.
@@ -151,10 +183,19 @@ class FabricBuilder(Component):
         # cargo build a "(stack)-(uart).bin" in this place
         # TODO make the bootloader dev free, please.
         if boot_device != None:
+            stack_start = memory_map.find_resource(boot_device).start
+            uart_start = memory_map.find_resource(uart_device).start
+
+            boot_device.set_name(stack_start, uart_start)
+
             # in half words
-            self.reset_vector = memory_map.find_resource(boot_device).start >> 1
+            self.reset_vector = stack_start >> 1
         else:
             self.reset_vector = 0  # main mem boot
+
+    def show(self):
+        for i in self.memory_map.all_resources():
+            log.info(f"{i.path} \t{i.start} \t{i.end}")
 
     def bind(self, m):
         """
@@ -169,7 +210,7 @@ class FabricBuilder(Component):
     def elaborate(self, platform):
         """
         This just adds submodules and does @cbiffles simple fabric
-        
+
         TODO use a multiplexer instead rather than the simple fabric build
         """
         m = Module()

@@ -7,3 +7,4 @@ sim-cpu.v
 test.vcd
 test.gtkw
 *.code-workspace
+bootloader/*.bin
