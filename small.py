@@ -27,19 +27,13 @@ class Computer(Elaboratable):
     def __init__(self):
         F = 16e6  # Hz
         super().__init__()
-        self.mainmem = mainmem = BasicMemory(depth=512 * 4 )  # 16bit cells
+        self.mainmem = mainmem = BasicMemory(depth=512 * 4)  # 16bit cells
         self.bootmem = bootmem = BootMem()
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
 
-        devices = [
-            self.mainmem,
-            bootmem,
-            self.bidi,
-            self.warmboot,
-            self.watchdog
-        ]
+        devices = [self.mainmem, bootmem, self.bidi, self.warmboot, self.watchdog]
 
         self.fabric = fabric = FabricBuilder(devices)
 
@@ -48,7 +42,7 @@ class Computer(Elaboratable):
         # Data for the cli
         self.serial = "/dev/ttyUSB0"
         self.baud_rate = 115200
-        self.firmware = "firmware/console"
+        self.firmware = "firmware/base"
 
     def elaborate(self, platform):
         m = Module()

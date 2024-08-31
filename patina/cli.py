@@ -34,9 +34,10 @@ def run(platform, construct):
     generate = runner.add_parser("generate")
 
     console = runner.add_parser("console", description="Connect a serial console")
+    console.add_argument("-b", "--bin", type=str)
 
     args = parser.parse_args()
-
+    
     match args.commands:
         case "prepare":
             print(Panel("build firmware and stuff"))
@@ -68,6 +69,8 @@ def do_mapping(construct):
 def do_generate(construct):
     ra = RustArtifacts(construct, folder="bootloader")
     ra.make_bootloader()
+    ra = RustArtifacts(construct, folder="firmware")
+    ra.make_firmware()
 
 
 def do_console(construct):
@@ -83,14 +86,14 @@ def do_console(construct):
 
 
 def build_firmware(construct):
-    if not hasattr(construct,"firmware"):
-        log.critical(f'No firmware provided')
+    if not hasattr(construct, "firmware"):
+        log.critical(f"No firmware provided")
         return
     log.info(f"Build firmware {construct.firmware}")
     file_parts = construct.firmware.split(os.sep)
     folder = file_parts[0]
     bin_name = file_parts[1]
-    r = subprocess.run(["cargo", "build", "--release","--bin",bin_name], cwd=folder)
+    r = subprocess.run(["cargo", "build", "--release", "--bin", bin_name], cwd=folder)
     if r.returncode != 0:
         return False
     # convert to binary
