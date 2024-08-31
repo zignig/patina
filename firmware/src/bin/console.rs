@@ -73,7 +73,7 @@ pub extern "C" fn main() -> ! {
     println!("press esc to return to bootloader\r\n\r\n");
     println!("{}\r\n", generated::DATE_STAMP);
 
-    let mut counter: u32 = 0;
+    let mut _counter: u32 = 0;
 
     // Create the main context
     let mut ctx = Ctx::new();

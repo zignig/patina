@@ -12,6 +12,9 @@ import argparse
 import configparser
 import os
 
+import logging
+log = logging.getLogger(__name__)
+
 class Commands(Enum):
     " Hapenny serial bootloader "
     call = 0
@@ -138,7 +141,7 @@ class MonTool:
         return list(boot_image)
 
     def run(self, file_name):
-        print("Loading ", file_name)
+        log.info("Loading ", file_name)
         firm = self.load(file_name)
         self.write(0, firm)
         data = self.read(0,len(firm))

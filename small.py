@@ -14,6 +14,8 @@ from hapenny.mem import BasicMemory
 
 from patina.generate import *
 from patina.fabric_builder import FabricBuilder, BootMem
+from patina.warmboot import WarmBoot
+from patina.watchdog import Watchdog
 from patina import cli
 from patina import log_base
 import logging
@@ -25,15 +27,18 @@ class Computer(Elaboratable):
     def __init__(self):
         F = 16e6  # Hz
         super().__init__()
-        self.mainmem = mainmem = BasicMemory(depth=512 * 20 )  # 16bit cells
+        self.mainmem = mainmem = BasicMemory(depth=512 * 4 )  # 16bit cells
         self.bootmem = bootmem = BootMem()
-
+        self.warmboot = warmboot = WarmBoot()
+        self.watchdog = watchdog = Watchdog()
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
 
         devices = [
             self.mainmem,
             bootmem,
             self.bidi,
+            self.warmboot,
+            self.watchdog
         ]
 
         self.fabric = fabric = FabricBuilder(devices)
@@ -43,7 +48,7 @@ class Computer(Elaboratable):
         # Data for the cli
         self.serial = "/dev/ttyUSB0"
         self.baud_rate = 115200
-        self.firmware = "firmware/bin/console"
+        self.firmware = "firmware/console"
 
     def elaborate(self, platform):
         m = Module()

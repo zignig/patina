@@ -49,7 +49,6 @@ class BootMem(BasicMemory):
             ["cargo", "objcopy", "--release", "--", "-O", "binary", self.bin_name],
             cwd="bootloader",
         )
-        log.critical(r.returncode)
         if r.returncode != 0: 
             return False
         return True
@@ -139,8 +138,8 @@ class FabricBuilder(Component):
 
         # build the memory map list
         log.debug("Build the memory_map")
-        for d in devices:
-            log.debug(d.name)
+        for i,d in enumerate(devices):
+            log.debug(f"{i} - {d.name}")
             if hasattr(d, "memory_map"):
                 log.critical("Device already has map")
                 log.critical(d)
