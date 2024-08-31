@@ -3,7 +3,8 @@ from .memx import BootLoaderX
 from .variables import RustLib
 
 import os
-
+import logging 
+log = logging.getLogger(__name__)
 
 class RustArtifacts:
     def __init__(self, soc, folder=None):
@@ -16,7 +17,7 @@ class RustArtifacts:
         rustlib = RustLib(self.soc)
         bloader = BootLoaderX(self.soc)
 
-        print("Generate Bootloader Files in ", folder)
+        log.info(f"Generate Bootloader Files in {folder}")
         try:
             os.stat(folder)
         except:
@@ -32,7 +33,7 @@ class RustArtifacts:
         rustlib = RustLib(self.soc)
         bloader = GenRust(self.soc)
 
-        print("Generate Firmware Files in ",folder)
+        log.info(f"Generate Firmware Files in {folder}")
         if folder is not None:
             try:
                 os.stat(folder)

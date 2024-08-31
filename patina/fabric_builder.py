@@ -33,16 +33,14 @@ class BootMem(BasicMemory):
     # Name is set below in the
     def set_name(self, stack_start, uart_start):
         self.file_name = f"bootloader/bl-{stack_start}-{uart_start}.bin"
-        log.critical(self.file_name)
 
     def build(self):
         # build the firmware
         # split into two 
-
+        log.critical(f'building -- {self.file_name}')
         file_parts = self.file_name.split(os.sep)
         self.folder = file_parts[0]
         self.bin_name = file_parts[1]
-        log.critical(file_parts)
         r = subprocess.run(["cargo", "build", "--release"], cwd=self.folder)
         if r.returncode != 0:
             return False

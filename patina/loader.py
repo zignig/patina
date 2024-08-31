@@ -58,7 +58,7 @@ class MonTool:
                 return True
         else:
             if exit:
-                raise ("ack failed")
+                raise Exception("ack failed")
             else:
                 return False
 

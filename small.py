@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import struct
-from pathlib import Path
 
 from amaranth import Elaboratable, Module, Signal
 from amaranth.lib.wiring import connect
@@ -27,7 +25,7 @@ class Computer(Elaboratable):
     def __init__(self):
         F = 16e6  # Hz
         super().__init__()
-        self.mainmem = mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
+        self.mainmem = mainmem = BasicMemory(depth=512 * 20 )  # 16bit cells
         self.bootmem = bootmem = BootMem()
 
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
@@ -41,6 +39,11 @@ class Computer(Elaboratable):
         self.fabric = fabric = FabricBuilder(devices)
 
         self.cpu = Cpu(reset_vector=fabric.reset_vector, addr_width=fabric.addr_width)
+
+        # Data for the cli
+        self.serial = "/dev/ttyUSB0"
+        self.baud_rate = 115200
+        self.firmware = "firmware/bin/console"
 
     def elaborate(self, platform):
         m = Module()
