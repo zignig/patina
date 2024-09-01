@@ -46,7 +46,7 @@ class Computer(Elaboratable):
             self.mainmem,
             bootmem,
             self.bidi,
-            #self.warmboot,
+            self.warmboot,
             #self.watchdog,
             #self.spi,
         ]

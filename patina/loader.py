@@ -141,14 +141,14 @@ class MonTool:
         return list(boot_image)
 
     def run(self, file_name):
-        log.info("Loading ", file_name)
+        log.info(f"Loading {file_name}")
         firm = self.load(file_name)
         self.write(0, firm)
         data = self.read(0,len(firm))
         if data == firm:
             print("OK")
-            m.call(0)
-            m.attach()
+            self.call(0)
+            self.attach()
         else:
             print(data,firm)
             print("failed upload")

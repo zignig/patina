@@ -91,10 +91,13 @@ def do_console(construct):
         if hasattr(construct, "baud"):
 
             mt = MonTool(port=construct.serial, baud=construct.baud)
-            try:
-                mt.run(construct.firmware)
-            except:
-                log.critical(f"Console Failed , no ack from {construct.serial}")
+            name = "/".join([construct.firmware[0],'bin',construct.firmware[1]])
+            log.critical(name)
+            mt.run(name)
+            # try:
+            #     mt.run(construct.firmware)
+            # except:
+            #     log.critical(f"Console Failed , no ack from {construct.serial}")
     else:
         log.critical("Serial port not defined , construct needs .serial")
 
