@@ -16,6 +16,7 @@ from patina.generate import *
 from patina.fabric_builder import FabricBuilder, BootMem
 from patina.warmboot import WarmBoot
 from patina.watchdog import Watchdog
+from patina.spi import SimpleSPI
 from patina import cli
 from patina import log_base
 import logging
@@ -27,13 +28,22 @@ class Computer(Elaboratable):
     def __init__(self):
         F = 16e6  # Hz
         super().__init__()
-        self.mainmem = mainmem = BasicMemory(depth=512 * 4)  # 16bit cells
+        self.mainmem = mainmem = BasicMemory(depth=512 * 1)  # 16bit cells
         self.bootmem = bootmem = BootMem()
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
+        self.spi = spi = SimpleSPI()
+
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
 
-        devices = [self.mainmem, bootmem, self.bidi, self.warmboot, self.watchdog]
+        devices = [
+            self.mainmem,
+            bootmem,
+            self.bidi,
+            # self.warmboot,
+            # self.watchdog,
+            # self.spi,
+        ]
 
         self.fabric = fabric = FabricBuilder(devices)
 
@@ -42,7 +52,7 @@ class Computer(Elaboratable):
         # Data for the cli
         self.serial = "/dev/ttyUSB0"
         self.baud_rate = 115200
-        self.firmware = "firmware/base"
+        self.firmware = "firmware/console"
 
     def elaborate(self, platform):
         m = Module()
@@ -57,40 +67,46 @@ class Computer(Elaboratable):
         # Connect the cpu and the fabric
         connect(m, self.cpu.bus, self.fabric.bus)
 
-        uartpins = platform.request("uart", 0)
-        rx_post_sync = Signal()
-        m.submodules.rxsync = amaranth.lib.cdc.FFSynchronizer(
-            i=uartpins.rx.i,
-            o=rx_post_sync,
-            o_domain="sync",
-            init=1,
-            stages=2,
-        )
-        m.d.comb += [
-            uartpins.tx.o.eq(self.bidi.tx),
-            self.bidi.rx.eq(rx_post_sync),
-        ]
+        uart = True
+        if uart:
+            uartpins = platform.request("uart", 0)
+            rx_post_sync = Signal()
+            m.submodules.rxsync = amaranth.lib.cdc.FFSynchronizer(
+                i=uartpins.rx.i,
+                o=rx_post_sync,
+                o_domain="sync",
+                init=1,
+                stages=2,
+            )
+            m.d.comb += [
+                uartpins.tx.o.eq(self.bidi.tx),
+                self.bidi.rx.eq(rx_post_sync),
+            ]
 
         return m
 
 
-from amaranth_boards.tinyfpga_bx import TinyFPGABXPlatform
+from amaranth_boards.tinyfpga_bx import TinyFPGABXPlatform as ThePlatform
+
+#from amaranth_boards.nandland_go import NandlandGoPlatform as ThePlatform
+#from amaranth_boards.icestick import ICEStickPlatform as ThePlatform
+from amaranth_boards.icesugar import ICESugarPlatform as ThePlatform
 
 
 if __name__ == "__main__":
-    platform = TinyFPGABXPlatform()
+    platform = ThePlatform()
 
-    platform.add_resources(
-        [
-            UARTResource(
-                0, rx="A8", tx="B8", attrs=Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
-            ),
-            Resource(
-                "boot", 0, Pins("H2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
-            ),
-            Resource("user", 0, Pins("J1", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
-        ]
-    )
+    # platform.add_resources(
+    #     [
+    #         UARTResource(
+    #             0, rx="A8", tx="B8", attrs=Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
+    #         ),
+    #         Resource(
+    #             "boot", 0, Pins("H2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
+    #         ),
+    #         Resource("user", 0, Pins("J1", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
+    #     ]
+    # )
 
     pooter = Computer()
 

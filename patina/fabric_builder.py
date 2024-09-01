@@ -132,7 +132,6 @@ class FabricBuilder(Component):
         self.memory_map = memory_map = MemoryMap(
             addr_width=addr_width + extra_bits + 1,
             data_width=16,
-            name=uniq_name(name),
             alignment=addr_width,
         )
 
@@ -146,7 +145,7 @@ class FabricBuilder(Component):
                 memory_map.add_window(d.memory_map)
             else:
                 device_memory = MemoryMap(
-                    addr_width=d.width + 1, data_width=16, name=uniq_name(d.name)
+                    addr_width=d.width + 1, data_width=16
                 )
                 # the size of the window may not be the same as the resource
                 # memory may have less address values than bits that it has
@@ -163,7 +162,8 @@ class FabricBuilder(Component):
         # show the memory map
         div()
         for i in self.memory_map.window_patterns():
-            log.debug(f"{i[0]} \t  {i[1][0]}, {len(i[1][0])}")
+            log.debug(i[1])
+            #log.debug(f"{i[0]} \t  {i[1][0]}, {len(i[1][0])}")
         # show the resources
         log.info("")
         log.info("Resources")

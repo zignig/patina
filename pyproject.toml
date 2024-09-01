@@ -10,7 +10,7 @@ requires-python = ">=3.11"
 license = {text = "MIT"}
 
 dependencies = [
-    "amaranth[builtin-yosys] @ git+https://github.com/amaranth-lang/amaranth",
+    "amaranth[builtin-yosys] @ git+https://github.com/amaranth-lang/amaranth@v0.5.1 ",
     "amaranth_soc @ git+https://github.com/amaranth-lang/amaranth-soc",
     "amaranth_stdio @ git+https://github.com/amaranth-lang/amaranth-stdio",
     "yowasp-yosys",

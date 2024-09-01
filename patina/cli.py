@@ -11,7 +11,9 @@ import subprocess
 
 log = logging.getLogger(__name__)
 
-
+def panel(data):
+    print(Panel(data))
+    
 def run(platform, construct):
 
     console = Console()
@@ -40,17 +42,18 @@ def run(platform, construct):
     
     match args.commands:
         case "prepare":
-            print(Panel("build firmware and stuff"))
+            panel("build firmware and stuff")
             do_mapping(construct)
         case "build":
             do_generate(construct)
+            panel("Building FPGA image ; pls hold ...")
             do_build(platform, construct)
         case "mapping":
             do_mapping(construct)
         case "generate":
             do_generate(construct)
         case "console":
-            print(Panel("Attach the console.."))
+            panel("Attach the console..")
             build_firmware(construct)
             do_console(construct)
         case None:

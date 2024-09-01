@@ -12,7 +12,8 @@ use rustv::{
     watchdog::Watchdog,
 };
 
-use patina_pac::{input::Input, led::Led, warmboot::Warmboot};
+// use patina_pac::{input::Input, led::Led, warmboot::Warmboot};
+use patina_pac::warmboot::Warmboot;
 
 use rustv::uart::{Bind, DefaultSerial};
 
@@ -25,10 +26,10 @@ const PROMPT: &str = "|>";
 pub type TinyFlash = Flash<{ generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
 
 /// Single led on the tinybox board
-pub type ActualLed = Led<{ generated::OUTPUTPORT_ADDR }>;
+/// pub type ActualLed = Led<{ generated::OUTPUTPORT_ADDR }>;
 
 /// Input pins
-pub type ActualInput = Input<{ crate::generated::INPUTPORT_ADDR }>;
+// pub type ActualInput = Input<{ crate::generated::INPUTPORT_ADDR }>;
 
 /// Internal warmboot device on the ice40
 pub type ActualWarm = Warmboot<{ crate::generated::WARMBOOT_ADDR }>;
@@ -42,8 +43,8 @@ struct Ctx {
     cons: readline::Console,
     counter: usize,
     warm: ActualWarm,
-    led: ActualLed,
-    input: ActualInput,
+    //led: ActualLed,
+    //input: ActualInput,
     flash: TinyFlash,
     watchdog: ActualWD,
 }
@@ -55,8 +56,8 @@ impl Ctx {
             cons: readline::Console::new(),
             counter: 10,
             warm: Warmboot::new(),
-            led: Led::new(),
-            input: Input::new(),
+            // led: Led::new(),
+            // input: Input::new(),
             flash: Flash::new(),
             watchdog: Watchdog::new(),
         }
@@ -77,11 +78,6 @@ pub extern "C" fn main() -> ! {
 
     // Create the main context
     let mut ctx = Ctx::new();
-
-    // Working blinky.
-    ctx.led.on();
-    wait(10000);
-    ctx.led.off();
 
     // Hello flash, why are you sleeping ?
     ctx.flash.wakeup();
@@ -214,30 +210,30 @@ fn cmd_rect(_ctx: &mut Ctx) {
 
 fn cmd_read(ctx: &mut Ctx) {
     loop {
-        let val: u16 = ctx.input.read();
+        // let val: u16 = ctx.input.read();
         if let Some(_c) = ctx.cons.serial.get() {
             return;
         }
-        println!("{}", val);
+        // println!("{}", val);
         wait(10000);
     }
 }
 
-fn cmd_on(ctx: &mut Ctx) {
-    ctx.led.on();
+fn cmd_on(_ctx: &mut Ctx) {
+    // ctx.led.on();
 }
 
-fn cmd_off(ctx: &mut Ctx) {
-    ctx.led.off();
+fn cmd_off(_ctx: &mut Ctx) {
+    // ctx.led.off();
 }
 
-fn cmd_blink(ctx: &mut Ctx) {
+fn cmd_blink(_ctx: &mut Ctx) {
     const DELAY: u32 = 50_000;
     for _ in 0..10 {
         wait(DELAY);
-        ctx.led.on();
+        // ctx.led.on();
         wait(DELAY);
-        ctx.led.off();
+        // ctx.led.off();
         println!("#");
     }
 }
