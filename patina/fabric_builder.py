@@ -153,8 +153,8 @@ class FabricBuilder(Component):
                     res_size = d.size << 1
                 else:
                     res_size = 2 ** (d.width + 1)
-                device_memory.add_resource(d, name=(d.name,), size=res_size)
-                memory_map.add_window(device_memory)
+                device_memory.add_resource(d, name=d.name, size=res_size)
+                memory_map.add_window(device_memory,name=d.name)
 
         # show the memory map
         div()

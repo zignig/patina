@@ -34,7 +34,7 @@ class Computer(Elaboratable):
         self.firmware = firmware
 
         super().__init__()
-        self.mainmem = mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
+        self.mainmem = mainmem = BasicMemory(depth=512 * 6)  # 16bit cells
         self.bootmem = bootmem = BootMem()  # one bram , auto build
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
@@ -46,7 +46,7 @@ class Computer(Elaboratable):
             bootmem,
             self.bidi,
             self.warmboot,
-            # self.watchdog,
+            #self.watchdog,
             # self.spi,
         ]
 
@@ -84,7 +84,7 @@ from amaranth_boards.tinyfpga_bx import TinyFPGABXPlatform as ThePlatform
 
 if __name__ == "__main__":
     platform = ThePlatform()
-
+ 
     platform.add_resources(
         [
             UARTResource(
