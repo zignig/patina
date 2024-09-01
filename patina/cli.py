@@ -11,9 +11,11 @@ import subprocess
 
 log = logging.getLogger(__name__)
 
+
 def panel(data):
     print(Panel(data))
-    
+
+
 def run(platform, construct):
 
     console = Console()
@@ -36,10 +38,12 @@ def run(platform, construct):
     generate = runner.add_parser("generate")
 
     console = runner.add_parser("console", description="Connect a serial console")
-    console.add_argument("-b", "--bin", type=str)
+    console.add_argument("bin_name", nargs="?", type=str)
+
+    deploy = runner.add_parser("deploy")
 
     args = parser.parse_args()
-    
+
     match args.commands:
         case "prepare":
             panel("build firmware and stuff")
@@ -54,6 +58,12 @@ def run(platform, construct):
             do_generate(construct)
         case "console":
             panel("Attach the console..")
+            log.critical(args)
+            build_firmware(construct, args.bin_name)
+            do_console(construct)
+        case "deploy":
+            do_generate(construct)
+            do_build(platform, construct)
             build_firmware(construct)
             do_console(construct)
         case None:
@@ -78,8 +88,9 @@ def do_generate(construct):
 
 def do_console(construct):
     if hasattr(construct, "serial"):
-        if hasattr(construct, "baud_rate"):
-            mt = MonTool(port=construct.serial, baud=construct.baud_rate)
+        if hasattr(construct, "baud"):
+
+            mt = MonTool(port=construct.serial, baud=construct.baud)
             try:
                 mt.run(construct.firmware)
             except:
@@ -88,19 +99,35 @@ def do_console(construct):
         log.critical("Serial port not defined , construct needs .serial")
 
 
-def build_firmware(construct):
-    if not hasattr(construct, "firmware"):
+def build_firmware(construct, bin_name=None):
+    if hasattr(construct, "firmware"):
+        if construct.firmware is not None:
+            log.info(f"Build firmware {construct.firmware}")
+            folder = construct.firmware[0]
+            if bin_name is None:
+                bin_name = construct.firmware[1]
+            r = subprocess.run(
+                ["cargo", "build", "--release", "--bin", bin_name], cwd=folder
+            )
+            if r.returncode != 0:
+                log.critical("Firmware failed")
+            # convert to binary
+            r = subprocess.run(
+                [
+                    "cargo",
+                    "objcopy",
+                    "--release",
+                    "--bin",
+                    bin_name,
+                    "--",
+                    "-O",
+                    "binary",
+                    f"bin/{bin_name}",
+                ],
+                cwd="firmware",
+            )
+        else:
+            log.critical("Firmware is none")
+    else:
         log.critical(f"No firmware provided")
         return
-    log.info(f"Build firmware {construct.firmware}")
-    file_parts = construct.firmware.split(os.sep)
-    folder = file_parts[0]
-    bin_name = file_parts[1]
-    r = subprocess.run(["cargo", "build", "--release", "--bin", bin_name], cwd=folder)
-    if r.returncode != 0:
-        return False
-    # convert to binary
-    r = subprocess.run(
-        ["cargo", "objcopy", "--release", "--", "-O", "binary", bin_name],
-        cwd="bootloader",
-    )

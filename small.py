@@ -25,11 +25,18 @@ log = logging.getLogger(__name__)
 
 
 class Computer(Elaboratable):
-    def __init__(self):
+    def __init__(self, serial="/dev/ttyUSB0", baud=115200, firmware=None):
         F = 16e6  # Hz
+
+        # cli uses these to connect
+        self.serial = serial
+        self.baud = baud
+        self.firmware = firmware
+
+
         super().__init__()
-        self.mainmem = mainmem = BasicMemory(depth=512 * 1)  # 16bit cells
-        self.bootmem = bootmem = BootMem()
+        self.mainmem = mainmem = BasicMemory(depth=512 * 4)  # 16bit cells
+        self.bootmem = bootmem = BootMem()  # one bram , auto build
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
         self.spi = spi = SimpleSPI()
@@ -40,19 +47,14 @@ class Computer(Elaboratable):
             self.mainmem,
             bootmem,
             self.bidi,
-            # self.warmboot,
-            # self.watchdog,
-            # self.spi,
+            #self.warmboot,
+            #self.watchdog,
+            #self.spi,
         ]
 
         self.fabric = fabric = FabricBuilder(devices)
 
         self.cpu = Cpu(reset_vector=fabric.reset_vector, addr_width=fabric.addr_width)
-
-        # Data for the cli
-        self.serial = "/dev/ttyUSB0"
-        self.baud_rate = 115200
-        self.firmware = "firmware/console"
 
     def elaborate(self, platform):
         m = Module()
@@ -70,44 +72,29 @@ class Computer(Elaboratable):
         uart = True
         if uart:
             uartpins = platform.request("uart", 0)
-            rx_post_sync = Signal()
-            m.submodules.rxsync = amaranth.lib.cdc.FFSynchronizer(
-                i=uartpins.rx.i,
-                o=rx_post_sync,
-                o_domain="sync",
-                init=1,
-                stages=2,
-            )
-            m.d.comb += [
-                uartpins.tx.o.eq(self.bidi.tx),
-                self.bidi.rx.eq(rx_post_sync),
-            ]
-
+            self.bidi.bind(m,uartpins)
+        
         return m
 
 
 from amaranth_boards.tinyfpga_bx import TinyFPGABXPlatform as ThePlatform
 
-#from amaranth_boards.nandland_go import NandlandGoPlatform as ThePlatform
-#from amaranth_boards.icestick import ICEStickPlatform as ThePlatform
-from amaranth_boards.icesugar import ICESugarPlatform as ThePlatform
+# from amaranth_boards.nandland_go import NandlandGoPlatform as ThePlatform
+# from amaranth_boards.icestick import ICEStickPlatform as ThePlatform
+# from amaranth_boards.icesugar import ICESugarPlatform as ThePlatform
 
 
 if __name__ == "__main__":
     platform = ThePlatform()
 
-    # platform.add_resources(
-    #     [
-    #         UARTResource(
-    #             0, rx="A8", tx="B8", attrs=Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
-    #         ),
-    #         Resource(
-    #             "boot", 0, Pins("H2", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
-    #         ),
-    #         Resource("user", 0, Pins("J1", dir="i"), Attrs(IO_STANDARD="SB_LVCMOS")),
-    #     ]
-    # )
+    platform.add_resources(
+        [
+            UARTResource(
+                0, rx="A8", tx="B8", attrs=Attrs(IO_STANDARD="SB_LVCMOS", PULLUP=1)
+            ),
+        ]
+    )
 
-    pooter = Computer()
+    pooter = Computer(serial="/dev/ttyUSB0", baud=115200, firmware=["firmware", "base"])
 
     cli.run(platform, pooter)

@@ -94,3 +94,7 @@ Send: `05`
 Response: `AA`
 
 Basic verification that the bootloader is responding.
+
+### View the assembly
+
+cargo objdump --release  -- -d

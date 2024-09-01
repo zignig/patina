@@ -22,13 +22,10 @@ log = logging.getLogger(__name__)
 class BootMem(BasicMemory):
     """A subclass of the Basic mem for the bootloader"""
 
-    def __init__(self, image_size=None):
-        # if image_size == None:
-        #     image_size = 2 ** (len(boot_image)).bit_length()
-        # else:
-        #     image_size = image_size
-        # super().__init__(depth=image_size, read_only=True, contents=boot_image)
-        super().__init__(depth=image_size, read_only=True, size=512)
+    def __init__(self):
+        # The boot image weighs in at 496 bytes
+        # fits into one bram (on ice40)
+        super().__init__(depth=512, read_only=True)
 
     # Name is set below in the
     def set_name(self, stack_start, uart_start):
