@@ -10,7 +10,7 @@ import amaranth.lib.cdc
 
 from hapenny.cpu import Cpu
 from hapenny.serial import BidiUart
-from hapenny.mem import BasicMemory
+from hapenny.mem import BasicMemory, SpramMemory
 
 from patina.generate import *
 from patina.fabric_builder import FabricBuilder, BootMem
@@ -40,7 +40,6 @@ class Computer(Elaboratable):
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
         self.spi = spi = SimpleSPI()
-
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
 
         devices = [

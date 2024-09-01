@@ -22,12 +22,12 @@ log = logging.getLogger(__name__)
 class BootMem(BasicMemory):
     """A subclass of the Basic mem for the bootloader"""
 
-    def __init__(self):
+    def __init__(self,contents=None):
         # The boot image weighs in at 496 bytes
         # fits into one bram (on ice40)
-        super().__init__(depth=512, read_only=True)
+        super().__init__(depth=512, read_only=True,contents=contents)
 
-    # Name is set below in the
+    # Name is set below in the fabric build
     def set_name(self, stack_start, uart_start):
         self.file_name = f"bootloader/bl-{stack_start}-{uart_start}.bin"
 

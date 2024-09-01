@@ -55,11 +55,13 @@ class Computer(Elaboratable):
         super().__init__()
 
         mainmem = BasicMemory(depth=512 * 12)  # 16bit cells
-        bootmem = BootMem(boot_image)
+        bootmem = BootMem(contents=boot_image)
 
         # these are attached to self so they can be altered in elaboration.
 
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
+        self.bidi._bound = True
+        
         self.led = OutputPort(1, read_back=True)
         self.input = InputPort(5)
         self.spi = SimpleSPI(fifo_depth=512)
