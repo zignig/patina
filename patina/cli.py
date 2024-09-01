@@ -93,7 +93,6 @@ def do_console(construct,bin_name=None):
                 bin_name=construct.firmware[1]
             mt = MonTool(port=construct.serial, baud=construct.baud)
             name = "/".join([construct.firmware[0],'bin',bin_name])
-            log.critical(name)
             mt.run(name)
             # try:
             #     mt.run(construct.firmware)

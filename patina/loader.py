@@ -124,11 +124,8 @@ class MonTool:
         self._write_c(count)
         self._ack()
         self._cmd(Commands.write)
-        for chunks, val in enumerate(data):
-            if chunks % 64 == 0:
-                print("#", end="")
+        for val in data:
             self._write_num(val)
-        print()
         self._ack()
 
     def peek(self, addr):
@@ -201,9 +198,6 @@ if __name__ == "__main__":
         args = argparse.Namespace(**conf_dict)
     except:
         print("no config")
-
-    # print(args)
-    # print(conf_dict)
 
     # spin up the monitor
     m = MonTool(port=args.port, baud=args.baud)

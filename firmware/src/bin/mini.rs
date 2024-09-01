@@ -2,13 +2,12 @@
 #![no_main]
 
 use rustv::{
-    flash::Flash,
     generated,
     init::{reset, wait},
     println, readline,
 };
 
-use patina_pac::{input::Input, led::Led, warmboot::Warmboot};
+use patina_pac::warmboot::Warmboot;
 
 use rustv::uart::{Bind, DefaultSerial};
 
@@ -21,7 +20,6 @@ pub type ActualWarm = Warmboot<{ crate::generated::WARMBOOT_ADDR }>;
 // Add more to me and it is made available to commands
 struct Ctx {
     cons: readline::Console,
-    counter: usize,
     warm: ActualWarm,
 }
 
@@ -29,7 +27,6 @@ impl Ctx {
     fn new() -> Self {
         Self {
             cons: readline::Console::new(),
-            counter: 10,
             warm: Warmboot::new(),
             //input: Input::new(),
         }
