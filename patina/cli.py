@@ -50,7 +50,6 @@ def run(platform, construct):
             do_mapping(construct)
         case "build":
             do_generate(construct)
-            panel("Building FPGA image ; pls hold ...")
             do_build(platform, construct)
         case "mapping":
             do_mapping(construct)
@@ -60,7 +59,7 @@ def run(platform, construct):
             panel("Attach the console..")
             log.critical(args)
             build_firmware(construct, args.bin_name)
-            do_console(construct)
+            do_console(construct,args.bin_name)
         case "deploy":
             do_generate(construct)
             do_build(platform, construct)
@@ -72,6 +71,7 @@ def run(platform, construct):
 
 
 def do_build(platform, construct):
+    panel("Building FPGA image ; pls hold ...")
     platform.build(construct, do_program=True)
 
 
@@ -86,12 +86,13 @@ def do_generate(construct):
     ra.make_firmware()
 
 
-def do_console(construct):
+def do_console(construct,bin_name=None):
     if hasattr(construct, "serial"):
         if hasattr(construct, "baud"):
-
+            if bin_name is None:
+                bin_name=construct.firmware[1]
             mt = MonTool(port=construct.serial, baud=construct.baud)
-            name = "/".join([construct.firmware[0],'bin',construct.firmware[1]])
+            name = "/".join([construct.firmware[0],'bin',bin_name])
             log.critical(name)
             mt.run(name)
             # try:

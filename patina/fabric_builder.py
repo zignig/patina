@@ -77,8 +77,8 @@ class FabricBuilder(Component):
         self.devices = devices
         self.name = name
 
-        log.info("Build fabric for".format(name))
-        log.info("Device hierarchy test")
+        log.debug("Build fabric for".format(name))
+        log.debug("Device hierarchy test")
 
         # replaces a [] list with a sub fabric recursivly.
         for pos, d in enumerate(self.devices):
@@ -162,11 +162,11 @@ class FabricBuilder(Component):
             log.debug(i[1])
             #log.debug(f"{i[0]} \t  {i[1][0]}, {len(i[1][0])}")
         # show the resources
-        log.info("")
-        log.info("Resources")
-        div()
-        for i in self.memory_map.all_resources():
-            log.info(f"{i.path} \t{i.start} \t{i.end}")
+        # log.info("")
+        # log.info("Resources")
+        # div()
+        # for i in self.memory_map.all_resources():
+        #     log.info(f"{i.path} \t{i.start} \t{i.end}")
 
         # set some variables for the cpu to use
 

@@ -118,7 +118,7 @@ class MonTool:
 
     def write(self, addr, data):
         count = len(data)
-        print(addr, count * 4, " bytes")
+        log.info(f"{addr}, {count * 4}, bytes")
         self._write_a(addr)
         self._ack()
         self._write_c(count)
@@ -148,7 +148,7 @@ class MonTool:
         self.write(0, firm)
         data = self.read(0, len(firm))
         if data == firm:
-            print("OK")
+            log.info("OK")
             self.call(0)
             self.attach()
         else:
@@ -215,5 +215,4 @@ if __name__ == "__main__":
             if args.console:
                 m.attach()
             else:
-                print()
-                print("no active bootloader")
+                log.critical("no active bootloader")
