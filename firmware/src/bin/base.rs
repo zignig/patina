@@ -12,11 +12,11 @@ pub extern "C" fn main() -> ! {
         if let Some(c) = ds.get() {
             match c {
                 32 => {
-                    for char in 32..126 {
+                    for char in 31..126 {
                         ds.putb(char);
                     }
                 }
-                b'\x04' => {
+                b'\x1b' => {
                     reset();
                 }
                 _ => {

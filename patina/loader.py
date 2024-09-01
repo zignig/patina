@@ -13,10 +13,12 @@ import configparser
 import os
 
 import logging
+
 log = logging.getLogger(__name__)
 
+
 class Commands(Enum):
-    " Hapenny serial bootloader "
+    "Hapenny serial bootloader"
     call = 0
     write = 1
     read = 2
@@ -48,7 +50,7 @@ class MonTool:
         term.start()
         term.join(True)
         # send exit (ESC key)
-        self.ser.write([0x1b])
+        self.ser.write([0x1B])
         print("exit console")
 
     def _cmd(self, cmd):
@@ -68,9 +70,9 @@ class MonTool:
     def _flush(self):
         while True:
             val = self.ser.read()
-            if val == b'':
+            if val == b"":
                 return
-    
+
     def _write_num(self, val):
         num = val.to_bytes(4, byteorder="little")
         self.ser.write(num)
@@ -122,9 +124,9 @@ class MonTool:
         self._write_c(count)
         self._ack()
         self._cmd(Commands.write)
-        for (chunks,val) in enumerate(data):
+        for chunks, val in enumerate(data):
             if chunks % 64 == 0:
-                print('#',end='')
+                print("#", end="")
             self._write_num(val)
         print()
         self._ack()
@@ -144,13 +146,13 @@ class MonTool:
         log.info(f"Loading {file_name}")
         firm = self.load(file_name)
         self.write(0, firm)
-        data = self.read(0,len(firm))
+        data = self.read(0, len(firm))
         if data == firm:
             print("OK")
             self.call(0)
             self.attach()
         else:
-            print(data,firm)
+            print(data, firm)
             print("failed upload")
 
 
@@ -165,6 +167,7 @@ if __name__ == "__main__":
     parser.add_argument("-b", "--baud", type=int)
     parser.add_argument("-f", "--firmware", type=str)
     parser.add_argument("-c", "--console", action="store_true")
+    parser.add_argument("-i", "--interactive", action="store_true")
     parser.add_argument("-s", "--save", action="store_true")
 
     args = parser.parse_args()
@@ -185,31 +188,32 @@ if __name__ == "__main__":
     try:
         os.stat(cfile)
         conf.read_file(open(cfile))
-        conf_dict = dict(conf['serial'].items())
+        conf_dict = dict(conf["serial"].items())
         args_dict = args.__dict__
 
         # use command line as override
         for i in args_dict.keys():
             if args_dict[i] is not None:
-                #print("override",i)
+                # print("override",i)
                 conf_dict[i] = args_dict[i]
-        
+
         # create new args
         args = argparse.Namespace(**conf_dict)
     except:
         print("no config")
-   
-    #print(args)
-    #print(conf_dict)
-    
+
+    # print(args)
+    # print(conf_dict)
+
     # spin up the monitor
     m = MonTool(port=args.port, baud=args.baud)
     m._flush()
-    if m.ping():
-        m.run(args.firmware)
-    else:
-        if args.console:
-            m.attach()
+    if not args.interactive:
+        if m.ping():
+            m.run(args.firmware)
         else:
-            print()
-            print('no active bootloader')
+            if args.console:
+                m.attach()
+            else:
+                print()
+                print("no active bootloader")
