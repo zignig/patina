@@ -149,8 +149,8 @@ class FabricBuilder(Component):
                 # (after much prognostication) :) , tell me how I know.
                 # it does have a bus width though...
                 # TODO fold back into happenny.
-                if hasattr(d, "size"):
-                    res_size = d.size << 1
+                if hasattr(d, "depth"):
+                    res_size = d.depth << 1
                 else:
                     res_size = 2 ** (d.width + 1)
                 device_memory.add_resource(d, name=d.name, size=res_size)
@@ -159,8 +159,8 @@ class FabricBuilder(Component):
         # show the memory map
         div()
         for i in self.memory_map.window_patterns():
-            log.debug(i[1])
-            #log.debug(f"{i[0]} \t  {i[1][0]}, {len(i[1][0])}")
+            log.info(f"{i[1]}")
+            #log.info(f"{i[0]} \t  {i[1][0]}, {len(i[1][0])}")
         # show the resources
         # log.info("")
         # log.info("Resources")

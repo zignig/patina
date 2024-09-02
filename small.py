@@ -34,7 +34,7 @@ class Computer(Elaboratable):
         self.firmware = firmware
 
         super().__init__()
-        self.mainmem = mainmem = BasicMemory(depth=512 * 6)  # 16bit cells
+        self.mainmem = mainmem = BasicMemory(depth=512 * 5)  # 16bit cells
         self.bootmem = bootmem = BootMem()  # one bram , auto build
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
