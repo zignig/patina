@@ -19,13 +19,13 @@ from hapenny.serial import BidiUart
 from hapenny.mem import BasicMemory, SpramMemory
 from hapenny.gpio import OutputPort, InputPort
 
-from warmboot import WarmBoot
+from patina.warmboot import WarmBoot
 
-from spi import SimpleSPI
+from patina.spi import SimpleSPI
 
-from generate import *
+from patina.generate import *
 
-from fabric_builder import FabricBuilder, BootMem
+from patina.fabric_builder import FabricBuilder, BootMem
 
 # Logging
 import logging

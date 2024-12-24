@@ -7,13 +7,10 @@ import logging
 log = logging.getLogger(__name__)
 
 class RustArtifacts:
-    def __init__(self, soc, folder=None):
+    def __init__(self, soc):
         self.soc = soc
-        self.folder = folder
 
-    def make_bootloader(self):
-        folder = self.folder
-
+    def make_bootloader(self,folder):
         rustlib = RustLib(self.soc)
         bloader = BootLoaderX(self.soc)
 
@@ -27,9 +24,7 @@ class RustArtifacts:
         libx = open(folder + os.sep + "generated.rs", "w")
         rustlib.gen_lib_rs(libx)
 
-    def make_firmware(self):
-        folder = self.folder
-
+    def make_firmware(self,folder):
         rustlib = RustLib(self.soc)
         bloader = GenRust(self.soc)
 

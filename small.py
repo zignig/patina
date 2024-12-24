@@ -34,7 +34,7 @@ class Computer(Elaboratable):
         self.firmware = firmware
 
         super().__init__()
-        self.mainmem = mainmem = BasicMemory(depth=512 * 5)  # 16bit cells
+        self.mainmem = mainmem = BasicMemory(depth=512 * 4)  # 16bit cells
         self.bootmem = bootmem = BootMem()  # one bram , auto build
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
@@ -45,9 +45,9 @@ class Computer(Elaboratable):
             self.mainmem,
             bootmem,
             self.bidi,
-            self.warmboot,
+            #self.warmboot,
             #self.watchdog,
-            # self.spi,
+            self.spi,
         ]
 
         self.fabric = fabric = FabricBuilder(devices)
@@ -68,11 +68,24 @@ class Computer(Elaboratable):
         connect(m, self.cpu.bus, self.fabric.bus)
 
         uart = True
+        flash = True 
+
         if uart:
             uartpins = platform.request("uart", 0)
             self.bidi.bind(m, uartpins)
-
+        
+        if flash:
+            spi_pins = platform.request("spi_flash_1x")
+            m.d.comb += [
+                # peripheral to outside world
+                spi_pins.clk.o.eq(self.spi.clk),
+                spi_pins.cs.o.eq(~self.spi.cs),
+                spi_pins.copi.o.eq(self.spi.copi),
+                self.spi.cipo.eq(spi_pins.cipo.i),
+            ]
+            
         return m
+    
 
 
 from amaranth_boards.tinyfpga_bx import TinyFPGABXPlatform as ThePlatform

@@ -14,7 +14,7 @@ from serial import AsyncSerialPeripheral
 
 class MemFaker(wiring.Component):
     def __init__(self, name, mm, addr_width):
-        self.mm = MemoryMap(name=name, addr_width=addr_width, data_width=32)
+        self.mm = MemoryMap(addr_width=addr_width, data_width=32)
         self.mm.add_resource(name=("ram",), resource=self, size=2**addr_width)
         mm.add_window(self.mm)
         super().__init__(

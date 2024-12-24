@@ -6,6 +6,7 @@ from rich.logging import RichHandler
 
 log_level = logging.DEBUG
 
+
 FORMAT = "%(message)s" #\t  %(name)s - line %(lineno)s - (%(funcName)s)"
 handler = RichHandler()
 

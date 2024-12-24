@@ -80,10 +80,9 @@ def do_mapping(construct):
 
 
 def do_generate(construct):
-    ra = RustArtifacts(construct, folder="bootloader")
-    ra.make_bootloader()
-    ra = RustArtifacts(construct, folder="firmware")
-    ra.make_firmware()
+    ra = RustArtifacts(construct)
+    ra.make_bootloader("bootloader")
+    ra.make_firmware("firmware")
 
 
 def do_console(construct,bin_name=None):
