@@ -34,7 +34,7 @@ class Computer(Elaboratable):
         self.firmware = firmware
 
         super().__init__()
-        self.mainmem = mainmem = BasicMemory(depth=512 * 4)  # 16bit cells
+        self.mainmem = mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
         self.bootmem = bootmem = BootMem()  # one bram , auto build
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
@@ -45,8 +45,8 @@ class Computer(Elaboratable):
             self.mainmem,
             bootmem,
             self.bidi,
-            #self.warmboot,
-            #self.watchdog,
+            self.warmboot,
+            self.watchdog,
             self.spi,
         ]
 
@@ -68,7 +68,7 @@ class Computer(Elaboratable):
         connect(m, self.cpu.bus, self.fabric.bus)
 
         uart = True
-        flash = True 
+        flash = False 
 
         if uart:
             uartpins = platform.request("uart", 0)

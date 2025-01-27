@@ -20,7 +20,7 @@ from hapenny.gpio import OutputPort
 
 from patina.spi import SimpleSPI
 
-from generate import *
+from patina.generate import *
 from patina.fabric_builder import FabricBuilder, BootMem
 
 from amaranth.sim import Simulator, Tick
