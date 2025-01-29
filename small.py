@@ -17,6 +17,7 @@ from patina.fabric_builder import FabricBuilder, BootMem
 from patina.warmboot import WarmBoot
 from patina.watchdog import Watchdog
 from patina.spi import SimpleSPI
+from patina.amcsr import Amcsr_bus,testp
 from patina import cli
 from patina import log_base
 import logging
@@ -33,14 +34,17 @@ class Computer(Elaboratable):
         self.baud = baud
         self.firmware = firmware
 
+        t = testp()
+        t2 = testp()
+
         super().__init__()
-        self.mainmem = mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
+        self.mainmem = mainmem = BasicMemory(depth=512 * 10)  # 16bit cells
         self.bootmem = bootmem = BootMem()  # one bram , auto build
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
         self.spi = spi = SimpleSPI()
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
-
+        self.csr = Amcsr_bus([t,t2])
         devices = [
             self.mainmem,
             bootmem,
@@ -48,6 +52,7 @@ class Computer(Elaboratable):
             self.warmboot,
             self.watchdog,
             self.spi,
+            self.csr
         ]
 
         self.fabric = fabric = FabricBuilder(devices)
@@ -106,6 +111,6 @@ if __name__ == "__main__":
         ]
     )
 
-    pooter = Computer(serial="/dev/ttyUSB0", baud=115200, firmware=["firmware", "base"])
+    pooter = Computer(serial="/dev/ttyUSB0", baud=115200, firmware=["firmware", "console"])
 
     cli.run(platform, pooter)

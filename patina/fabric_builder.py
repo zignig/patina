@@ -161,7 +161,8 @@ class FabricBuilder(Component):
         #show the memory map
         div()
         for i in self.memory_map.window_patterns():
-            log.info(f"{i[1][0].ljust(15)}{str(i[2]):^}")
+            log.info(f"{i}")
+            #log.info(f"{i[1][0].ljust(15)}{str(i[2]):^}")
             #log.info(f"{i[0]} \t  {i[1][0]}, {len(i[1][0])}")
         # show the resources
         # log.info("")

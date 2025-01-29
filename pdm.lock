@@ -204,7 +204,7 @@ dependencies = [
 
 [[package]]
 name = "yowasp-yosys"
-version = "0.48.0.0.post834"
+version = "0.49.0.0.post848"
 summary = "Yosys Open SYnthesis Suite"
 dependencies = [
     "click",
@@ -343,6 +343,6 @@ content_hash = "sha256:63c35aa9a03b7b999918786f25871c4918a85984caf31a5fbb5abeab3
 "yowasp-runtime 1.55" = [
     {url = "https://files.pythonhosted.org/packages/03/f3/e272881fc5ee23bee9d5b42fb3d7cbb8bb0082d06494fa2d4449798a1083/yowasp_runtime-1.55-py3-none-any.whl", hash = "sha256:e8b7df84052a37437cd8abef680fe0035b068d77fcd8493947f42747cbcfae75"},
 ]
-"yowasp-yosys 0.48.0.0.post834" = [
-    {url = "https://files.pythonhosted.org/packages/64/09/554119fa811ea476f5f2cb9d6a5bec742ee98590f8b0affc15fb6429d5cf/yowasp_yosys-0.48.0.0.post834-py3-none-any.whl", hash = "sha256:6a53cdb48083c7ac88dc9e5312e72e92f5afd69aeea412274505c82f8d8d374c"},
+"yowasp-yosys 0.49.0.0.post848" = [
+    {url = "https://files.pythonhosted.org/packages/54/3c/2b849f29263985f2a68270ff838dfb6de9c21dbed3541da0e6f851183488/yowasp_yosys-0.49.0.0.post848-py3-none-any.whl", hash = "sha256:db1db4a2b6ea1386632364773f9583a6905e11fb7696c37b7d7de470b7463c09"},
 ]
