@@ -7,7 +7,7 @@
 use rustv::{
     flash::Flash,
     generated,
-    init::{reset, wait},
+    init::{reset, wait,heap_start},
     println, readline,
     watchdog::Watchdog,
 };
@@ -169,16 +169,23 @@ static COMMANDS: &[(&str, Command)] = &[
     ("jdec", cmd_jedec),
     ("poke", cmd_watchdog),
     ("count", cmd_count),
+    ("heap", cmd_heap),
 ];
 
+fn cmd_heap(ctx: &mut Ctx){
+    println!("{}", heap_start() as u32);
+}
 fn cmd_count(ctx: &mut Ctx) {
     // This will turn it on and start the watch dog.
     ctx.watchdog.poke();
-    //let mut count: u32 = 0;
+    let mut count: u32 = 0;
     loop {
         //println!("{}\r\n", count);
-        //count += 1;
+        count += 1;
         println!("{}\r\n",ctx.watchdog.read());
+        if count > 5000 {
+            return 
+        }
     }
 }
 

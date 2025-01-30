@@ -17,3 +17,7 @@ this is posted at 0x50000
 
 get the length from ls -la of test.bit ( for now )
 
+
+# Dump assembly for a binary ( and learn to read ;) 
+
+cargo objdump --release --bin base -- --disassemble --no-show-raw-insn

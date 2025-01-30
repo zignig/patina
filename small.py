@@ -52,7 +52,7 @@ class Computer(Elaboratable):
             self.warmboot,
             self.watchdog,
             self.spi,
-            self.csr
+            #self.csr
         ]
 
         self.fabric = fabric = FabricBuilder(devices)
@@ -73,7 +73,7 @@ class Computer(Elaboratable):
         connect(m, self.cpu.bus, self.fabric.bus)
 
         uart = True
-        flash = False 
+        flash = True 
 
         if uart:
             uartpins = platform.request("uart", 0)

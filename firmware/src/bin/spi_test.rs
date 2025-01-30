@@ -14,7 +14,7 @@
 use rustv::{
     flash::Flash,
     generated,
-    init::reset,
+    init::{heap_start, reset},
     println,
     uart::{Bind, DefaultSerial},
 };
@@ -32,7 +32,7 @@ pub extern "C" fn main() -> ! {
 
     // const START: u32 = 0x50000;
     // const SIZE: u16 = 65000;
-    let mut dst: *mut u32 = core::ptr::null_mut();
+    let mut dst: *mut u32 = heap_start();
     dst = 0x1000 as _;
     // Load the first word from flash
     // length for now

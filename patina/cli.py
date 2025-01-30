@@ -38,7 +38,7 @@ def run(platform, construct):
     generate = runner.add_parser("generate")
 
     console = runner.add_parser("console", description="Connect a serial console")
-    console.add_argument("bin_name", nargs="?", type=str)
+    console.add_argument("bin", nargs="?", type=str)
 
     deploy = runner.add_parser("deploy")
 
@@ -58,8 +58,8 @@ def run(platform, construct):
         case "console":
             panel("Attach the console..")
             log.critical(args)
-            build_firmware(construct, args.bin_name)
-            do_console(construct,args.bin_name)
+            build_firmware(construct, args.bin)
+            do_console(construct,args.bin)
         case "deploy":
             do_generate(construct)
             do_build(platform, construct)
@@ -126,7 +126,7 @@ def build_firmware(construct, bin_name=None):
                     "binary",
                     f"bin/{bin_name}",
                 ],
-                cwd="firmware",
+                cwd=folder,
             )
         else:
             log.critical("Firmware is none")

@@ -103,6 +103,11 @@ SECTIONS {{
     {{
     *(.data .data.*);
     }} > {mem}
+    .heap (NOLOAD) : ALIGN(4)
+    {{
+        __sheap = .;
+        . = ALIGN(4);
+    }} > {mem}
 }}
         """
         emit(chunk.format(mem="MEMORY"))    
