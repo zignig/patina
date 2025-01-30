@@ -17,7 +17,7 @@ class testp(Component):
                 }
             )
 
-    def __init__(self,name=None):
+    def __init__(self, name=None):
         regs = csr.Builder(addr_width=4, data_width=16)
         self.t = self.test_reg(8, 0)
         self.t2 = self.test_reg(8, 0)
@@ -36,8 +36,10 @@ class testp(Component):
 
 class Amcsr_bus(Component):
     name = "csr_bus"
+
     def __init__(self, devices):
-        name_dict = {} 
+        name_dict = {}
+
         def uniq_name(name):
             if name in name_dict:
                 name_dict[name] += 1
@@ -45,14 +47,18 @@ class Amcsr_bus(Component):
             else:
                 name_dict[name] = 0
                 return name
+
         # for fixed for now
+        self.name = uniq_name(self.__class__.__qualname__)
         self.devices = devices
         self.addr_bits = 5
         # get widths
-        self.memory_map = mm = MemoryMap(addr_width=self.addr_bits,data_width=16)
+        self.memory_map = mm = MemoryMap(addr_width=self.addr_bits, data_width=16)
+        # temp for svg generation
+        mm.csr_only = True
         self.mult = csr.Multiplexer(mm)
         for i in devices:
-            mm.add_resource(i,name=uniq_name("test"),size=4)
+            mm.add_resource(i, name=uniq_name("test"), size=4)
         super().__init__({"bus": In(BusPort(addr=self.addr_bits, data=16))})
 
     def elaborate(self, platform):

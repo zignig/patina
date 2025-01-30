@@ -138,9 +138,9 @@ class FabricBuilder(Component):
         for i,d in enumerate(devices):
             log.debug(f"{i} - {d.name}")
             if hasattr(d, "memory_map"):
-                log.critical("Device already has map")
-                log.critical(d)
-                memory_map.add_window(d.memory_map)
+                # log.critical("Device already has map")
+                # log.critical(d)
+                memory_map.add_window(d.memory_map,name=d.name)
             else:
                 device_memory = MemoryMap(
                     addr_width=d.width + 1, data_width=16
@@ -159,9 +159,9 @@ class FabricBuilder(Component):
 
 
         #show the memory map
-        div()
-        for i in self.memory_map.window_patterns():
-            log.info(f"{i}")
+        # div()
+        # for i in self.memory_map.window_patterns():
+        #     log.info(f"{i}")
             #log.info(f"{i[1][0].ljust(15)}{str(i[2]):^}")
             #log.info(f"{i[0]} \t  {i[1][0]}, {len(i[1][0])}")
         # show the resources

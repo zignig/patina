@@ -36,6 +36,7 @@ class Computer(Elaboratable):
 
         t = testp()
         t2 = testp()
+        t3 = testp()
 
         super().__init__()
         self.mainmem = mainmem = BasicMemory(depth=512 * 10)  # 16bit cells
@@ -44,7 +45,7 @@ class Computer(Elaboratable):
         self.watchdog = watchdog = Watchdog()
         self.spi = spi = SimpleSPI()
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
-        self.csr = Amcsr_bus([t,t2])
+        self.csr = Amcsr_bus([t,t2,t3])
         devices = [
             self.mainmem,
             bootmem,
@@ -52,7 +53,7 @@ class Computer(Elaboratable):
             self.warmboot,
             self.watchdog,
             self.spi,
-            #self.csr
+            self.csr
         ]
 
         self.fabric = fabric = FabricBuilder(devices)

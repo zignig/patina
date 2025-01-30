@@ -52,6 +52,7 @@ impl<const UART: u32> Bind for Serial<UART> {
         }
     }
 
+    // #[inline(never)]
     fn putb(&mut self, b: u8) {
         self.flush();
         unsafe {
@@ -68,7 +69,8 @@ impl<const UART: u32> Bind for Serial<UART> {
             }
         }
     }
-
+    
+    // #[inline(never)]
     fn get(&mut self) -> Option<u8> {
         let status = unsafe { Self::RX.read_volatile() };
         if status >= 0 {

@@ -41,6 +41,7 @@ def run(platform, construct):
     console.add_argument("bin", nargs="?", type=str)
 
     deploy = runner.add_parser("deploy")
+    svd = runner.add_parser("svd")
 
     args = parser.parse_args()
 
@@ -65,8 +66,10 @@ def run(platform, construct):
             do_build(platform, construct)
             build_firmware(construct)
             do_console(construct)
+        case "svd":
+            do_svd(construct)
         case None:
-            do_generate(construct)
+            do_build(platform, construct)
             do_console(construct)
 
 
@@ -84,6 +87,9 @@ def do_generate(construct):
     ra.make_bootloader("bootloader")
     ra.make_firmware("firmware")
 
+def do_svd(construct):
+    ra = RustArtifacts(construct)
+    ra.make_svd('.')
 
 def do_console(construct,bin_name=None):
     if hasattr(construct, "serial"):
