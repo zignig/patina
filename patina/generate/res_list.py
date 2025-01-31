@@ -1,6 +1,7 @@
 # Resource extraction testing
 
 import amaranth_soc
+from amaranth_soc import csr
 from amaranth_soc.memory import MemoryMap, ResourceInfo
 
 
@@ -10,13 +11,30 @@ class ResList:
         self.mm = self._soc.fabric.memory_map
 
     def generate(self):
+        # for i in self.mm.all_resources():
+        #     print(i.path,i.start,i.end,i.resource)
+        #     print()
+        #     if isinstance(i.resource,csr.Register):
+        #         reg = i.resource
+        #         for f in reg:
+        #             print("\t",f)
+        #             # print(dir(f))
+        #         print("--")
+        # print("-----")
+        # return
         for window , name , (start,stop,ratio) in self.mm.windows():
-            print(window,start,stop)
             if not hasattr(window,"csr_only"):
-                    continue
-            for w2 in window.all_resources():
-                print("  ",w2.path,w2,start,w2.end)
-                res = w2.resource
-                print(res.bus.memory_map)
-                # print(dir(res))
-                
+                continue
+            print(window)
+            for i in window.all_resources():
+                print(i.path,i.start+start,i.end+stop)
+                if isinstance(i.resource,csr.Register):
+                    # print("tag",i.path)
+                    reg = i.resource
+                    for f in reg:
+                        print("\t",f)
+
+                         
+
+        
+                    

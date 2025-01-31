@@ -139,7 +139,7 @@ class FabricBuilder(Component):
             log.debug(f"{i} - {d.name}")
             if hasattr(d, "memory_map"):
                 # log.critical("Device already has map")
-                # log.critical(d)
+                #  log.critical(d)
                 memory_map.add_window(d.memory_map,name=d.name)
             else:
                 device_memory = MemoryMap(
