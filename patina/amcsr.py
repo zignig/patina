@@ -7,7 +7,28 @@ from amaranth_soc.memory import MemoryMap
 from hapenny import StreamSig, AlwaysReady, mux, oneof
 from hapenny.bus import BusPort
 
+# this is some testing with a view to converting hapeeny to a csr bus internally.
 
+class enableReg(csr.Register,access="rw"):
+    enable: csr.Field(csr.action.RW,1)
+
+# csr periperal test 
+class compl(Component):
+    def __init__(self,name=None):
+        regs = csr.Builder(addr_width=4, data_width=16)
+        regs.add("enable",enableReg())
+        self._bridge = csr.Bridge(regs.as_memory_map())
+
+        super().__init__({"bus": In(csr.Signature(addr_width=4, data_width=16))})
+        self.bus.memory_map = self._bridge.bus.memory_map
+
+    def elaborate(self, platform):
+        m = Module()
+        m.submodules.bridge = self._bridge
+        connect(m, flipped(self.bus), self._bridge.bus)
+        # add module logic here
+        return m
+    
 class testp(Component):
     class test_reg(csr.Register, access="rw"):
         def __init__(self, width, init):
@@ -26,18 +47,18 @@ class testp(Component):
         third: csr.Field(csr.action.RW,3)
 
     def __init__(self, name=None):
+        if name:
+            self.name = name
         regs = csr.Builder(addr_width=4, data_width=16)
         self.enable = self.enableReg() 
         self.t = self.test_reg(8, 0)
         self.t2 = self.test_reg(16, 0)
-        self.t3 = self.test_reg(24,100)
         self.m = self.multi()
 
         regs.add("enable",self.enable)
         regs.add("test", self.t)
         regs.add("test2", self.t2)
-        regs.add("t3",self.t3)
-        regs.add("m",self.m)
+        regs.add("action",self.m)
 
         self._bridge = csr.Bridge(regs.as_memory_map())
 
@@ -66,14 +87,20 @@ class Amcsr_bus(Component):
                 name_dict[name] = 0
                 return name
 
-        # for fixed for now
         self.name = uniq_name(self.__class__.__qualname__)
         self.devices = devices
+        # for fixed for now
         self.addr_bits = 6
         # get widths
         self.dec = csr.Decoder(addr_width=self.addr_bits,data_width=16)
         for i in devices:
-            self.dec.add(i.bus,name=uniq_name(i.__class__.__qualname__))
+            name = None
+            if hasattr(i,"name"):
+                name = uniq_name(i.name)
+            else:
+                name=uniq_name(i.__class__.__qualname__)
+            self.dec.add(i.bus,name=name)
+    
         super().__init__({"bus": In(BusPort(addr=self.addr_bits, data=16))})
         self.dec.bus.memory_map.csr_only = True
         self.memory_map = self.dec.bus.memory_map
@@ -81,3 +108,4 @@ class Amcsr_bus(Component):
     
     def elaborate(self, platform):
         m = Module()
+        return m
