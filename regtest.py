@@ -36,12 +36,13 @@ class Computer(Elaboratable):
 
         t = testp(name="test")
         t2 = compl()
+        t3 = testp(name="fasdfasdf")
 
         super().__init__()
         self.mainmem = mainmem = BasicMemory(depth=512 *2)  # 16bit cells
         self.bootmem = bootmem = BootMem()  # one bram , auto build
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
-        self.csr = Amcsr_bus([t,t2])
+        self.csr = Amcsr_bus([t,t2,t3])
         devices = [
             self.mainmem,
             # bootmem,
