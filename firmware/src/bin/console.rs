@@ -128,7 +128,7 @@ pub extern "C" fn main() -> ! {
 
 fn list() {
     for i in COMMANDS {
-        println!("{} ", i.0);
+        println!("{}\r\n", i.0);
     }
     println!("\r\n");
 }

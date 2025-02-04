@@ -42,7 +42,7 @@ class Computer(Elaboratable):
         self.mainmem = mainmem = BasicMemory(depth=512 * 10)  # 16bit cells
         self.bootmem = bootmem = BootMem()  # one bram , auto build
         self.warmboot = warmboot = WarmBoot()
-        #self.watchdog = watchdog = Watchdog()
+        self.watchdog = watchdog = Watchdog()
         self.spi = spi = SimpleSPI()
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
         # self.csr = Amcsr_bus([t,t2,t3])
@@ -51,9 +51,9 @@ class Computer(Elaboratable):
             bootmem,
             self.bidi,
             self.warmboot,
-            #self.watchdog,
+            self.watchdog,
             self.spi,
-            #self.csr
+            # self.csr
         ]
 
         self.fabric = fabric = FabricBuilder(devices)
