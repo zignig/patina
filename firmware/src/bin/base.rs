@@ -22,7 +22,7 @@ pub extern "C" fn main() -> ! {
                 //         ds.putb(char);
                 //     }
                 // }
-                b'\x03' => {
+                b'\x1b' => {
                     reset();
                 }
                 b'\x04' => {
