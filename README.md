@@ -6,8 +6,12 @@ An attempt at a minimal rust riscv framework for fpga control plane development
 
 # Installation
 
-This project uses pdm so running `pdm lock` should install all the python packages that are needed.
+This project uses pdm so running `pdm install` should install all the python packages that are needed.
 
 For the bootloader and the firmware a rust install for riscv32i-unknown-none-elf. 
 
+# on the rust side
 
+$ cargo install cargo-binutils
+
+$ rustup component add llvm-tools

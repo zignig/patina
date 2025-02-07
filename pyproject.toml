@@ -17,6 +17,8 @@ dependencies = [
     "rich>=13.7.0",
     # "hapenny @ git+https://github.com/zignig/hapenny@qol",
     "yowasp-nextpnr-ice40",
+    "pyserial>=3.5",
+    "tinyprog>=1.0.21",
 ]
 
 [build-system]
