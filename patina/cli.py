@@ -69,7 +69,8 @@ def run(platform, construct):
         case "svd":
             do_svd(construct)
         case None:
-            do_build(platform, construct)
+            panel("Attach the console..")
+            build_firmware(construct)
             do_console(construct)
 
 

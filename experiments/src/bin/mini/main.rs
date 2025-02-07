@@ -11,6 +11,7 @@ use patina_pac::{
 pub extern "C" fn main() -> ! {
     let mut warmboot = Warm::new();
     let mut ds = DefaultSerial::new();
+    
     loop {
         if let Some(c) = ds.get() {
             match c {

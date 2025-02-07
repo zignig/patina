@@ -15,3 +15,10 @@ For the bootloader and the firmware a rust install for riscv32i-unknown-none-elf
 $ cargo install cargo-binutils
 
 $ rustup component add llvm-tools
+
+# pdm entry
+
+to enter the PDM venv from the command line 
+
+eval $(pdm venv activate in-project)
+. .env.toolchain

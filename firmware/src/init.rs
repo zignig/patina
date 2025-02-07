@@ -41,9 +41,9 @@ pub fn reset() {
     unsafe {
         core::arch::asm!(
         "
-        jr a0               # activate bootloader
+        jr {}               # activate bootloader
         ",
-            in("a0") a,
+            in(reg) a,
             options(noreturn),
         );
     }

@@ -1,17 +1,13 @@
 #![no_std]
 #![no_main]
 
-use patina_pac::warmboot::Warmboot;
-// use rustv::init::reset;
-// use rustv::uart::{Bind, DefaultSerial};
-// use rustv::generated;
-
-/// Internal warmboot device on the ice40
-pub type ActualWarm = Warmboot<{ generated::WARMBOOT_ADDR }>;
+use patina_pac::warmboot::Warm;
+use patina_pac::init::reset;
+use patina_pac::uart::{Bind, DefaultSerial};
 
 #[no_mangle]
 pub extern "C" fn main() -> ! {
-    let mut warmboot: ActualWarm = Warmboot::new();
+    let mut warmboot = Warm::new();
     //Create a serial port
     let mut ds = DefaultSerial::new();
     loop {

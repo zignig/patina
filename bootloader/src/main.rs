@@ -32,9 +32,9 @@ pub extern "C" fn main() -> ! {
                  1: auipc ra, %pcrel_hi(__start)
                     addi ra, ra, %pcrel_lo(1b)
 
-                    jr a0               # activate routine
+                    jr {}               # activate routine
                     ",
-                    in("a0") a,
+                    in(reg) a,
                     options(noreturn),
                 );
             }

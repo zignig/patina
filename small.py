@@ -48,7 +48,7 @@ class Computer(Elaboratable):
         # self.csr = Amcsr_bus([t,t2,t3])
         devices = [
             self.mainmem,
-            bootmem,
+            self.bootmem,
             self.bidi,
             self.warmboot,
             self.watchdog,
@@ -112,6 +112,6 @@ if __name__ == "__main__":
         ]
     )
 
-    pooter = Computer(serial="/dev/ttyUSB0", baud=115200, firmware=["experiments", "mini"])
+    pooter = Computer(serial="/dev/ttyUSB0", baud=115200, firmware=["firmware", "console"])
 
     cli.run(platform, pooter)
