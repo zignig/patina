@@ -1,7 +1,5 @@
 //! Simple uart functions
 
-// moved into pac
-
 // The uart address is generted by the build script
 use core::option::*;
 use core::convert::Infallible;

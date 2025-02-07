@@ -1,5 +1,5 @@
 [package]
-name = "rustv"
+name = "experimental"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,7 +10,7 @@ edition = "2021"
 cfg-if = "1.0.0"
 heapless = { version = "0.8.0" }
 ufmt = { version = "0.2.0", default-features = true }
-patina_pac = { path = "../patina_pac" features="warmboot"} 
+patina_pac = { path = "../patina_pac" , features=["warmboot"]} 
 
 [profile.dev]
 panic = "abort"
@@ -22,7 +22,6 @@ opt-level = 'z'
 debug = false
 
 [build-dependencies]
-#riscv-target = "0.1.2"
 parse_int = "0.6.0"
 askama = "0.12.1"
 

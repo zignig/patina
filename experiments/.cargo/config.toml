@@ -1,10 +1,6 @@
 [build]
 target = "riscv32i-unknown-none-elf"
 
-[target.riscv32i-unknown-none-elf]
-runner = "cargo objdump --release --bin spi_test -- --disassemble --no-show-raw-insn"
-
-# link.x is from riscv_rt
 rustflags = [
  "-C", "relocation-model=pie",
  "-C", "link-arg=-Tmemory.x",

@@ -1,6 +1,8 @@
 //! Watch dog interface
 //!
 
+// moved in pac
+
 /// Watchdog structure
 pub struct Watchdog<const ADDR: u32>;
 

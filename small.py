@@ -112,6 +112,6 @@ if __name__ == "__main__":
         ]
     )
 
-    pooter = Computer(serial="/dev/ttyUSB0", baud=115200, firmware=["firmware", "base"])
+    pooter = Computer(serial="/dev/ttyUSB0", baud=115200, firmware=["experiments", "mini"])
 
     cli.run(platform, pooter)

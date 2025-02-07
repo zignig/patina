@@ -85,7 +85,9 @@ def do_mapping(construct):
 def do_generate(construct):
     ra = RustArtifacts(construct)
     ra.make_bootloader("bootloader")
-    ra.make_firmware("firmware")
+    #ra.make_firmware("firmware")
+    ra.make_firmware("patina_pac")
+    
 
 def do_svd(construct):
     ra = RustArtifacts(construct)

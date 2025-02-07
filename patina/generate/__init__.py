@@ -34,7 +34,7 @@ class RustArtifacts:
 
     def make_firmware(self,folder):
         rustlib = RustLib(self.soc)
-        bloader = GenRust(self.soc)
+        memmap = GenRust(self.soc)
 
         log.info(f"Generate Firmware Files in {folder}")
         if folder is not None:
@@ -44,8 +44,8 @@ class RustArtifacts:
                 os.mkdir(folder)
             memx = open(folder + os.sep + "memory.x", "w")
             libx = open(folder + os.sep + "generated.rs", "w")
-            bloader.generate_memory_x(memx)
+            memmap.generate_memory_x(memx)
             rustlib.gen_lib_rs(libx)
         else:
-            bloader.generate_memory_x()
+            memmap.generate_memory_x()
             rustlib.gen_lib_rs()
