@@ -65,9 +65,9 @@ fn call(addr: *mut u32) {
      1: auipc ra, %pcrel_hi(__start)
         addi ra, ra, %pcrel_lo(1b)
 
-        jr a0               # activate routine
+        jr {}               # activate routine
         ",
-            in("a0") addr,
+            in(reg) addr,
             options(noreturn),
         );
     }

@@ -1,7 +1,7 @@
 //! Start of terminal line drawing in an ascii terminal 
 
-use crate::println;
-use crate::uart::{Bind, DefaultSerial};
+use patina_pac::println;
+use patina_pac::uart::{Bind, DefaultSerial};
 
 const BOX: &[&str] = &["┌─┬┐", "│ ││", "├─┼┤", "└─┴┘"];
 

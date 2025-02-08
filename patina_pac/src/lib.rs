@@ -13,4 +13,4 @@ pub mod input;
 #[cfg(feature = "warmboot")]
 pub mod warmboot;
 pub mod uart;
-
+pub mod watchdog;

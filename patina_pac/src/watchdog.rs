@@ -1,12 +1,13 @@
 //! Watch dog interface
 //!
 
-// moved in pac
 
-/// Watchdog structure
-pub struct Watchdog<const ADDR: u32>;
+/// Watchdog structure implied
+pub type Watchdog = WatchdogDev<{crate::generated::WATCHDOG_ADDR}>;
 
-impl<const ADDR: u32> Watchdog<ADDR> {
+pub struct WatchdogDev<const ADDR: u32>;
+
+impl<const ADDR: u32> WatchdogDev<ADDR> {
     const STATUS: *mut u16 = ADDR as *mut u16;
     const COUNTER: *mut u16 = (ADDR + 2) as *mut u16;
 

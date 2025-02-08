@@ -7,14 +7,14 @@
 
 /// This file is templated in patina/generated/variables.py
 /// made from the SOC memory map.
-pub mod generated {
-    use core::{include,concat,env};
-    include!(concat!(env!("OUT_DIR"), "/generated.rs"));
-}
+// pub mod generated {
+//     use core::{include,concat,env};
+//     include!(concat!(env!("OUT_DIR"), "/generated.rs"));
+// }
 
-pub mod init;
-pub mod uart;
+// pub mod init;
+// pub mod uart;
 pub mod readline;
 pub mod terminal;
 pub mod flash;
-pub mod watchdog;
+// pub mod watchdog;

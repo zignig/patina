@@ -1,7 +1,7 @@
 //! Reader and decoder for an ANSI terminal.
 
-use crate::println;
-use crate::uart::{Bind, DefaultSerial};
+use patina_pac::println;
+use patina_pac::uart::{Bind, DefaultSerial};
 use heapless::String;
 use ufmt::derive::uDebug;
 
@@ -88,7 +88,7 @@ impl Default for Console {
 pub struct Console {
     buffer: Buffer,
     /// point to the serial device
-    pub serial: crate::uart::DefaultSerial, //pub serial: crate::uart::Serial<ADDR>,
+    pub serial: patina_pac::uart::DefaultSerial, //pub serial: crate::uart::Serial<ADDR>,
     //insert: bool,
     echo: bool,
 }

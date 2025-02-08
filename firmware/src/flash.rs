@@ -29,8 +29,8 @@
 
 use core::ops::{BitAnd, BitOr};
 
-use crate::uart::{Bind, DefaultSerial};
-use crate::{init::wait, println};
+use patina_pac::uart::{Bind, DefaultSerial};
+use patina_pac::{init::wait, println};
 
 #[repr(u8)]
 enum Commands {

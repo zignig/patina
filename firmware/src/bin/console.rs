@@ -4,18 +4,16 @@
 
 //! riscv32i rust target.
 
-use rustv::{
-    flash::Flash,
+use rustv::{flash::Flash, readline};
+
+use patina_pac::{
     generated,
-    init::{reset, wait,heap_start},
-    println, readline,
+    init::{heap_start, reset, wait},
+    println,
+    uart::{Bind, DefaultSerial},
+    warmboot::Warm,
     watchdog::Watchdog,
 };
-
-// use patina_pac::{input::Input, led::Led, warmboot::Warmboot};
-use patina_pac::warmboot::Warmboot;
-
-use rustv::uart::{Bind, DefaultSerial};
 
 const PROMPT: &str = "|>";
 
@@ -31,22 +29,16 @@ pub type TinyFlash = Flash<{ generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
 /// Input pins
 // pub type ActualInput = Input<{ crate::generated::INPUTPORT_ADDR }>;
 
-/// Internal warmboot device on the ice40
-pub type ActualWarm = Warmboot<{ crate::generated::WARMBOOT_ADDR }>;
-
-/// Watch dog
-pub type ActualWD = Watchdog<{ crate::generated::WATCHDOG_ADDR }>;
-
 /// Primary data construct
 /// Add more to me and it is made available to commands
 struct Ctx {
     cons: readline::Console,
     counter: usize,
-    warm: ActualWarm,
+    warm: Warm,
     //led: ActualLed,
     //input: ActualInput,
     flash: TinyFlash,
-    watchdog: ActualWD,
+    watchdog: Watchdog,
 }
 
 /// Make a clean context.
@@ -55,7 +47,7 @@ impl Ctx {
         Self {
             cons: readline::Console::new(),
             counter: 10,
-            warm: Warmboot::new(),
+            warm: Warm::new(),
             // led: Led::new(),
             // input: Input::new(),
             flash: Flash::new(),
@@ -172,9 +164,10 @@ static COMMANDS: &[(&str, Command)] = &[
     ("heap", cmd_heap),
 ];
 
-fn cmd_heap(ctx: &mut Ctx){
+fn cmd_heap(_ctx: &mut Ctx) {
     println!("{}", heap_start() as u32);
 }
+
 fn cmd_count(ctx: &mut Ctx) {
     // This will turn it on and start the watch dog.
     ctx.watchdog.poke();
@@ -182,9 +175,9 @@ fn cmd_count(ctx: &mut Ctx) {
     loop {
         //println!("{}\r\n", count);
         count += 1;
-        println!("{}\r\n",ctx.watchdog.read());
+        println!("{}\r\n", ctx.watchdog.read());
         if count > 5000 {
-            return 
+            return;
         }
     }
 }

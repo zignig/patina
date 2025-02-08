@@ -105,8 +105,9 @@ SECTIONS {{
     }} > {mem}
     .heap (NOLOAD) : ALIGN(4)
     {{
-        __sheap = .;
         . = ALIGN(4);
+        . = ALIGN(4);
+        __sheap = .;
     }} > {mem}
 }}
         """
