@@ -34,18 +34,18 @@ class Computer(Elaboratable):
         self.baud = baud
         self.firmware = firmware
 
-        # t = testp()
+        t = testp()
         # t2 = testp()
         # t3 = testp()
 
         super().__init__()
-        self.mainmem = mainmem = BasicMemory(depth=512 * 10)  # 16bit cells
+        self.mainmem = mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
         self.bootmem = bootmem = BootMem()  # one bram , auto build
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
         self.spi = spi = SimpleSPI()
         self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
-        # self.csr = Amcsr_bus([t,t2,t3])
+        self.csr = Amcsr_bus([t])
         devices = [
             self.mainmem,
             self.bootmem,
@@ -53,7 +53,7 @@ class Computer(Elaboratable):
             self.warmboot,
             self.watchdog,
             self.spi,
-            # self.csr
+            self.csr
         ]
 
         self.fabric = fabric = FabricBuilder(devices)
@@ -112,6 +112,6 @@ if __name__ == "__main__":
         ]
     )
 
-    pooter = Computer(serial="/dev/ttyUSB0", baud=115200, firmware=["firmware", "console"])
+    pooter = Computer(serial="/dev/ttyUSB0", baud=115200, firmware=["firmware", "base"])
 
     cli.run(platform, pooter)
