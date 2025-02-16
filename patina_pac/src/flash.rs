@@ -26,9 +26,8 @@
 //!                   1 if TX fifo is full, 0 otherwise (in write mode)
 //!              6-0: remaining bits of char, if RX fifo is not empty in read mode
 
-
-use core::ops::{BitAnd, BitOr};
 use crate::init::wait;
+use core::ops::{BitAnd, BitOr};
 
 #[repr(u8)]
 enum Commands {
@@ -38,7 +37,11 @@ enum Commands {
 }
 
 /// Implied type with flash mapping
-pub type Flash = FlashDev<{ crate::generated::SIMPLESPI_ADDR},{crate::generated::SIMPLESPI_START_ADDR},{crate::generated::SIMPLESPI_FLASH_SIZE}>;
+pub type Flash = FlashDev<
+    { crate::generated::SIMPLESPI_ADDR },
+    { crate::generated::SIMPLESPI_START_ADDR },
+    { crate::generated::SIMPLESPI_FLASH_SIZE },
+>;
 
 /// The interface to the flash device on the SOC
 /// TODO Convert all of this to u32
@@ -243,10 +246,10 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> FlashDev<ADDR, START, S
         self.into_iter()
     }
 
-    
     /// Read a 32 bit numbers from an address
-    pub fn read_words(&mut self, addr: u32,len: u16) -> impl Iterator<Item = u32> + '_ {
-        self.read_iter(addr,len * 4).array_chunks::<4>().map(|data|u32::from_le_bytes(data))
+    pub fn read_words(&mut self, addr: u32, len: u16) -> impl Iterator<Item = u32> + '_ {
+        self.read_iter(addr, len * 4)
+            .array_chunks::<4>()
+            .map(|data| u32::from_le_bytes(data))
     }
-
 }

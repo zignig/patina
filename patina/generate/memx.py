@@ -106,9 +106,8 @@ SECTIONS {{
     {{
     *(.data .data.*);
     }} > {mem}
-    .heap (NOLOAD) : ALIGN(16)
+    .heap (NOLOAD) : ALIGN(4)
     {{
-        . = ALIGN(4);
         . = ALIGN(4);
         __sheap = .;
     }} > {mem}

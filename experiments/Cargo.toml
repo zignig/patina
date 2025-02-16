@@ -11,6 +11,7 @@ cfg-if = "1.0.0"
 heapless = { version = "0.8.0" }
 ufmt = { version = "0.2.0", default-features = true }
 patina_pac = { path = "../patina_pac" , features=["warmboot"]} 
+ascii = { version = "1.1.0", default-features = false }
 
 [profile.dev]
 panic = "abort"

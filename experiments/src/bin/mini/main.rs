@@ -4,11 +4,15 @@
 use patina_pac::{
     init::reset,
     uart::{Bind, DefaultSerial},
+    println,
     warmboot::Warm,
 };
 
+use ascii;
 #[no_mangle]
 pub extern "C" fn main() -> ! {
+    let t = ascii::AsciiStr::from_ascii("test").unwrap();
+    println!("{}",t);
     let mut warmboot = Warm::new();
     let mut ds = DefaultSerial::new();
     loop {

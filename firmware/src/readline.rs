@@ -1,12 +1,11 @@
 //! Reader and decoder for an ANSI terminal.
 
+use heapless::String;
 use patina_pac::println;
 use patina_pac::uart::{Bind, DefaultSerial};
-use heapless::String;
 // use ufmt::derive::uDebug;
 
 const PROMPT: &str = ">>";
-
 
 /// An enumeration of actions that come from the console
 // #[derive(uDebug)]
@@ -160,7 +159,7 @@ impl Console {
                     Some(act)
                 }
                 ConsoleAction::BackSpace => {
-                    //self.backspace();
+                    // self.backspace();
                     None
                 }
 
@@ -200,7 +199,7 @@ impl Console {
 
     /// Process backspce key
     pub fn backspace(&mut self) {
-        //        let _ = self.buffer.data.remove(self.buffer.cursor);
+        let _ = self.buffer.data.remove(self.buffer.cursor);
         self.redraw_line();
     }
 

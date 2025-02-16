@@ -16,7 +16,7 @@ use patina_pac::{
     watchdog::Watchdog,
 };
 
-const PROMPT: &str = "|>";
+const PROMPT: &str = ">>";
 
 // Actual devices
 /// Primary data construct
