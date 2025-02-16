@@ -7,13 +7,13 @@
 use rustv::readline;
 
 use patina_pac::{
+    flash::Flash,
     generated,
     init::{heap_start, reset, wait},
     println,
     uart::{Bind, DefaultSerial},
     warmboot::Warm,
     watchdog::Watchdog,
-    flash::Flash,
 };
 
 const PROMPT: &str = "|>";
@@ -152,8 +152,19 @@ static COMMANDS: &[(&str, Command)] = &[
     ("poke", cmd_watchdog),
     ("count", cmd_count),
     ("heap", cmd_heap),
+    ("ansi", cmd_ansi),
 ];
 
+fn cmd_ansi(ctx: &mut Ctx) {
+    // https://gist.github.com/ConnerWill/d4b6c776b509add763e17f9f113fd25b
+    // ansi testing
+    println!("\x1b[999G");
+    println!("\x1b[6n");
+    wait(10000);
+    while let Some(ch) = ctx.cons.serial.tget() {
+        println!("{}", ch as char);
+    }
+}
 fn cmd_heap(_ctx: &mut Ctx) {
     println!("{}", heap_start() as u32);
 }
@@ -177,8 +188,8 @@ fn cmd_watchdog(ctx: &mut Ctx) {
 }
 
 fn cmd_flash(ctx: &mut Ctx) {
-    for data in ctx.flash.read_iter(0x50000, 1290){
-        println!("{}",data);
+    for data in ctx.flash.read_iter(0x50000, 1290) {
+        println!("{}", data);
     }
     println!("\r\n");
 }

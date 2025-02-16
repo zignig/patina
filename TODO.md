@@ -16,8 +16,6 @@ so I should probably write a list.
 1. Rewrite the simple fabric to a multiplexer
 1. write an amaranth_soc <-> hapenny bus bridge.
 1. look into the svd exporter (for embeded-hal)
-1. auto generate bootloader
-1. move the command line into patina/cli.py
 1.  move the logging builder into patina/logging.py
 1. clean up the flash lib
    1.  add u32 reader and iterator
@@ -36,3 +34,5 @@ These are not TODO these are TODONE.
    1. a page of config  (256 bytes)
    2. 1st word length of program. ( after this page)
    3. second word is address of the data block...
+1. auto generate bootloader
+1. move the command line into patina/cli.py

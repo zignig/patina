@@ -13,22 +13,18 @@
 
 
 use patina_pac::init::heap_start;
-use patina_pac::generated;
-use rustv::flash::Flash;
-
-pub type TinyFlash = Flash<{ generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
+use patina_pac::flash;
 
 /// Main entry point
 #[no_mangle]
 pub extern "C" fn main() -> ! {
-    let mut flash: TinyFlash = Flash::new();
+    let mut flash = flash::Flash::new();
 
     flash.wakeup();
 
     // const START: u32 = 0x50000;
     // const SIZE: u16 = 65000;
     let mut dst: *mut u32 = heap_start();
-    dst = 0x1000 as _;
     // Load the first word from flash
     // length for now
     // FF 256 bytes , read words into ram
@@ -45,8 +41,6 @@ pub extern "C" fn main() -> ! {
             //println!("{}\r\n", word);
             //println!(".")
         }
-
-        dst = 0x1000 as _;
         call(dst);
         //reset();
     }
