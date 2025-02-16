@@ -1,6 +1,9 @@
 #![no_std]
+// features 
 
-/// This file is templated in patina/generated/variables.py
+#![feature(iter_array_chunks)]
+#![feature(iter_next_chunk)]
+
 /// made from the SOC memory map.
 pub mod generated {
     use core::{include,concat,env};
@@ -14,3 +17,5 @@ pub mod input;
 pub mod warmboot;
 pub mod uart;
 pub mod watchdog;
+#[cfg(feature= "flash")]
+pub mod flash;

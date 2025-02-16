@@ -28,9 +28,7 @@
 
 
 use core::ops::{BitAnd, BitOr};
-
-use patina_pac::uart::{Bind, DefaultSerial};
-use patina_pac::{init::wait, println};
+use crate::init::wait;
 
 #[repr(u8)]
 enum Commands {
@@ -39,16 +37,19 @@ enum Commands {
     FastRead = 0x0B,
 }
 
+/// Implied type with flash mapping
+pub type Flash = FlashDev<{ crate::generated::SIMPLESPI_ADDR},{crate::generated::SIMPLESPI_START_ADDR},{crate::generated::SIMPLESPI_FLASH_SIZE}>;
+
 /// The interface to the flash device on the SOC
-/// TODO COnvert all of this to u32
-pub struct Flash<const ADDR: u32, const START: u32, const SIZE: u32> {
+/// TODO Convert all of this to u32
+pub struct FlashDev<const ADDR: u32, const START: u32, const SIZE: u32> {
     byte_counter: u16,
     chunk_bytes: u16,
     bytes_left: u16,
     in_transaction: bool,
 }
 
-impl<const ADDR: u32, const START: u32, const SIZE: u32> Default for Flash<ADDR, START, SIZE> {
+impl<const ADDR: u32, const START: u32, const SIZE: u32> Default for FlashDev<ADDR, START, SIZE> {
     fn default() -> Self {
         Self::new()
     }
@@ -56,7 +57,7 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Default for Flash<ADDR,
 
 /// Make  the entire flash object an iterator
 // TODO: put it some guard rails around transactions
-impl<const ADDR: u32, const START: u32, const SIZE: u32> Iterator for Flash<ADDR, START, SIZE> {
+impl<const ADDR: u32, const START: u32, const SIZE: u32> Iterator for FlashDev<ADDR, START, SIZE> {
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -97,7 +98,7 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Iterator for Flash<ADDR
 }
 
 /// Transaction manager for the flash , Read Only for now.
-impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE> {
+impl<const ADDR: u32, const START: u32, const SIZE: u32> FlashDev<ADDR, START, SIZE> {
     // Registers
     const STATUS: *mut u16 = ADDR as *mut u16;
     const DATA: *mut u16 = (ADDR + 2) as *mut u16;
@@ -248,11 +249,4 @@ impl<const ADDR: u32, const START: u32, const SIZE: u32> Flash<ADDR, START, SIZE
         self.read_iter(addr,len * 4).array_chunks::<4>().map(|data|u32::from_le_bytes(data))
     }
 
-    /// Read a block out of flash and print
-    pub fn read_block(&mut self, addr: u32, len: u16) {
-        for val in self.read_iter(addr, len){ 
-            println!("{}",val);
-        }
-        println!("\r\n");
-    }
 }

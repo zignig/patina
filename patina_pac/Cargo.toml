@@ -9,3 +9,4 @@ ufmt = "0.2.0"
 
 [features]
 warmboot = []
+flash = []

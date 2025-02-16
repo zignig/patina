@@ -4,7 +4,7 @@
 
 //! riscv32i rust target.
 
-use rustv::{flash::Flash, readline};
+use rustv::readline;
 
 use patina_pac::{
     generated,
@@ -13,22 +13,12 @@ use patina_pac::{
     uart::{Bind, DefaultSerial},
     warmboot::Warm,
     watchdog::Watchdog,
+    flash::Flash,
 };
 
 const PROMPT: &str = "|>";
 
 // Actual devices
-
-/// Flash connected to the board ( uses spi.py interface)
-/// ( start address , segment lenth )
-pub type TinyFlash = Flash<{ generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
-
-/// Single led on the tinybox board
-/// pub type ActualLed = Led<{ generated::OUTPUTPORT_ADDR }>;
-
-/// Input pins
-// pub type ActualInput = Input<{ crate::generated::INPUTPORT_ADDR }>;
-
 /// Primary data construct
 /// Add more to me and it is made available to commands
 struct Ctx {
@@ -37,7 +27,7 @@ struct Ctx {
     warm: Warm,
     //led: ActualLed,
     //input: ActualInput,
-    flash: TinyFlash,
+    flash: Flash,
     watchdog: Watchdog,
 }
 
@@ -187,19 +177,14 @@ fn cmd_watchdog(ctx: &mut Ctx) {
 }
 
 fn cmd_flash(ctx: &mut Ctx) {
-    ctx.flash.read_block(0x50000, 1290);
-    //let addr = 0;
-    // for i in 0..50{
-    //     ctx.flash.read_block(i*2048, 2048);
-    // }
+    for data in ctx.flash.read_iter(0x50000, 1290){
+        println!("{}",data);
+    }
+    println!("\r\n");
 }
 
 fn cmd_jedec(ctx: &mut Ctx) {
     let jd = ctx.flash.read_jedec();
-    // for i in jd{
-    //     println!("{:X} ",i);
-    // }
-    // println!("\r\n");
     println!("{:?}", jd);
 }
 
