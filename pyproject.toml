@@ -28,7 +28,7 @@ build-backend = "pdm.pep517.api"
 [tool.pdm.scripts]
 _.env_file = ".env.toolchain"
 svd  = { cmd = "./small.py svd" }
-prog = { cmd = "./tinybxtest.py -b" }
+console = { cmd = "./small.py console console" }
 gen = { cmd = "./tinybxtest.py -g" }
 
 [tool.pdm.dev-dependencies]

@@ -22,7 +22,7 @@ class RustLib:
         emit("")
         for i in self.soc.fabric.memory_map.all_resources():
             res = i.resource
-            name = i.resource.name
+            name = i.resource.name.upper()
             start = i.start
             sec_length = i.end - i.start
             # exclude the storage memory
@@ -31,9 +31,16 @@ class RustLib:
             emit("/// {name}".format(name=name))
             emit(
                 "pub const {name}: u32 = 0x{addr:01X} ; // {addr}".format(
-                    name=name.upper()+"_ADDR", addr=i.start
+                    name=name+"_ADDR", addr=i.start
                 )
             )
+            
+            # check for extra info from an "extra function"
+            if hasattr(res,'extra'):
+                emit("// extra settings for device")
+                extra = res.extra()
+                for n,val in extra.items():
+                    emit("pub const {name}: u32 = 0x{val:01X} ; // {val} ".format(name= name+"_"+n.upper(),val=val))
             emit("")
             # log(res,name,start,sec_length)
         # Reset vector

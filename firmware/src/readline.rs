@@ -3,13 +3,13 @@
 use patina_pac::println;
 use patina_pac::uart::{Bind, DefaultSerial};
 use heapless::String;
-use ufmt::derive::uDebug;
+// use ufmt::derive::uDebug;
 
 const PROMPT: &str = ">>";
 
 
 /// An enumeration of actions that come from the console
-#[derive(uDebug)]
+// #[derive(uDebug)]
 pub enum ConsoleAction {
     /// Single Char
     Char(u8),

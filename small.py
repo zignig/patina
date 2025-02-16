@@ -34,7 +34,7 @@ class Computer(Elaboratable):
         self.baud = baud
         self.firmware = firmware
 
-        t = testp()
+        # t = testp()
         # t2 = testp()
         # t3 = testp()
 
@@ -43,9 +43,10 @@ class Computer(Elaboratable):
         self.bootmem = bootmem = BootMem()  # one bram , auto build
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
-        self.spi = spi = SimpleSPI()
-        self.bidi = BidiUart(baud_rate=115200, oversample=4, clock_freq=F)
-        self.csr = Amcsr_bus([t])
+        # this is board specific , depends on the flash chip
+        self.spi = spi = SimpleSPI(start_addr=50000,flash_size=1024)
+        self.bidi = BidiUart(baud_rate=baud, oversample=4, clock_freq=F)
+        # self.csr = Amcsr_bus([t])
         devices = [
             self.mainmem,
             self.bootmem,
@@ -53,7 +54,7 @@ class Computer(Elaboratable):
             self.warmboot,
             self.watchdog,
             self.spi,
-            self.csr
+            # self.csr
         ]
 
         self.fabric = fabric = FabricBuilder(devices)

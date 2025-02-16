@@ -1,8 +1,8 @@
 #![no_std]
 #![no_main]
 
-use rustv::init::reset;
-use rustv::uart::{Bind, DefaultSerial};
+use patina_pac::init::reset;
+use patina_pac::uart::{Bind, DefaultSerial};
 
 #[no_mangle]
 pub extern "C" fn main() -> ! {

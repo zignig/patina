@@ -102,7 +102,7 @@ pub extern "C" fn main() -> ! {
                         ctx.cons.reset();
                         println!("\n{}", PROMPT);
                     }
-                    _ => println!("|{:?}", val),
+                    _ => {} //println!("|{:?}", val),
                 }
                 // Stuff happened.
                 // counter = 0;

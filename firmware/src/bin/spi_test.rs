@@ -11,22 +11,17 @@
 //! time out after ~seconds(ish) and read from flash
 //!
 
-use rustv::{
-    flash::Flash,
-    generated,
-    init::{heap_start, reset},
-    println,
-    uart::{Bind, DefaultSerial},
-};
 
-/// This constant is board specific , add the address and length to flash .rs
+use patina_pac::init::heap_start;
+use patina_pac::generated;
+use rustv::flash::Flash;
+
 pub type TinyFlash = Flash<{ generated::SIMPLESPI_ADDR }, 0x50000, 0xFBFFF>;
 
 /// Main entry point
 #[no_mangle]
 pub extern "C" fn main() -> ! {
     let mut flash: TinyFlash = Flash::new();
-    //let mut ds = DefaultSerial::new();
 
     flash.wakeup();
 
@@ -62,7 +57,7 @@ fn call(addr: *mut u32) {
         core::arch::asm!(
             "
         # restart monitor if program returns.
-     1: auipc ra, %pcrel_hi(__start)
+     2: auipc ra, %pcrel_hi(__start)
         addi ra, ra, %pcrel_lo(1b)
 
         jr {}               # activate routine

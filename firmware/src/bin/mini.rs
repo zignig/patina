@@ -1,33 +1,31 @@
 #![no_std]
 #![no_main]
 
-use rustv::{
+use patina_pac::{
     generated,
     init::{reset, wait},
-    println, readline,
+    println,
+    uart::{Bind, DefaultSerial},
+    warmboot::Warm,
 };
 
-use patina_pac::warmboot::Warmboot;
-
-use rustv::uart::{Bind, DefaultSerial};
-
+use rustv::readline;
 const PROMPT: &str = "|>";
 
 // Actual devices
-pub type ActualWarm = Warmboot<{ crate::generated::WARMBOOT_ADDR }>;
 
 // Primary data construct
 // Add more to me and it is made available to commands
 struct Ctx {
     cons: readline::Console,
-    warm: ActualWarm,
+    warm: Warm,
 }
 
 impl Ctx {
     fn new() -> Self {
         Self {
             cons: readline::Console::new(),
-            warm: Warmboot::new(),
+            warm: Warm::new(),
             //input: Input::new(),
         }
     }
@@ -67,7 +65,8 @@ pub extern "C" fn main() -> ! {
                         ctx.cons.reset();
                         println!("\n{}", PROMPT);
                     }
-                    _ => println!("|{:?}", val),
+                    _ =>{}
+                     ///println!("|{:?}", val),
                 }
                 // Stuff happened.
                 counter = 0;

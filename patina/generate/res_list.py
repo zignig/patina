@@ -16,7 +16,7 @@ class ResList:
             if len(list(w._windows)) > 0:
                 depth += 1
                 for sw in w.windows():
-                    print(sw.resource)
+                    print(sw)
                     #self.show_win(sw, depth=depth)
             # for i in w.all_resources():
             #     print(i.resource)

@@ -87,10 +87,18 @@ class SimpleSPI(Component):
     copi: Out(1)
     cipo: In(1)
 
-    def __init__(self, fifo_depth=16):
+    def __init__(self,start_addr=0,flash_size=0, fifo_depth=16):
         super().__init__()
+        self.start_addr = start_addr
+        self.flash_size = flash_size
         self.fifo = SyncFIFOBuffered(width=8, depth=fifo_depth)
 
+    # the builder will ask for extra data for the infomap when it
+    # builds the fabric 
+
+    def extra(self):
+        return {"start_addr":self.start_addr,"flash_size":self.flash_size}
+    
     def elaborate(self, platform):
         m = Module()
         m.submodules.fifo = fifo = self.fifo

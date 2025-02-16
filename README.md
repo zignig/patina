@@ -13,6 +13,7 @@ For the bootloader and the firmware a rust install for riscv32i-unknown-none-elf
 # on the rust side
 
 $ cargo install cargo-binutils
+$ cargo install cargo-bloat
 
 $ rustup component add llvm-tools
 

@@ -60,7 +60,10 @@ class GenRust:
         # Add bootmem if it exists
         for i in self._soc.fabric.memory_map.all_resources():
             res = i.resource
-            name = i.resource.name.upper()
+            if hasattr(i.resource,'name'):
+                name = i.resource.name.upper()
+            else:
+                name = 'unnamed'
             start = i.start
             sec_length = i.end - i.start
             if isinstance(res,(BootMem)):
@@ -103,7 +106,7 @@ SECTIONS {{
     {{
     *(.data .data.*);
     }} > {mem}
-    .heap (NOLOAD) : ALIGN(4)
+    .heap (NOLOAD) : ALIGN(16)
     {{
         . = ALIGN(4);
         . = ALIGN(4);
