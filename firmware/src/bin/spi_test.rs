@@ -31,17 +31,13 @@ pub extern "C" fn main() -> ! {
     //
     loop {
         let flash_len = flash.read_words(0x50000, 1).next().unwrap();
-        //println!("{}", flash_len);
         for word in flash.read_words(0x50000 + 256, (flash_len) as u16) {
             unsafe {
                 dst.write_volatile(word);
                 dst = dst.add(1);
             }
-            //println!("{}\r\n", word);
-            //println!(".")
         }
         call_jump(dst);
-        //reset();
     }
 }
 

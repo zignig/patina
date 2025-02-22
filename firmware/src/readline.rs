@@ -1,7 +1,7 @@
 //! Reader and decoder for an ANSI terminal.
 
 use heapless::String;
-use patina_pac::println;
+use patina_pac::{println,print};
 use patina_pac::uart::{Bind, DefaultSerial};
 // use ufmt::derive::uDebug;
 
@@ -119,7 +119,7 @@ impl Console {
             match act {
                 ConsoleAction::Char(c) => {
                     if self.echo {
-                        println!("{}", (c as char));
+                        print!("{}", (c as char));
                     }
                     None
                 }
@@ -193,7 +193,7 @@ impl Console {
             // ConsoleAction::BackSpace => todo!(),
             _ => None,
         } {
-            println!("{}", val);
+            print!("{}", val);
         }
     }
 
@@ -223,16 +223,16 @@ impl Console {
     /// Clear and redraw the current buffer
     pub fn redraw_line(&mut self) {
         //Clear line
-        println!("\x1b[2K");
+        print!("\x1b[2K");
         // Move al the way left
-        println!("\x1b[G");
-        println!("{}", PROMPT);
-        println!("{}", self.buffer.data.as_str());
+        print!("\x1b[G");
+        print!("{}", PROMPT);
+        print!("{}", self.buffer.data.as_str());
     }
 
     /// Clean the entire screen
     pub fn clear_screen(&mut self) {
-        println!("\x1b[2J\x1b[H"); // clear screen and home
+        print!("\x1b[2J\x1b[H"); // clear screen and home
     }
 
     /// Process a keystroke(s)

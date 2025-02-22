@@ -1,6 +1,6 @@
 //! Start of terminal line drawing in an ascii terminal 
 
-use patina_pac::println;
+use patina_pac::{println,print};
 use patina_pac::uart::{Bind, DefaultSerial};
 
 const BOX: &[&str] = &["┌─┬┐", "│ ││", "├─┼┤", "└─┴┘"];
@@ -22,7 +22,7 @@ pub fn rectangle(w: usize, h: usize) {
     per(top, 3);
 
     for _ in 0..h - 2 {
-        println!("\r\n");
+        println!();
         let middle = BOX[1];
         per(middle, 0);
         for _ in 0..w - 2 {
@@ -30,7 +30,7 @@ pub fn rectangle(w: usize, h: usize) {
         }
         per(middle, 3);
     }
-    println!("\r\n");
+    println!();
     let bottom = BOX[3];
     per(bottom, 0);
     for _ in 0..w - 2 {
@@ -41,5 +41,5 @@ pub fn rectangle(w: usize, h: usize) {
 
 //#[inline(never)]
 fn per(s: &str, i: usize) {
-    println!("{}", s.chars().nth(i).unwrap());
+    print!("{}", s.chars().nth(i).unwrap());
 }

@@ -11,6 +11,7 @@ use patina_pac::{
     generated,
     init::{heap_start, reset, wait},
     println,
+    print,
     uart::{Bind, DefaultSerial},
     warmboot::Warm,
     watchdog::Watchdog,
@@ -52,9 +53,9 @@ pub extern "C" fn main() -> ! {
     // Delay
     wait(600);
 
-    println!("Welcome to patina it's awesome\r\n");
-    println!("press esc to return to bootloader\r\n\r\n");
-    println!("{}\r\n", generated::DATE_STAMP);
+    println!("Welcome to patina it's awesome");
+    println!("press esc to return to bootloader");
+    println!("{}", generated::DATE_STAMP);
 
     let mut _counter: u32 = 0;
 
@@ -67,7 +68,7 @@ pub extern "C" fn main() -> ! {
     // Dump a block.
     //cmd_flash(&mut ctx);
 
-    println!("{}", PROMPT);
+    print!("{}", PROMPT);
 
     loop {
         // get something from the serial port
@@ -90,9 +91,10 @@ pub extern "C" fn main() -> ! {
                     Enter => {
                         run_command(&mut ctx);
                         ctx.cons.reset();
-                        println!("\n{}", PROMPT);
+                        println!();
+                        print!("{}", PROMPT);
                     }
-                    _ => {} //println!("|{:?}", val),
+                    _ => {},
                 }
                 // Stuff happened.
                 // counter = 0;
@@ -110,9 +112,9 @@ pub extern "C" fn main() -> ! {
 
 fn list() {
     for i in COMMANDS {
-        println!("{}\r\n", i.0);
+        println!("{}", i.0);
     }
-    println!("\r\n");
+    println!();
 }
 
 fn run_command(ctx: &mut Ctx) {
@@ -120,12 +122,12 @@ fn run_command(ctx: &mut Ctx) {
     if let Some(cmd) = data.split_ascii_whitespace().next() {
         for (name, imp) in COMMANDS {
             if *name == cmd {
-                println!("\r\n");
+                println!("");
                 imp(ctx);
                 return;
             }
         }
-        println!("\r\nCommand not found,\"{}\" try from > \r\n \r\n", &cmd);
+        println!("Command not found,\"{}\" try from >", &cmd);
         list();
     }
 }
@@ -158,11 +160,11 @@ static COMMANDS: &[(&str, Command)] = &[
 fn cmd_ansi(ctx: &mut Ctx) {
     // https://gist.github.com/ConnerWill/d4b6c776b509add763e17f9f113fd25b
     // ansi testing
-    println!("\x1b[999G");
-    println!("\x1b[6n");
+    print!("\x1b[999G");
+    print!("\x1b[6n");
     wait(10000);
     while let Some(ch) = ctx.cons.serial.tget() {
-        println!("{}", ch as char);
+        print!("{}", ch as char);
     }
 }
 fn cmd_heap(_ctx: &mut Ctx) {
@@ -174,9 +176,8 @@ fn cmd_count(ctx: &mut Ctx) {
     ctx.watchdog.poke();
     let mut count: u32 = 0;
     loop {
-        //println!("{}\r\n", count);
         count += 1;
-        println!("{}\r\n", ctx.watchdog.read());
+        println!("{}", ctx.watchdog.read());
         if count > 5000 {
             return;
         }
@@ -189,14 +190,14 @@ fn cmd_watchdog(ctx: &mut Ctx) {
 
 fn cmd_flash(ctx: &mut Ctx) {
     for data in ctx.flash.read_iter(0x50000, 1290) {
-        println!("{}", data);
+        print!("{}", data);
     }
-    println!("\r\n");
+    println!();
 }
 
 fn cmd_jedec(ctx: &mut Ctx) {
     let jd = ctx.flash.read_jedec();
-    println!("{:?}", jd);
+    print!("{:?}", jd);
 }
 
 fn cmd_rect(_ctx: &mut Ctx) {
@@ -210,7 +211,6 @@ fn cmd_read(ctx: &mut Ctx) {
         if let Some(_c) = ctx.cons.serial.get() {
             return;
         }
-        // println!("{}", val);
         wait(10000);
     }
 }
@@ -230,8 +230,9 @@ fn cmd_blink(_ctx: &mut Ctx) {
         // ctx.led.on();
         wait(DELAY);
         // ctx.led.off();
-        println!("#");
+        print!("#");
     }
+    println!();
 }
 
 fn cmd_warm(ctx: &mut Ctx) {
@@ -260,7 +261,7 @@ fn cmd_demo(ctx: &mut Ctx) {
         for char in 32..126 {
             ctx.cons.serial.putb(char)
         }
-        println!("\r\n");
+        println!();
         counter -= 1;
     }
 }
@@ -274,7 +275,8 @@ fn cmd_list(_ctx: &mut Ctx) {
 }
 
 fn cmd_help(_ctx: &mut Ctx) {
-    println!("\r\nThis is a simple readline for hapenny\r\n\r\n");
-    println!("Available commands\r\n\r\n");
+    println!();
+    println!("This is a simple readline for hapenny");
+    println!("Available commands");
     list();
 }

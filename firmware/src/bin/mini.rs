@@ -35,10 +35,10 @@ impl Ctx {
 pub extern "C" fn main() -> ! {
     // Delay
     wait(600);
-    println!("Welcome to patina\r\n");
-    println!("press esc to return to bootloader\r\n\r\n");
-    println!("{}\r\n", generated::DATE_STAMP);
-    println!("{}", PROMPT);
+    println!("Welcome to patina");
+    println!("press esc to return to bootloader");
+    println!("{}", generated::DATE_STAMP);
+    print!("{}", PROMPT);
 
     let mut counter: u32 = 0;
     // Create the main context
@@ -85,7 +85,7 @@ fn list() {
     for i in COMMANDS {
         println!("{} ", i.0);
     }
-    println!("\r\n");
+    println!();
 }
 
 fn run_command(ctx: &mut Ctx) {
@@ -93,12 +93,13 @@ fn run_command(ctx: &mut Ctx) {
     if let Some(cmd) = data.split_ascii_whitespace().next() {
         for (name, imp) in COMMANDS {
             if *name == cmd {
-                println!("\r\n");
+                println!();
                 imp(ctx);
                 return;
             }
         }
-        println!("\r\nCommand not found,\"{}\" try from > \r\n \r\n", &cmd);
+        println!();
+        println!("Command not found,\"{}\" try from >", &cmd);
         list();
     }
 }

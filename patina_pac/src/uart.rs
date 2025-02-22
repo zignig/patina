@@ -1,13 +1,13 @@
 //! Simple uart functions
 
 // The uart address is generted by the build script
-use core::option::*;
 use core::convert::Infallible;
+use core::option::*;
 
 use ufmt::uWrite;
 
 /// Bind a alias that points to the UART address
-pub type DefaultSerial = Serial<{crate::generated::BIDIUART_ADDR }>;
+pub type DefaultSerial = Serial<{ crate::generated::BIDIUART_ADDR }>;
 
 /// Generic serial port struct
 pub struct Serial<const UART: u32>;
@@ -69,7 +69,7 @@ impl<const UART: u32> Bind for Serial<UART> {
             }
         }
     }
-    
+
     // #[inline(never)]
     fn get(&mut self) -> Option<u8> {
         let status = unsafe { Self::RX.read_volatile() };
@@ -80,56 +80,52 @@ impl<const UART: u32> Bind for Serial<UART> {
     }
 
     // blocking get with timeout
-    fn tget(& mut self) -> Option<u8> { 
-        let mut counter: u32 = 0 ;
+    fn tget(&mut self) -> Option<u8> {
+        let mut counter: u32 = 0;
         loop {
             let status = unsafe { Self::RX.read_volatile() };
             if status >= 0 {
                 return Some(status as u8);
             }
             counter += 1;
-            if counter > 500{ 
-                return None
+            if counter > 500 {
+                return None;
             }
         }
     }
-
 }
 
 // Some macros on the default serial
 // give me the basics
 // please ...
 // write! and println! for the DefaultSerial
-impl uWrite for DefaultSerial{
+impl uWrite for DefaultSerial {
     type Error = Infallible;
 
     fn write_str(&mut self, s: &str) -> Result<(), Self::Error> {
-        for c in s.as_bytes() { 
+        for c in s.as_bytes() {
             self.putb(*c);
         }
         Ok(())
     }
 }
 
-/// Formatted printing
+// Formatted printing
 #[macro_export]
-macro_rules! println
+macro_rules! print
 {
 	($($args:tt)+) => ({
 		let _ = ::ufmt::uwrite!(DefaultSerial::new(), $($args)+);
 	});
 }
 
-// #[macro_export]
-// macro_rules! println
-// {
-// 	() => ({
-// 		   print!("\r\n")
-// 		   });
-//     ($fmt:expr) => ({
-// 			print!(concat!(fmt, "\r\n"))
-// 			});
-// 	($fmt:expr, $($args:tt)+) => ({
-// 			print!(concat!($fmt, "\r\n"), $($args)+)
-// 			});
-// }
+#[macro_export]
+macro_rules! println
+{
+    () => {
+        let _ = ::ufmt::uwrite!(DefaultSerial::new(), "\n");
+    };
+    ($($arg:tt)*) => {
+        let _ = ::ufmt::uwriteln!(DefaultSerial::new(), $($arg)*);
+    };
+}
