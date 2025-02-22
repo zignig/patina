@@ -16,7 +16,7 @@ from patina.fabric_builder import FabricBuilder, BootMem
 from patina.warmboot import WarmBoot
 from patina.watchdog import Watchdog
 from patina.spi import SimpleSPI
-from patina.amcsr import Amcsr_bus, testp
+from patina.amcsr import Amcsr_bus, testp ,compl
 from patina import cli
 from patina import log_base
 import logging
@@ -35,7 +35,7 @@ class Computer(Elaboratable):
 
         t = testp()
         t2 = testp()
-        # t3 = testp()
+        t3 = compl()
 
         super().__init__()
         self.mainmem = mainmem = BasicMemory(depth=512 * 10)  # 16bit cells
@@ -50,7 +50,7 @@ class Computer(Elaboratable):
 
         # CSR 
         
-        self.csr = Amcsr_bus([t,t2])
+        self.csr = Amcsr_bus([t,t2,t3])
         devices = [
             self.mainmem,
             self.bootmem,

@@ -192,7 +192,7 @@ fn cmd_watchdog(ctx: &mut Ctx) {
 
 fn cmd_flash(ctx: &mut Ctx) {
     for data in ctx.flash.read_iter(0x50000, 1290) {
-        print!("{}", data);
+        print!("{:02x}", data);
     }
     println!();
 }

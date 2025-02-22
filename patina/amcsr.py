@@ -12,14 +12,20 @@ from hapenny.bus import BusPort
 class enableReg(csr.Register,access="rw"):
     enable: csr.Field(csr.action.RW,1)
 
+class toggleReg(csr.Register,access="rw"):
+    toggle: csr.Field(csr.action.RW,64)
+
 # csr periperal test 
 class compl(Component):
     def __init__(self,name=None):
-        regs = csr.Builder(addr_width=4, data_width=16)
+        regs = csr.Builder(addr_width=4, data_width=8)
         regs.add("enable",enableReg())
+        toggle = csr.Register(csr.Field(csr.action.RW,64),access="rw")
+        regs.add("toggle",toggleReg())
+
         self._bridge = csr.Bridge(regs.as_memory_map())
 
-        super().__init__({"bus": In(csr.Signature(addr_width=4, data_width=16))})
+        super().__init__({"bus": In(csr.Signature(addr_width=4, data_width=8))})
         self.bus.memory_map = self._bridge.bus.memory_map
 
     def elaborate(self, platform):
@@ -49,7 +55,7 @@ class testp(Component):
     def __init__(self, name=None):
         if name:
             self.name = name
-        regs = csr.Builder(addr_width=4, data_width=16)
+        regs = csr.Builder(addr_width=4, data_width=8)
         self.enable = self.enableReg() 
         self.t = self.test_reg(8, 0)
         self.t2 = self.test_reg(16, 0)
@@ -62,7 +68,7 @@ class testp(Component):
 
         self._bridge = csr.Bridge(regs.as_memory_map())
 
-        super().__init__({"bus": In(csr.Signature(addr_width=4, data_width=16))})
+        super().__init__({"bus": In(csr.Signature(addr_width=4, data_width=8))})
         self.bus.memory_map = self._bridge.bus.memory_map
 
     def elaborate(self, platform):
@@ -90,9 +96,9 @@ class Amcsr_bus(Component):
         self.name = uniq_name(self.__class__.__qualname__)
         self.devices = devices
         # for fixed for now
-        self.addr_bits = 6
+        self.addr_bits = 10
         # get widths
-        self.dec = csr.Decoder(addr_width=self.addr_bits,data_width=16)
+        self.dec = csr.Decoder(addr_width=self.addr_bits,data_width=8)
         for i in devices:
             name = None
             if hasattr(i,"name"):
