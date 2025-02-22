@@ -4,7 +4,6 @@
 //use crate::uart::{Bind, DefaultSerial};
 use core::arch::asm;
 use core::arch::global_asm;
-use core::ops::Add;
 
 // World's cheapest RISC-V "runtime" - only works because we don't use non-stack
 // RAM (as ensured by our linker script)
@@ -70,7 +69,7 @@ unsafe fn my_panic(_info: &core::panic::PanicInfo) -> ! {
 pub fn heap_start() -> *mut u32 {
     unsafe extern "C" {
         unsafe static mut __sheap: u32;
+        
     }
-    // add gap
     core::ptr::addr_of_mut!(__sheap)
 }
