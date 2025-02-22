@@ -129,14 +129,14 @@ class Amcsr_bus(Component):
             m.d.comb += [
                 self.dec.bus.addr.eq(cmd.payload.addr),
                 self.dec.bus.r_stb.eq(1),
-                read_data.eq(self.bus.r_data),
+                read_data.eq(self.dec.bus.r_data),
             ],
         ## write
         with m.If(cmd.valid &  (cmd.payload.lanes.any() )):
             m.d.comb += [
                 self.dec.bus.addr.eq(cmd.payload.addr),
                 self.dec.bus.w_stb.eq(1),
-                self.dec.bus.wdata.eq(cmd.payload.data)
+                self.dec.bus.w_data.eq(cmd.payload.data)
             ]
         
         return m

@@ -4,7 +4,7 @@ build/
 firmware/*.bin
 __pycache__/
 sim-cpu.v
-test.vcd
+*.vcd
 test.gtkw
 *.code-workspace
 bootloader/*.bin
