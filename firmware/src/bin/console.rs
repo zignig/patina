@@ -10,8 +10,7 @@ use patina_pac::{
     flash::Flash,
     generated,
     init::{heap_start, reset, wait},
-    println,
-    print,
+    print, println,
     uart::{Bind, DefaultSerial},
     warmboot::Warm,
     watchdog::Watchdog,
@@ -94,7 +93,7 @@ pub extern "C" fn main() -> ! {
                         println!();
                         print!("{}", PROMPT);
                     }
-                    _ => {},
+                    _ => {}
                 }
                 // Stuff happened.
                 // counter = 0;
@@ -160,12 +159,15 @@ static COMMANDS: &[(&str, Command)] = &[
 fn cmd_ansi(ctx: &mut Ctx) {
     // https://gist.github.com/ConnerWill/d4b6c776b509add763e17f9f113fd25b
     // ansi testing
-    print!("\x1b[999G");
+    print!("\x1b[2J");
+    print!("\x1b[0;999H");
     print!("\x1b[6n");
-    wait(10000);
     while let Some(ch) = ctx.cons.serial.tget() {
-        print!("{}", ch as char);
+        if ch != b'\x1b' {
+            print!("{}", ch as char);
+        }
     }
+    print!("\x1b[1;1H");
 }
 fn cmd_heap(_ctx: &mut Ctx) {
     println!("{}", heap_start() as u32);

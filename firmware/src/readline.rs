@@ -125,7 +125,14 @@ impl Console {
                 }
 
                 // Perhaps a history ?
-                //ConsoleAction::Up => None,
+                ConsoleAction::Up => {
+                    self.reply(act);
+                    None
+                }
+                ConsoleAction::Down => { 
+                    self.reply(act);
+                    None
+                }
                 //ConsoleAction::Down => None,
                 ConsoleAction::Left => {
                     if self.buffer.cursor > 0 {
@@ -175,7 +182,8 @@ impl Console {
     pub fn reply(&mut self, action: ConsoleAction) {
         if let Some(val) = match action {
             // ConsoleAction::Char(_) => todo!(),
-            // ConsoleAction::Up => todo!(),
+            ConsoleAction::Up => Some("\x1b\x5b\x41"),
+            ConsoleAction::Down => Some("\x1b\x5b\x42"),
             // ConsoleAction::Down => todo!(),
             ConsoleAction::Left => Some("\x1b\x5b\x44"),
             ConsoleAction::Right => Some("\x1b\x5b\x43"),

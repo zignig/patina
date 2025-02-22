@@ -4,11 +4,9 @@
 use patina_pac::{
     init::reset,
     uart::{Bind, DefaultSerial},
-    println,
     warmboot::Warm,
 };
 
-use ascii;
 #[no_mangle]
 pub extern "C" fn main() -> ! {
     let mut warmboot = Warm::new();
