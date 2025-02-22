@@ -190,27 +190,70 @@ class FabricBuilder(Component):
         else:
             self.reset_vector = 0  # main mem boot
 
+        # Gen some info ( moved from hapenny/bus.py)
+        assert len(devices) > 0
+        data_bits = max(p.bus.cmd.payload.data.shape().width for p in devices)
+        addr_bits = max(p.bus.cmd.payload.addr.shape().width for p in devices)
+        sig = BusPort(addr = addr_bits, data = data_bits).flip()
+        log.info(f"fabric configured for {addr_bits} addr bits, {data_bits} data bits")
+        self.extra_bits = (len(devices) - 1).bit_length()
+        self.addr_bits = addr_bits
+        self.data_bits = data_bits
+
+        self.bus = BusPort(addr = addr_bits + self.extra_bits, data =
+                                 data_bits).flip().create()
+
+
     def show(self):
         for i in self.memory_map.all_resources():
             log.info(f"{i.path} \t{i.start} \t{i.end}")
 
-    def bind(self, m):
+    def elaborate(self, platform):
         """
-        TODO make this into a multiplexor interface, slice the lower bit.
+        Create The fabric
         """
+        m = Module()
+        # Attach all the sub modules 
+        for dev in self.devices:
+            m.submodules[dev.name] = dev
+        
+        # create the partials
         dev_list = []
         for dev in self.devices:
             dev_list.append(partial_decode(m, dev.bus, self.decoder_width))
-        m.submodules.simple_fabric = fabric = SimpleFabric(dev_list)
-        self.bus = fabric.bus
 
-    def elaborate(self, platform):
-        """
-        This just adds submodules and does @cbiffles simple fabric
+        # Copied from hapenny/bus.py
 
-        TODO use a multiplexer instead rather than the simple fabric build
-        """
-        m = Module()
-        for dev in self.devices:
-            m.submodules[dev.name] = dev
+        devid = Signal(self.extra_bits)
+        m.d.comb += devid.eq(self.bus.cmd.payload.addr[self.addr_bits:])
+
+        # index of the last selected device (registered).
+        last_id = Signal(self.extra_bits)
+        # Since the setting of the response mux is ignored if the CPU isn't
+        # expecting data back, we can just capture the address lines on every
+        # cycle whether it's valid or not.
+        m.d.sync += last_id.eq(devid)
+
+        for (i, d) in enumerate(dev_list):
+            # Fan out the incoming address, data, and lanes to every device.
+            m.d.comb += [
+                d.cmd.payload.addr.eq(self.bus.cmd.payload.addr),
+                d.cmd.payload.data.eq(self.bus.cmd.payload.data),
+                d.cmd.payload.lanes.eq(self.bus.cmd.payload.lanes),
+            ]
+            # Only propagate cmd valid to the specific addressed device.
+            dv = Signal(1, name = f"valid_{i}")
+            m.d.comb += [
+                dv.eq(self.bus.cmd.valid & (devid == i)),
+                d.cmd.valid.eq(dv),
+            ]
+
+        # Fan the response data in based on who we're listening to.
+        response_data = []
+        for (i, d) in enumerate(self.devices):
+            data = d.bus.resp & (last_id == i).replicate(self.data_bits)
+            response_data.append(data)
+
+        m.d.comb += self.bus.resp.eq(treeduce(lambda a, b: a | b, response_data))
+
         return m

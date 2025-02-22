@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
-from amaranth import Elaboratable, Module, Signal
+from amaranth import Elaboratable, Module
 from amaranth.lib.wiring import connect
 
 from amaranth_boards.resources.interface import UARTResource
-from amaranth.build import Resource, Pins, Attrs
+from amaranth.build import Attrs
 
-import amaranth.lib.cdc
 
 from hapenny.cpu import Cpu
 from hapenny.serial import BidiUart
-from hapenny.mem import BasicMemory, SpramMemory
+from hapenny.mem import BasicMemory
 
 from patina.generate import *
 from patina.fabric_builder import FabricBuilder, BootMem
@@ -63,14 +62,13 @@ class Computer(Elaboratable):
 
     def elaborate(self, platform):
         m = Module()
-
         # This creates and binds all the devices
         # Add the CPU
         m.submodules.cpu = self.cpu
+
         # Add the fabric
         m.submodules.fabric = self.fabric
-        # Bind the fabric (weird semantics in elaborate)
-        self.fabric.bind(m)
+
         # Connect the cpu and the fabric
         connect(m, self.cpu.bus, self.fabric.bus)
 

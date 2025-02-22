@@ -12,7 +12,6 @@ so I should probably write a list.
 
 # Firmware
 
-1. Rewrite the simple fabric to a multiplexer
 1. write an amaranth_soc <-> hapenny bus bridge.
 1. look into the svd exporter (for embeded-hal)
 1. clean up the flash lib
@@ -36,3 +35,4 @@ These are not TODO these are TODONE.
 1. auto generate bootloader
 1. move the command line into patina/cli.py
 1.  move the logging builder into patina/logging.py
+1. Rewrite the simple fabric to a single component
