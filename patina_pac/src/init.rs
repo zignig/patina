@@ -4,6 +4,7 @@
 //use crate::uart::{Bind, DefaultSerial};
 use core::arch::asm;
 use core::arch::global_asm;
+use core::ops::Add;
 
 // World's cheapest RISC-V "runtime" - only works because we don't use non-stack
 // RAM (as ensured by our linker script)
@@ -62,7 +63,6 @@ unsafe fn my_panic(_info: &core::panic::PanicInfo) -> ! {
     }
 }
 
-
 /// heap start ( end of the program 4 byte aligned)
 /// no alloc yet , good for  flash boot testing as  it
 /// is below the exisiting code
@@ -71,9 +71,6 @@ pub fn heap_start() -> *mut u32 {
     unsafe extern "C" {
         unsafe static mut __sheap: u32;
     }
-
-    #[allow(unused_unsafe)] // no longer unsafe since rust 1.82.0
-    unsafe {
-        core::ptr::addr_of_mut!(__sheap)
-    }
+    // add gap
+    core::ptr::addr_of_mut!(__sheap)
 }

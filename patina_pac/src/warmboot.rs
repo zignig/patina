@@ -10,10 +10,6 @@ impl<const WARM: u32> Warmboot<WARM> {
         Self {}
     }
 
-    pub fn addr(&mut self) -> u32 { 
-        return Self::ADDR as u32 ;
-    }
-
     pub fn write(&mut self) {
         unsafe {
             Self::ADDR.write_volatile(1);

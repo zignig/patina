@@ -235,7 +235,6 @@ fn cmd_blink(_ctx: &mut Ctx) {
 }
 
 fn cmd_warm(ctx: &mut Ctx) {
-    println!("0x{:x}", ctx.warm.addr());
     // wait for the the chars to spool out before rebooting
     wait(10000);
     ctx.warm.write();
