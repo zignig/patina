@@ -10,34 +10,27 @@ class ResList:
         self._soc = soc
         self.mm: MemoryMap = self._soc.fabric.memory_map
 
-    def show_win(self, window, depth=0):
-        for w, name, (start, stop, ratio) in window.windows():
-            print(depth * "   ", name, start, stop)
-            if len(list(w._windows)) > 0:
-                depth += 1
-                for sw in w.windows():
-                    print(sw)
-                    #self.show_win(sw, depth=depth)
-            # for i in w.all_resources():
-            #     print(i.resource)
+
+    def find_csr_window(self):
+        for window ,name,(start,end,_) in self.mm.windows():
+            if not hasattr(window,"csr_only"):
+                continue
+            print(name,start,end)
+            return (window,start,end)
 
     def generate(self):
-        self.show_win(self.mm)
-        return
-        for r, res in self.mm._ranges.items():
-            print(r, res)
-        print("-----")
-        for w, name, (start, stop, ratio) in self.mm.windows():
-            print(name, start, stop)
+        # find the csr window
+        ( window , start, end)  = self.find_csr_window()
+        print(start,end)
+        # for w in window.windows():
+            # print(w[1])
+        for register in window.all_resources():
+            # print('\t',register.path)
+            # print(register.start)
+            print(register.path,register.start)
+            for i in register.resource.f.flatten():
+                print(i)
+                # for j in i:
+                #     print(j)
 
-        for window, name, (start, stop, ratio) in self.mm.windows():
-            # if not hasattr(window,"csr_only"):
-            # continue
-            print(name)
-            print("->", window._windows)
-            for i in window.all_resources():
-                if isinstance(i.resource, csr.Register):
-                    # print("tag",i.path)
-                    reg = i.resource
-                    for f in reg:
-                        print("\t", f)
+            print()

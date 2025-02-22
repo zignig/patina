@@ -131,8 +131,6 @@ class FabricBuilder(Component):
             data_width=16,
             alignment=addr_width,
         )
-        storage_map = MemoryMap(addr_width=13,data_width=16)
-        device_map = MemoryMap(addr_width=4,data_width=16)
         # build the memory map list
         log.debug("Build the memory_map")
         for i,d in enumerate(devices):
@@ -156,20 +154,6 @@ class FabricBuilder(Component):
                     res_size = 2 ** (d.width + 1)
                 device_memory.add_resource(d, name=d.name, size=res_size)
                 memory_map.add_window(device_memory,name=d.name)
-
-
-        #show the memory map
-        # div()
-        # for i in self.memory_map.window_patterns():
-        #     log.info(f"{i}")
-            #log.info(f"{i[1][0].ljust(15)}{str(i[2]):^}")
-            #log.info(f"{i[0]} \t  {i[1][0]}, {len(i[1][0])}")
-        # show the resources
-        # log.info("")
-        # log.info("Resources")
-        # div()
-        # for i in self.memory_map.all_resources():
-        #     log.info(f"{i.path} \t{i.start} \t{i.end}")
 
         # set some variables for the cpu to use
 

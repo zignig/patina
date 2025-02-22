@@ -16,7 +16,7 @@ from patina.fabric_builder import FabricBuilder, BootMem
 from patina.warmboot import WarmBoot
 from patina.watchdog import Watchdog
 from patina.spi import SimpleSPI
-from patina.amcsr import Amcsr_bus,testp
+from patina.amcsr import Amcsr_bus, testp
 from patina import cli
 from patina import log_base
 import logging
@@ -33,19 +33,24 @@ class Computer(Elaboratable):
         self.baud = baud
         self.firmware = firmware
 
-        # t = testp()
-        # t2 = testp()
+        t = testp()
+        t2 = testp()
         # t3 = testp()
 
         super().__init__()
-        self.mainmem = mainmem = BasicMemory(depth=512 * 8)  # 16bit cells
+        self.mainmem = mainmem = BasicMemory(depth=512 * 10)  # 16bit cells
         self.bootmem = bootmem = BootMem()  # one bram , auto build
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
+
         # this is board specific , depends on the flash chip
-        self.spi = spi = SimpleSPI(start_addr=50000,flash_size=1024)
+        self.spi = spi = SimpleSPI(start_addr=50000, flash_size=1024)
+
         self.bidi = BidiUart(baud_rate=baud, oversample=4, clock_freq=F)
-        # self.csr = Amcsr_bus([t])
+
+        # CSR 
+        
+        self.csr = Amcsr_bus([t,t2])
         devices = [
             self.mainmem,
             self.bootmem,
@@ -53,7 +58,7 @@ class Computer(Elaboratable):
             self.warmboot,
             self.watchdog,
             self.spi,
-            # self.csr
+            self.csr
         ]
 
         self.fabric = fabric = FabricBuilder(devices)
@@ -73,12 +78,12 @@ class Computer(Elaboratable):
         connect(m, self.cpu.bus, self.fabric.bus)
 
         uart = True
-        flash = True 
+        flash = True
 
         if uart:
             uartpins = platform.request("uart", 0)
             self.bidi.bind(m, uartpins)
-        
+
         if flash:
             spi_pins = platform.request("spi_flash_1x")
             m.d.comb += [
@@ -88,9 +93,8 @@ class Computer(Elaboratable):
                 spi_pins.copi.o.eq(self.spi.copi),
                 self.spi.cipo.eq(spi_pins.cipo.i),
             ]
-            
+
         return m
-    
 
 
 from amaranth_boards.tinyfpga_bx import TinyFPGABXPlatform as ThePlatform
@@ -102,7 +106,7 @@ from amaranth_boards.tinyfpga_bx import TinyFPGABXPlatform as ThePlatform
 
 if __name__ == "__main__":
     platform = ThePlatform()
- 
+
     platform.add_resources(
         [
             UARTResource(
@@ -111,6 +115,8 @@ if __name__ == "__main__":
         ]
     )
 
-    pooter = Computer(serial="/dev/ttyUSB0", baud=115200, firmware=["firmware", "console"])
+    pooter = Computer(
+        serial="/dev/ttyUSB0", baud=115200, firmware=["firmware", "console"]
+    )
 
     cli.run(platform, pooter)

@@ -14,6 +14,7 @@ so I should probably write a list.
 
 1. write an amaranth_soc <-> hapenny bus bridge.
 1. look into the svd exporter (for embeded-hal)
+   1. use [https://github.com/embassy-rs/chiptool]
 1. clean up the flash lib
    1.  add u32 reader and iterator
    1.  add byte array loader
