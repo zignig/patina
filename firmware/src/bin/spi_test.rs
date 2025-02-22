@@ -11,9 +11,8 @@
 //! time out after ~seconds(ish) and read from flash
 //!
 
-
-use patina_pac::init::heap_start;
 use patina_pac::flash;
+use patina_pac::init::heap_start;
 
 /// Main entry point
 #[no_mangle]
@@ -41,22 +40,22 @@ pub extern "C" fn main() -> ! {
             //println!("{}\r\n", word);
             //println!(".")
         }
-        call(dst);
+        call_jump(dst);
         //reset();
     }
 }
 
-fn call(addr: *mut u32) {
+#[allow(unused_assignments)]
+fn call_jump(addr: *mut u32) {
+    // Jump into the new program
+    let mut a: *mut u32 = core::ptr::null_mut();
+    a = addr as _;
     unsafe {
         core::arch::asm!(
-            "
-        # restart monitor if program returns.
-     2: auipc ra, %pcrel_hi(__start)
-        addi ra, ra, %pcrel_lo(1b)
-
-        jr {}               # activate routine
-        ",
-            in(reg) addr,
+        "
+            jr {}               # activate 
+            ",
+            in(reg) a,
             options(noreturn),
         );
     }
