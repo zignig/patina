@@ -5,6 +5,7 @@ use patina_pac::{
     generated,
     init::{reset, wait},
     println,
+    print,
     uart::{Bind, DefaultSerial},
     warmboot::Warm,
 };

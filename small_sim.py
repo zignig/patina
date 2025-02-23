@@ -72,13 +72,14 @@ class Computer(Elaboratable):
 
 async def bench(ctx):
     for _ in range(10000):
+        print('tick')
         await ctx.tick()
 
 from amaranth.sim import Simulator
 if __name__ == "__main__":
     pooter = Computer()
     sim = Simulator(pooter)
-    sim.add_clock(10000)
+    sim.add_clock(1e-6)
     sim.add_testbench(bench)
     with sim.write_vcd("pooter.vcd"):
         sim.run()
