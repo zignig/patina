@@ -8,12 +8,14 @@ edition = "2021"
 
 [dependencies]
 cfg-if = "1.0.0"
-heapless = { version = "0.8.0" }
+heapless = "0.8.0"
 ufmt = { version = "0.2.0", default-features = true }
 patina_pac = { path = "../patina_pac" , features=["warmboot"]} 
 ascii = { version = "1.1.0", default-features = false }
 corncobs = "0.1.3"
 hubpack = "0.1.2"
+serde = { version = "1.0.218", default-features = false }
+serde_derive = { version = "1.0.218", default-features = false }
 
 [profile.dev]
 panic = "abort"
