@@ -2,7 +2,7 @@
 target = "riscv32i-unknown-none-elf"
 
 [target.riscv32i-unknown-none-elf]
-runner = "cargo objdump --release --bin spi_test -- --disassemble --no-show-raw-insn"
+runner = "cargo objdump --release --bin spinner -- --disassemble --no-show-raw-insn"
 
 # nice and small can be reloacated.
 rustflags = [

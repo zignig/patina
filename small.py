@@ -28,29 +28,35 @@ class Computer(Elaboratable):
     def __init__(self, serial="/dev/ttyUSB0", baud=115200, firmware=None):
         F = 16e6  # Hz
 
+        super().__init__()
+
         # cli uses these to connect
         self.serial = serial
         self.baud = baud
         self.firmware = firmware
 
+        # some csr style devices to attach the Amcsr_bus
         t = testp()
         t2 = testp()
         t3 = compl()
+        # CSR bus bridge ( 8 bit databus)
+        self.csr = Amcsr_bus([t,t2,t3])
 
-        super().__init__()
+        # RAM should be at the top 
         self.mainmem = mainmem = BasicMemory(depth=512 * 10)  # 16bit cells
+        # serial bootloader
         self.bootmem = bootmem = BootMem()  # one bram , auto build
+
         self.warmboot = warmboot = WarmBoot()
         self.watchdog = watchdog = Watchdog()
 
         # this is board specific , depends on the flash chip
         self.spi = spi = SimpleSPI(start_addr=50000, flash_size=1024)
 
+        # uart connection to the outside world
         self.bidi = BidiUart(baud_rate=baud, oversample=4, clock_freq=F)
 
-        # CSR 
-        
-        self.csr = Amcsr_bus([t,t2,t3])
+        # create the list of devices
         devices = [
             self.mainmem,
             self.bootmem,
@@ -67,14 +73,14 @@ class Computer(Elaboratable):
 
     def elaborate(self, platform):
         m = Module()
-        # This creates and binds all the devices
+        
         # Add the CPU
         m.submodules.cpu = self.cpu
 
         # Add the fabric
         m.submodules.fabric = self.fabric
 
-        # Connect the cpu and the fabric
+        # Connect the cpu to the fabric
         connect(m, self.cpu.bus, self.fabric.bus)
 
         uart = True

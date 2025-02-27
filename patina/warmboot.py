@@ -8,6 +8,7 @@ __all__ = ["WarmBoot"]
 from hapenny import StreamSig, AlwaysReady, mux, oneof
 from hapenny.bus import BusPort
 
+
 class WarmBoot(Component):
 
     bus: In(BusPort(addr=1, data=16))
@@ -33,7 +34,7 @@ class WarmBoot(Component):
         # bus cmd shorthand
         cmd = self.bus.cmd
 
-        with m.If(cmd.valid & (cmd.payload.lanes == 3 )):
+        with m.If(cmd.valid & (cmd.payload.lanes == 3)):
             m.d.sync += self.internal.eq(1)
 
         # state machine to run the warmboot

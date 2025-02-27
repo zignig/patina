@@ -105,9 +105,13 @@ class Amcsr_bus(Component):
                 name = uniq_name(i.name)
             else:
                 name=uniq_name(i.__class__.__qualname__)
+            i.name = name
             self.dec.add(i.bus,name=name)
     
         super().__init__({"bus": In(BusPort(addr=self.addr_bits, data=16))})
+
+        # INFO , the mapper uses this for svd generation.
+        
         self.dec.bus.memory_map.csr_only = True
         self.memory_map = self.dec.bus.memory_map
         
@@ -116,7 +120,7 @@ class Amcsr_bus(Component):
         m = Module()
         # connect the devices
         for dev in self.devices:
-             m.submodules += dev
+             m.submodules[dev.name]= dev
         # connect the bus
         # bus cmd shorthand
         cmd = self.bus.cmd

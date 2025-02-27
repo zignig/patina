@@ -19,17 +19,17 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class BootMem(BasicMemory):
+class ProgramMemory(BasicMemory):
     """A subclass of the Basic mem for the bootloader"""
 
-    def __init__(self, contents=None):
+    def __init__(self, depth=512, contents=None):
         # The boot image weighs in at 496 bytes
         # fits into one bram (on ice40)
-        super().__init__(depth=512, read_only=True, contents=contents)
+        super().__init__(depth=depth, contents=contents, read_only=True)
 
     # Name is set below in the fabric build
-    def set_name(self, stack_start, uart_start):
-        self.file_name = f"bootloader/bl-{stack_start}-{uart_start}.bin"
+    def set_file(self, file_name):
+        self.file_name = file_name
 
     def build(self):
         # build the firmware
@@ -37,18 +37,31 @@ class BootMem(BasicMemory):
         log.critical(f"building -- {self.file_name}")
         file_parts = self.file_name.split(os.sep)
         self.folder = file_parts[0]
-        self.bin_name = file_parts[1]
-        r = subprocess.run(["cargo", "build", "--release"], cwd=self.folder)
-        if r.returncode != 0:
-            return False
-        # convert to binary
+        self.bin_name = file_parts[2]
+        log.critical(f"folder -- { self.folder }")
+
+        # build the elf file
         r = subprocess.run(
-            ["cargo", "objcopy", "--release", "--", "-O", "binary", self.bin_name],
-            cwd="bootloader",
+            ["cargo", "build", "--release", "--bin", self.bin_name],
+            cwd=self.folder,
         )
         if r.returncode != 0:
             return False
+        log.critical(f"binary name -- { self.bin_name }")
+        # convert to binary
+        r = subprocess.run(
+            ["cargo", "objcopy", "--release","--bin", self.bin_name ,"--", "-O", "binary", self.bin_name],
+            cwd=self.folder,
+        )
+        if r.returncode != 0:
+            print(r.stdio)
+            return False
         return True
+
+
+class BootMem(ProgramMemory):
+    def __init__(self, depth=512, contents=None):
+        super().__init__(depth=depth, contents=contents)
 
 
 class FabricBuilder(Component):
@@ -98,7 +111,7 @@ class FabricBuilder(Component):
         log.debug("address in halfwords")
         div()
 
-        # Check for devices save for address extraction
+        # Check for specific devices and save for address extraction
         # used to build the firmware name
         boot_device = None
         uart_device = None
@@ -108,6 +121,7 @@ class FabricBuilder(Component):
             d.name = uniq_name(d.__class__.__qualname__)
             d.width = d.bus.cmd.payload.addr.shape().width
             log.debug(f"{d.name} - {d.width}")
+
             if isinstance(d, BootMem):
                 boot_device = d
             if isinstance(d, BidiUart):
@@ -125,12 +139,14 @@ class FabricBuilder(Component):
         div()
 
         # Create the memory map for the fabric itself
-        # Primic memory bus for the fabric
+        # the alignment pushes all the bits left so it
+        # matches the elaborated bus
         self.memory_map = memory_map = MemoryMap(
             addr_width=addr_width + extra_bits + 1,
             data_width=16,
             alignment=addr_width,
         )
+
         # build the memory map list
         log.debug("Build the memory_map")
         for i, d in enumerate(devices):
@@ -146,7 +162,6 @@ class FabricBuilder(Component):
                 # memory may have less address values than bits that it has
                 # (after much prognostication) :) , ask me how I know.
                 # it does have a bus width though...
-                # TODO fold back into happenny.
                 if hasattr(d, "depth"):
                     res_size = d.depth << 1
                 else:
@@ -165,8 +180,10 @@ class FabricBuilder(Component):
         if boot_device != None:
             stack_start = memory_map.find_resource(boot_device).start
             uart_start = memory_map.find_resource(uart_device).start
-
-            boot_device.set_name(stack_start, uart_start)
+            # Set the name of the boot mem
+            # if this file does not exist it will compile on
+            # elaboration
+            boot_device.set_file(f"bootloader/bin/bl-{stack_start}-{uart_start}.bin")
 
             # in half words
             self.reset_vector = stack_start >> 1
@@ -183,11 +200,13 @@ class FabricBuilder(Component):
         self.addr_bits = addr_bits
         self.data_bits = data_bits
 
+        # Create the actual bus device
         self.bus = (
             BusPort(addr=addr_bits + self.extra_bits, data=data_bits).flip().create()
         )
 
     def show(self):
+        # TODO make this fancy
         for i in self.memory_map.all_resources():
             log.info(f"{i.path} \t{i.start} \t{i.end}")
 
