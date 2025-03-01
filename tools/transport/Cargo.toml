@@ -1,0 +1,13 @@
+[package]
+name = "transport"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.96"
+clap = { version = "4.3.4", features = ["derive", "wrap_help"] }
+corncobs = "0.1.3"
+hubpack = "0.1.2"
+indicatif = "0.17.5"
+parse_int = "0.6.0"
+serialport = { version = "4.2.1", default-features = false }

@@ -9,5 +9,5 @@ test.gtkw
 *.code-workspace
 bootloader/*.bin
 firmware/bin/*
-experimental/bin/*
+experiments/bin/*
 pootview.json

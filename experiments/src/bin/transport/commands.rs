@@ -1,28 +1,29 @@
+use hubpack::SerializedSize;
 use serde_derive::{Deserialize, Serialize};
 use ufmt::derive::uDebug;
-use hubpack::SerializedSize;
 
-#[derive(uDebug, Clone, Copy, Deserialize, Serialize,SerializedSize)]
-pub enum Other { 
+#[derive(uDebug, PartialEq, Clone, Copy, Deserialize, Serialize, SerializedSize)]
+pub enum Other {
     One,
     Two(bool),
-    Three(u8)
-}
-#[derive(uDebug, Clone, Copy, Deserialize, Serialize)]
-pub struct Info { 
-    pub item : u8,
-    pub active: bool,
-    pub id: [u8;4]
+    Three(u8),
 }
 
-#[derive(uDebug, Clone, Copy, Deserialize, Serialize,SerializedSize)]
-pub enum Command { 
+// #[derive(uDebug, Clone, Copy, Deserialize, Serialize)]
+// pub struct Info {
+//     pub item: u8,
+//     pub active: bool,
+//     pub id: [u8; 4],
+// }
+
+#[derive(uDebug, PartialEq , Clone, Copy, Deserialize, Serialize, SerializedSize)]
+pub enum Command {
     Start,
     Stop,
-    Data(u8,u8),
+    Data(i8),
     Error,
     Fail,
-    Big(u32,u32),
+    Big(u32, u32),
     Inserter(Other),
     //Extra(Info)
 }
