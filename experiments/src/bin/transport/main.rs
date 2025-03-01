@@ -9,32 +9,33 @@ use patina_pac::{
 };
 
 use corncobs;
-use heapless::Deque;
-use hubpack;
+use heapless::Vec;
+use hubpack::{self, SerializedSize};
 
 mod commands;
-use commands::{Command,Other,Info};
+use commands::{Command,Other};
 
 #[no_mangle]
 pub extern "C" fn main() -> ! {
     //let mut ds = DefaultSerial::new();
-    let mut q = Deque::<Command, 8>::new();
+    let mut q = Vec::<Command, 8>::new();
     let mut tbuf: [u8; 20] = [0; 20];
     let mut rbuf: [u8; 20] = [0; 20];
     let mut obuf: [u8; 20] = [0;20];
-    let _ = q.push_back(Command::Big(12345, 56768, 90123));
-    let _ = q.push_back(Command::Data(100, 100));
-    let _ = q.push_back(Command::Start);
-    let _ = q.push_back(Command::Stop);
-    let _ = q.push_back(Command::Fail);
-    let _ = q.push_back(Command::Inserter(Other::Two(false)));
-    let _ = q.push_back(Command::Extra(Info{ item: 1, active: false , id: *b"blaf" }));
+    let _ = q.push(Command::Big(12345, 56768));
+    let _ = q.push(Command::Data(100, 100));
+    let _ = q.push(Command::Start);
+    let _ = q.push(Command::Stop);
+    let _ = q.push(Command::Fail);
+    let _ = q.push(Command::Inserter(Other::Two(false)));
+    //let _ = q.push_back(Command::Extra(Info{ item: 1, active: false , id: *b"blaf" }));
     println!("Decode check");
     println!("");
     wait(10);
+    println!("max size {:?}",Command::MAX_SIZE);
     loop {
         if !q.is_empty() {
-            if let Some(c) = q.pop_front() {
+            if let Some(c) = q.pop() {
                 // Encode
                 println!("incoming -> {:?}", c);
                 let a = hubpack::serialize(&mut tbuf, &c).unwrap();
@@ -54,3 +55,14 @@ pub extern "C" fn main() -> ! {
         }
     }
 }
+
+// pub struct Transport<T> { 
+//     incoming: Vec<T,4>,
+//     outboing: [u8;T::MAX_SIZE]
+// }
+
+// impl<T> Transport<T> { 
+//     pub fn new() -> Self { 
+//         Self {}
+//     }
+// }

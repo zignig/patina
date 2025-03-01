@@ -50,7 +50,7 @@ class ProgramMemory(BasicMemory):
         log.critical(f"binary name -- { self.bin_name }")
         # convert to binary
         r = subprocess.run(
-            ["cargo", "objcopy", "--release","--bin", self.bin_name ,"--", "-O", "binary", self.bin_name],
+            ["cargo", "objcopy", "--release","--bin", self.bin_name ,"--", "-O", "binary", "bin/"+self.bin_name],
             cwd=self.folder,
         )
         if r.returncode != 0:

@@ -84,6 +84,7 @@ from amaranth.sim import Simulator
 if __name__ == "__main__":
     pooter = Computer()
     pooter.fabric.show()
+    pooter.mainmem.build()
     sim = Simulator(pooter)
     sim.add_clock(1e-6)
     sim.add_testbench(bench)
