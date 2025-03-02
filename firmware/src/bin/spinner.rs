@@ -23,16 +23,11 @@ pub extern "C" fn main() -> ! {
                 val +=1 ;
             }
         }
-        unsafe {
-            addr.write_volatile(0);
-        };
-        wait(32);
-        unsafe {
-            addr.write_volatile(1);
-        };
-        wait(31);
-        unsafe {
-            let _word = addr.read_volatile();
+        for counter in AMCSR_ADDR..AMCSR_END{ 
+            addr = counter as _ ;
+            unsafe {
+                addr.write_volatile(0);
+            }
         }
     }
 }

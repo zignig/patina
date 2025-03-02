@@ -13,7 +13,7 @@ class enableReg(csr.Register,access="rw"):
     enable: csr.Field(csr.action.RW,1)
 
 class toggleReg(csr.Register,access="rw"):
-    toggle: csr.Field(csr.action.RW,64)
+    toggle: csr.Field(csr.action.RW,8)
 
 # csr periperal test 
 class compl(Component):
@@ -118,6 +118,8 @@ class Amcsr_bus(Component):
     
     def elaborate(self, platform):
         m = Module()
+        # connect the csr bus 
+        m.submodules.csr_bus = self.dec
         # connect the devices
         for dev in self.devices:
              m.submodules[dev.name]= dev
