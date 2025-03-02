@@ -5,7 +5,7 @@ use patina_pac::{
     init::reset,
     println,
     uart::{Bind, DefaultSerial},
-    watchdog::Watchdog,
+    // watchdog::Watchdog,
 };
 
 use corncobs;

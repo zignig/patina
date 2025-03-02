@@ -72,7 +72,7 @@ class Computer(Elaboratable):
 
 
 async def bench(ctx):
-    max = 2048
+    max = 4096
     for i in range(max):
         if i % 128 == 0:
             log.info(f"Remaining {max} - {max - i}")

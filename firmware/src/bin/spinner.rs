@@ -2,7 +2,10 @@
 #![no_main]
 
 use patina_pac::init::wait;
-// Amcsr bus on this test rig
+
+// Amcsr bus on this simulation rig
+// Run on csr_sim.py
+
 pub const AMCSR_ADDR: u32 = 2048;
 pub const AMCSR_END: u32 = 2096;
 pub const LED: u32 = 4096;
@@ -10,24 +13,20 @@ pub const LED: u32 = 4096;
 #[no_mangle]
 #[allow(unused_assignments)]
 pub extern "C" fn main() -> ! {
-    // let mut counter: u32 = AMCSR_ADDR;
     let mut addr: *mut u32 = core::ptr::null_mut();
     addr = LED as _;
-    // wait(1000);
-    let mut val: u32 = 0;
+    // let mut val: u32 = 0;
     loop {
-        for counter in AMCSR_ADDR..AMCSR_END{ 
-            addr = counter as _ ;
-            unsafe {
-                addr.write_volatile(val);
-                val +=1 ;
+        for counter in AMCSR_ADDR..AMCSR_END {
+            addr = counter as _;
+            for _j in 0..8 {
+                unsafe {
+                    addr.write_volatile(255);
+                    let _ = addr.read_volatile();
+                    addr.write_volatile(254);
+                }
             }
         }
-        for counter in AMCSR_ADDR..AMCSR_END{ 
-            addr = counter as _ ;
-            unsafe {
-                addr.write_volatile(0);
-            }
-        }
+        wait(10);
     }
 }
