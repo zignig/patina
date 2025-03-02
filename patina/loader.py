@@ -139,7 +139,7 @@ class MonTool:
         boot_image = struct.unpack("<" + "I" * (len(bootloader) // 4), bootloader)
         return list(boot_image)
 
-    def run(self, file_name):
+    def run(self, file_name, attach=True):
         log.info(f"Loading {file_name}")
         firm = self.load(file_name)
         self.write(0, firm)
@@ -147,7 +147,8 @@ class MonTool:
         if data == firm:
             log.info("OK")
             self.call(0)
-            self.attach()
+            if attach:
+                self.attach()
         else:
             print(data, firm)
             print("failed upload")

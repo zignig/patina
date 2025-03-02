@@ -21,10 +21,12 @@ log = logging.getLogger(__name__)
 
 class ProgramMemory(BasicMemory):
     """A subclass of the Basic mem for the bootloader"""
+    target_bin = None
 
     def __init__(self, depth=512, contents=None):
         # The boot image weighs in at 496 bytes
         # fits into one bram (on ice40)
+        
         super().__init__(depth=depth, contents=contents, read_only=True)
 
     # Name is set below in the fabric build
@@ -38,11 +40,13 @@ class ProgramMemory(BasicMemory):
         file_parts = self.file_name.split(os.sep)
         self.folder = file_parts[0]
         self.bin_name = file_parts[2]
+        if self.target_bin == None:
+            self.target_bin = file_parts[2]
         log.critical(f"folder -- { self.folder }")
 
         # build the elf file
         r = subprocess.run(
-            ["cargo", "build", "--release", "--bin", self.bin_name],
+            ["cargo", "build", "--release", "--bin", self.target_bin],
             cwd=self.folder,
         )
         if r.returncode != 0:
@@ -50,7 +54,7 @@ class ProgramMemory(BasicMemory):
         log.critical(f"binary name -- { self.bin_name }")
         # convert to binary
         r = subprocess.run(
-            ["cargo", "objcopy", "--release","--bin", self.bin_name ,"--", "-O", "binary", "bin/"+self.bin_name],
+            ["cargo", "objcopy", "--release","--bin", self.target_bin ,"--", "-O", "binary", "bin/"+self.bin_name],
             cwd=self.folder,
         )
         if r.returncode != 0:
@@ -60,6 +64,7 @@ class ProgramMemory(BasicMemory):
 
 
 class BootMem(ProgramMemory):
+    target_bin = "tinyboot"
     def __init__(self, depth=512, contents=None):
         super().__init__(depth=depth, contents=contents)
 

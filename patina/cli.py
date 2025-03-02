@@ -42,6 +42,8 @@ def run(platform, construct):
 
     deploy = runner.add_parser("deploy")
     svd = runner.add_parser("svd")
+    upload = runner.add_parser("upload")
+    upload.add_argument("bin", nargs="?", type=str)
 
     args = parser.parse_args()
 
@@ -49,25 +51,37 @@ def run(platform, construct):
         case "prepare":
             panel("build firmware and stuff")
             do_mapping(construct)
+
         case "build":
             do_generate(construct)
             do_build(platform, construct)
+
         case "mapping":
             do_mapping(construct)
+
         case "generate":
             do_generate(construct)
+
         case "console":
             panel("Attach the console..")
             log.critical(args)
             build_firmware(construct, args.bin)
-            do_console(construct,args.bin)
+            do_console(construct, args.bin)
+
+        case "upload":
+            panel("Upload")
+            build_firmware(construct, args.bin)
+            do_console(construct, args.bin, attach=False)
+
         case "deploy":
             do_generate(construct)
             do_build(platform, construct)
             build_firmware(construct)
             do_console(construct)
+
         case "svd":
             do_svd(construct)
+            
         case None:
             panel("Attach the console..")
             build_firmware(construct)
@@ -89,20 +103,20 @@ def do_generate(construct):
     ra.make_firmware("patina_pac")
     ra.make_memmap(construct.firmware[0])
 
-    
 
 def do_svd(construct):
     ra = RustArtifacts(construct)
-    ra.make_svd('.')
+    ra.make_svd(".")
 
-def do_console(construct,bin_name=None):
+
+def do_console(construct, bin_name=None, attach=True):
     if hasattr(construct, "serial"):
         if hasattr(construct, "baud"):
             if bin_name is None:
-                bin_name=construct.firmware[1]
+                bin_name = construct.firmware[1]
             mt = MonTool(port=construct.serial, baud=construct.baud)
-            name = "/".join([construct.firmware[0],'bin',bin_name])
-            mt.run(name)
+            name = "/".join([construct.firmware[0], "bin", bin_name])
+            mt.run(name, attach=attach)
             # try:
             #     mt.run(construct.firmware)
             # except:

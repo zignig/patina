@@ -7,7 +7,7 @@ sim-cpu.v
 *.vcd
 test.gtkw
 *.code-workspace
-bootloader/*.bin
+bootloader/bin/*
 firmware/bin/*
 experiments/bin/*
 pootview.json
