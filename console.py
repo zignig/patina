@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/bin/env python
 " Serial interface for uploading boneless firmware"
 
 
@@ -6,9 +6,9 @@ from serial.tools.miniterm import Miniterm
 import serial
 import time
 
-the_port ="/dev/serial/by-id/usb-MicroPython_Board_in_FS_mode_e661410403178c2a-if00"
+#the_port ="/dev/serial/by-id/usb-MicroPython_Board_in_FS_mode_e661410403178c2a-if00"
 #the_port ="/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A700eCzo-if00-port0"
-#the_port ="/dev/ttyUSB0"
+the_port ="/dev/ttyACM0"
 
 class Console:
     def __init__(self, port=the_port, baud=57600):

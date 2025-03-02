@@ -28,7 +28,7 @@ pub extern "C" fn main() -> ! {
     let mut out_buf: [u8; SerialTransport::COBS_SIZE] = [0; SerialTransport::COBS_SIZE];
     loop {
         let com = Command::Inserter(commands::Other::Two(false));
-        println!("{:?}",com);
+        // println!("{:?}",com);
         let size = ser_tr.encode(com, &mut out_buf).unwrap();
 
         let mut decoded_com: Command = Command::default();
@@ -38,7 +38,7 @@ pub extern "C" fn main() -> ! {
                 decoded_com = item;
             }
         }
-        println!("{:?}",decoded_com);
+        // println!("{:?}",decoded_com);
         if decoded_com == com {
             println!("THE SAME");
         } else {

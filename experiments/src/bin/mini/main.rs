@@ -7,7 +7,7 @@ use patina_pac::{
     warmboot::Warm,
 };
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn main() -> ! {
     let mut warmboot = Warm::new();
     let mut ds = DefaultSerial::new();

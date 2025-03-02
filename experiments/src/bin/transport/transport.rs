@@ -1,7 +1,6 @@
 //! Take Enum and Structs and transport them across a serial port for now
 //! Uses cobs and hubpack to serialize and frame the data for transport
 //!
-use core::char::MAX;
 
 use corncobs;
 use heapless::Vec;
