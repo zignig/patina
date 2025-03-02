@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from amaranth import * 
 from amaranth import Elaboratable, Module
 from amaranth.lib.wiring import connect
 
@@ -7,27 +8,17 @@ from amaranth_boards.resources.interface import UARTResource
 from amaranth.build import Attrs
 
 from hapenny.cpu import Cpu
-from hapenny.serial import BidiUart
-from hapenny.mem import BasicMemory
-from hapenny.gpio import MinimalOutputPort
 
 from patina.generate import *
 from patina.fabric_builder import FabricBuilder, ProgramMemory
-from patina.warmboot import WarmBoot
-from patina.watchdog import Watchdog
-from patina.spi import SimpleSPI
-from patina.amcsr import Amcsr_bus, testp, compl
+from patina.amcsr import Amcsr_bus
 from patina import cli
 from patina import log_base
+
+from patina.peripheral.timer import Timer
 import logging
 
-from pathlib import Path
-import struct
-
 log = logging.getLogger(__name__)
-
-# spinner = Path("firmware/bin/spinner").read_bytes()
-# spin_image = struct.unpack("<" + "H" * (len(spinner) // 2), spinner)
 
 
 class Computer(Elaboratable):
@@ -39,24 +30,18 @@ class Computer(Elaboratable):
         self.baud = baud
         self.firmware = firmware
 
-        #t = testp()
-        #t2 = testp()
-        t3 = compl()
-
         super().__init__()
         # auto build binary
         self.mainmem = mainmem = ProgramMemory(depth=512)  # 16bit cells
         mainmem.set_file("firmware/bin/spinner")
 
-        self.gpio_out = gpio_out = MinimalOutputPort(1)
-        
         # CSR
+        self.timer = timer = Timer()
+        self.csr = Amcsr_bus([timer])
 
-        self.csr = Amcsr_bus([t3])
-        devices = [self.mainmem, self.csr, gpio_out]
+        devices = [self.mainmem, self.csr]
 
         self.fabric = fabric = FabricBuilder(devices)
-
         self.cpu = Cpu(reset_vector=fabric.reset_vector, addr_width=fabric.addr_width)
 
     def elaborate(self, platform):
@@ -68,11 +53,14 @@ class Computer(Elaboratable):
         m.submodules.fabric = self.fabric
         # Connect the cpu and the fabric
         connect(m, self.cpu.bus, self.fabric.bus)
+
+        cycles = Signal(32)
+        m.d.sync += cycles.eq(cycles+1)
         return m
 
 
 async def bench(ctx):
-    max = 4096
+    max = 2048
     for i in range(max):
         if i % 128 == 0:
             log.info(f"Remaining {max} - {max - i}")
@@ -85,6 +73,9 @@ if __name__ == "__main__":
     pooter = Computer()
     pooter.fabric.show()
     pooter.mainmem.build()
+
+    cli.do_svd(pooter)
+
     sim = Simulator(pooter)
     sim.add_clock(1e-6)
     sim.add_testbench(bench)

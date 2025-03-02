@@ -32,10 +32,12 @@ class RustLib:
                 continue
             # skip the csr objects 
             if hasattr(res,'_field'):
-                # print(res," skipped")
-                continue
-
-            name = i.resource.name.upper()
+                sp = list( map(lambda x:x[0].upper(),list(i.path)))
+                sp = '_'.join(sp[1:])
+                print(sp)
+                name = sp
+            else:
+                name = i.resource.name.upper()
 
 
             emit("/// {name}".format(name=name))

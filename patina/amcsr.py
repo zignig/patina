@@ -124,19 +124,22 @@ class Amcsr_bus(Component):
         for dev in self.devices:
              m.submodules[dev.name]= dev
         # connect the bus
+
         # bus cmd shorthand
         cmd = self.bus.cmd
 
         # register the bus response
         read_data = Signal(16)  # it expects one cycle of read latency
         m.d.sync += self.bus.resp.eq(read_data)
+
         ## read 
         with m.If(cmd.valid & (cmd.payload.lanes == 0 )):
             m.d.comb += [
                 self.dec.bus.addr.eq(cmd.payload.addr),
                 self.dec.bus.r_stb.eq(1),
                 read_data.eq(self.dec.bus.r_data),
-            ],
+            ]
+        
         ## write
         with m.If(cmd.valid &  (cmd.payload.lanes.any() )):
             m.d.comb += [

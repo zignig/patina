@@ -34,7 +34,7 @@ pub extern "C" fn main() -> ! {
         let mut decoded_com: Command = Command::default();
         for c in out_buf[..size].iter() {
             // println!("{} - {:?}", i,  c);
-            if let Some(item) = ser_tr.add(c) {
+            if let Some(item) = ser_tr.add_char(c) {
                 decoded_com = item;
             }
         }

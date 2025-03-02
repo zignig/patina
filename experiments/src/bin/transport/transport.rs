@@ -32,7 +32,7 @@ where
         }
     }
 
-    pub fn add(&mut self, c: &u8) -> Option<T> {
+    pub fn add_char(&mut self, c: &u8) -> Option<T> {
         // incoming char where there is a zero
         // it's the end of the frame , process
         // if *c == 0 && self.incoming_bytes.len() == 0 {

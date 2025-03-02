@@ -12,7 +12,7 @@ class ResList:
 
     def res(self):
         for i in self.mm.all_resources():
-            print(i.path,i.start,i.end)
+            print(i.path,'\t\t',i.start,i.end)
 
     def rec(self,window,depth=0):
         for win, name, (pattern,ratio) in window.window_patterns():
@@ -36,10 +36,10 @@ class ResList:
         self.res()
         print()
         self.rec(self.mm)
-        print()
-        # find the csr window
+        # self.rec(self.mm)
+        # print()
+        # # find the csr window
         (window, start, end) = self.find_csr_window()
-        
         print(start)
         self.peripheral(window)
 

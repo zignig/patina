@@ -17,6 +17,7 @@ from patina.warmboot import WarmBoot
 from patina.watchdog import Watchdog
 from patina.spi import SimpleSPI
 from patina.amcsr import Amcsr_bus, testp ,compl
+from patina.peripheral.timer import Timer
 from patina import cli
 from patina import log_base
 import logging
@@ -36,11 +37,9 @@ class Computer(Elaboratable):
         self.firmware = firmware
 
         # some csr style devices to attach the Amcsr_bus
-        t = testp()
-        t2 = testp()
-        t3 = compl()
+        self.timer = timer = Timer()
         # CSR bus bridge ( 8 bit databus)
-        self.csr = Amcsr_bus([t,t2,t3])
+        self.csr = Amcsr_bus([timer])
 
         # RAM should be at the top 
         self.mainmem = mainmem = BasicMemory(depth=512 * 10)  # 16bit cells
@@ -122,7 +121,7 @@ if __name__ == "__main__":
     )
 
     pooter = Computer(
-        serial="/dev/ttyUSB0", baud=115200, firmware=["experiments", "transport"]
+        serial="/dev/ttyUSB0", baud=115200, firmware=["firmware", "console"]
     )
 
     cli.run(platform, pooter)

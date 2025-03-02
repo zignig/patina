@@ -5,28 +5,61 @@ use patina_pac::init::wait;
 
 // Amcsr bus on this simulation rig
 // Run on csr_sim.py
-
 pub const AMCSR_ADDR: u32 = 2048;
-pub const AMCSR_END: u32 = 2096;
-pub const LED: u32 = 4096;
+pub const AMCSR_END: u32 = 2056;
 // For Simulation testing
 #[no_mangle]
 #[allow(unused_assignments)]
+
+//
 pub extern "C" fn main() -> ! {
-    let mut addr: *mut u32 = core::ptr::null_mut();
-    addr = LED as _;
-    // let mut val: u32 = 0;
     loop {
-        for counter in AMCSR_ADDR..AMCSR_END {
-            addr = counter as _;
-            for _j in 0..8 {
-                unsafe {
-                    addr.write_volatile(255);
-                    let _ = addr.read_volatile();
-                    addr.write_volatile(254);
-                }
-            }
+
+        let mut addr: *mut u32 = core::ptr::null_mut();
+        addr = 2056 as _;
+        unsafe { 
+            addr.write_volatile(0x11223344);
         }
-        wait(10);
+        
+        wait(16);
+
+        // Manual write of the overflow register
+        let mut addr: *mut u16 = core::ptr::null_mut();
+
+        addr = 2056 as _;
+
+        unsafe {
+            addr.write_volatile(0x11);
+            addr = addr.add(1);
+            addr.write_volatile(0x22);
+            addr = addr.add(1);
+            addr.write_volatile(0x33);
+            addr = addr.add(1);
+            addr.write_volatile(0x44);
+        }
+        loop{}
     }
 }
+
+// let mut val: u8 = 0x1;
+
+// for val in 0..32 {
+//     unsafe {
+//         addr.write_volatile(val);
+//         addr = addr.add(1);
+//     }
+//     // val += 1;
+// }
+
+//     // Enable the timer
+//     addr = 2048 as _;
+//     unsafe {
+//         addr.write_volatile(1);
+//     }
+
+
+//         wait(4);
+//         unsafe {
+//             addr.write_volatile(0);
+//         }
+//     wait(4);
