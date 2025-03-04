@@ -1,0 +1,6 @@
+# the simple 16bit bus causes some issues when trying to read 8 bit values. 
+
+The read does not specify a byte address and there are not enough cycles to get two values. 
+
+* convert to 16bit wishbone ? 
+
