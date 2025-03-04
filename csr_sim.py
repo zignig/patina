@@ -16,6 +16,7 @@ from patina import cli
 from patina import log_base
 
 from patina.peripheral.timer import Timer
+from patina.peripheral.regtest import RegTest
 import logging
 
 log = logging.getLogger(__name__)
@@ -33,11 +34,12 @@ class Computer(Elaboratable):
         super().__init__()
         # auto build binary
         self.mainmem = mainmem = ProgramMemory(depth=512)  # 16bit cells
-        mainmem.set_file("firmware/bin/spinner")
+        mainmem.set_file("experiments/bin/spinner")
 
         # CSR
         self.timer = timer = Timer()
-        self.csr = Amcsr_bus([timer])
+        self.regtest = regtest = RegTest()
+        self.csr = Amcsr_bus([regtest,timer])
 
         devices = [self.mainmem, self.csr]
 
@@ -71,9 +73,16 @@ from amaranth.sim import Simulator
 
 if __name__ == "__main__":
     pooter = Computer()
-    pooter.fabric.show()
-    pooter.mainmem.build()
+    # build an artifact generator
+    ra = RustArtifacts(pooter)
+    # build the basic reg mapping for rust
+    ra.make_firmware('experiments/src/bin/spinner')
 
+    # show the memory mapping
+    pooter.fabric.show()
+    # build a fresh copy of the firmware
+    pooter.mainmem.build()
+    # show the register heirachy.
     cli.do_svd(pooter)
 
     sim = Simulator(pooter)

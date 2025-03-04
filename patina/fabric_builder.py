@@ -213,7 +213,9 @@ class FabricBuilder(Component):
     def show(self):
         # TODO make this fancy
         for i in self.memory_map.all_resources():
-            log.info(f"{i.path} \t{i.start} \t{i.end}")
+            path = list( map(lambda x:x[0].upper(),list(i.path)))
+
+            log.info(f"{path} \t{i.start} \t{i.end}")
 
     def elaborate(self, platform):
         """

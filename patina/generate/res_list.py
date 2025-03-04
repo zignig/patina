@@ -11,13 +11,20 @@ class ResList:
         self.mm: MemoryMap = self._soc.fabric.memory_map
 
     def res(self):
+        max_length = 0 
         for i in self.mm.all_resources():
-            print(i.path,'\t\t',i.start,i.end)
+            path = ' / '.join(list( map(lambda x:x[0].upper(),list(i.path))))
+            if len(path) > max_length: 
+                max_length = len(path)
+        for i in self.mm.all_resources():
+            path = ' / '.join(list( map(lambda x:x[0].upper(),list(i.path))))
+            print(path.ljust(max_length),' | ',str(i.start).ljust(8),str(i.end).ljust(8))
 
     def rec(self,window,depth=0):
         for win, name, (pattern,ratio) in window.window_patterns():
             # print(dir(window))
-            print('='*depth,name,'  \t\t',pattern)
+            path = ' / '.join(list( map(lambda x:x[0].upper(),list(name))))
+            print(path.ljust(20),' | ',pattern)
             if len(win._windows) > 0:
                 depth += 1 
 

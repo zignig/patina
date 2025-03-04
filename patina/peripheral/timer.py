@@ -11,17 +11,19 @@ class Enable(csr.Register, access="rw"):
     "Enable/Disable the timer"
 
     def __init__(self):
-        super().__init__({"val": csr.Field(csr.action.RW,1)})
+        super().__init__({"val": csr.Field(csr.action.RW, 1)})
 
 
 class Overflow(csr.Register, access="rw"):
     "Set the overflow value"
-    def __init__(self,width):
-        super().__init__({"val": csr.Field(csr.action.RW,width)})
+
+    def __init__(self, width):
+        super().__init__({"val": csr.Field(csr.action.RW, width)})
+
 
 class Timer(wiring.Component):
 
-    def __init__(self,width = 32):
+    def __init__(self, width=32):
         self.width = width
 
         regs = csr.Builder(addr_width=4, data_width=8)
@@ -53,12 +55,12 @@ class Timer(wiring.Component):
         # write the overflow value
         # if m.If( self.overflow.f.)
 
-        # reload the timer if it hits overflow
-        with m.If( self.overflow.f.val.data == val):
-            m.d.sync += val.eq(0)
-
         # increment the timer
-        with m.If(self.enable.f.val.data == 1 ):
-            m.d.sync += val.eq(val+1)
+        with m.If(self.enable.f.val.data == 1):
+            m.d.sync += val.eq(val + 1)
+
+        # reload the timer if it hits overflow
+        with m.If(self.overflow.f.val.data == val):
+            m.d.sync += val.eq(0)
 
         return m

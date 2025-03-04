@@ -16,7 +16,7 @@ from patina.fabric_builder import FabricBuilder, BootMem
 from patina.warmboot import WarmBoot
 from patina.watchdog import Watchdog
 from patina.spi import SimpleSPI
-from patina.amcsr import Amcsr_bus, testp ,compl
+from patina.amcsr import Amcsr_bus
 from patina.peripheral.timer import Timer
 from patina import cli
 from patina import log_base

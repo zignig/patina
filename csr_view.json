@@ -1,0 +1,121 @@
+{
+  "extensionVersion": "1.3.1",
+  "fileName": "/opt/patina/pooter.vcd",
+  "markerTime": 193331200000,
+  "altMarkerTime": 135168000000,
+  "selectedSignal": {
+    "name": "bench.top.cycles",
+    "numberFormat": "hexadecimal",
+    "msb": -1,
+    "lsb": -1
+  },
+  "zoomRatio": 1.5625e-7,
+  "scrollLeft": 41306,
+  "displayedSignals": [
+    {
+      "netlistId": 12,
+      "name": "bench.top.cycles",
+      "numberFormat": "hexadecimal",
+      "colorIndex": 0,
+      "renderType": "multiBit"
+    },
+    {
+      "netlistId": 538,
+      "name": "bench.top.fabric.Amcsr_bus.Timer.val",
+      "numberFormat": "hexadecimal",
+      "colorIndex": 0,
+      "renderType": "multiBit"
+    },
+    {
+      "netlistId": 575,
+      "name": "bench.top.fabric.Amcsr_bus.Timer.bridge.en.val.data",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 577,
+      "name": "bench.top.fabric.Amcsr_bus.Timer.bridge.en.val.port__w_data",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 578,
+      "name": "bench.top.fabric.Amcsr_bus.Timer.bridge.en.val.port__w_stb",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 628,
+      "name": "bench.top.fabric.Amcsr_bus.Timer.bridge.ovf.val.data",
+      "numberFormat": "hexadecimal",
+      "colorIndex": 0,
+      "renderType": "multiBit"
+    },
+    {
+      "netlistId": 631,
+      "name": "bench.top.fabric.Amcsr_bus.Timer.bridge.ovf.val.port__w_stb",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 630,
+      "name": "bench.top.fabric.Amcsr_bus.Timer.bridge.ovf.val.port__w_data",
+      "numberFormat": "hexadecimal",
+      "colorIndex": 0,
+      "renderType": "multiBit"
+    },
+    {
+      "netlistId": 518,
+      "name": "bench.top.fabric.Amcsr_bus.bus__w_stb",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 519,
+      "name": "bench.top.fabric.Amcsr_bus.bus__w_data",
+      "numberFormat": "hexadecimal",
+      "colorIndex": 0,
+      "renderType": "multiBit"
+    },
+    {
+      "netlistId": 625,
+      "name": "bench.top.fabric.Amcsr_bus.Timer.bridge.ovf.port__w_stb",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 609,
+      "name": "bench.top.fabric.Amcsr_bus.Timer.bridge.mux.w_shadow__1__w_en",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 611,
+      "name": "bench.top.fabric.Amcsr_bus.Timer.bridge.mux.w_shadow__2__w_en",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 613,
+      "name": "bench.top.fabric.Amcsr_bus.Timer.bridge.mux.w_shadow__3__w_en",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 607,
+      "name": "bench.top.fabric.Amcsr_bus.Timer.bridge.mux.w_shadow__0__w_en",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    }
+  ]
+}

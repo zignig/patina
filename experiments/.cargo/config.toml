@@ -1,6 +1,9 @@
 [build]
 target = "riscv32i-unknown-none-elf"
 
+[target.riscv32i-unknown-none-elf]
+runner = "cargo objdump --release --bin spinner -- --disassemble --no-show-raw-insn"
+
 rustflags = [
  "-C", "relocation-model=pie",
  "-C", "link-arg=-Tmemory.x",
