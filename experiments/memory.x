@@ -6,7 +6,7 @@
  */
 
 MEMORY {
-    MEMORY : ORIGIN = 0x00000000, LENGTH = 0x2800
+    MEMORY : ORIGIN = 0x00000000, LENGTH = 64
     BOOTMEM : ORIGIN = 0x00004000, LENGTH = 0x400
 }
 
@@ -15,7 +15,7 @@ EXTERN(__start);
 ENTRY(__start);
 
 SECTIONS {
-    PROVIDE(__stack_start = ORIGIN(MEMORY) + LENGTH(MEMORY)-16);
+    PROVIDE(__stack_start = ORIGIN(MEMORY) + LENGTH(MEMORY));
     PROVIDE(__stext = ORIGIN(MEMORY));
 
     .text __stext : {

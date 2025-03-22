@@ -2,21 +2,49 @@
 #![no_main]
 #[allow(unused_imports)]
 // use patina_pac::generated;
-use patina_pac::init::wait;
+// use patina_pac::init::wait;
+use core::arch::asm;
+use core::arch::global_asm;
 
-#[allow(dead_code)]
-mod generated;
+// World's cheapest RISC-V "runtime" - only works because we don't use non-stack
+// RAM (as ensured by our linker script)
+global_asm! {
+    "
+    .pushsection .start,\"ax\",%progbits
+    .globl __start
+    __start:
+        # initialize stack pointer
+1:      auipc sp, %pcrel_hi(__stack_start)
+        addi sp, sp, %pcrel_lo(1b)
+        # No need to fill in a return address, main won't return
+        j main
 
-// Amcsr bus on this simulation rig
-// Run on csr_sim.py
-pub const U8REG: u32 = 2048;
-pub const U8REG_T: u32 = 2052;
+    .popsection
+    "
+}
+
+#[panic_handler]
+unsafe fn my_panic(_info: &core::panic::PanicInfo) -> ! {
+    loop {
+    }
+}
 // For Simulation testing
 #[unsafe(no_mangle)]
 #[allow(unused_assignments)]
 #[allow(unused_variables)]
 pub extern "C" fn main() -> ! {
+    let mut a: u32 = 0;
     loop {
+        let mut addr: *mut u32 = core::ptr::null_mut();
+        addr = 0x29 as _;
+        unsafe {
+            addr.write_volatile(a);
+        }
+        a += 1;
+        unsafe { 
+            let _ = addr.read_volatile();
+        }
+
         // ! byte reads and writes
 
         // write to the register
@@ -27,7 +55,6 @@ pub extern "C" fn main() -> ! {
         // write_reg(generated::TIMER_OVF_ADDR+4,0x11223344);
         // let mut addr2: *mut u8 = core::ptr::null_mut();
         // addr2 = U8REG_T as _;
-
 
         // unsafe {
         //     addr.write_volatile(0x55);
@@ -47,17 +74,17 @@ pub extern "C" fn main() -> ! {
         //     addr.write_volatile(0xBB);
         //     let _ = addr.read_volatile();
         // }
-        let mut addr: *mut u8 = core::ptr::null_mut();
-        addr = generated::REGTEST_U8_ADDR as _ ;
-        let mut val:u8 = 0xAA;
-        for _ in 0..32 {
-            unsafe {
-                addr.write_volatile(val);
-                addr = addr.add(1);
-            }
-            val += 1;
-        }
-        wait(5);
+        // let mut addr: *mut u8 = core::ptr::null_mut();
+        // addr = generated::REGTEST_U8_ADDR as _ ;
+        // let mut val:u8 = 0xAA;
+        // for _ in 0..32 {
+        //     unsafe {
+        //         addr.write_volatile(val);
+        //         addr = addr.add(1);
+        //     }
+        //     val += 1;
+        // }
+        // wait(5);
 
         // let mut addr: *mut u32 = core::ptr::null_mut();
         // addr = 2056 as _;
